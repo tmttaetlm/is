@@ -1,0 +1,237 @@
+<?php
+namespace Controllers;
+
+use Core\Controller;
+use Models\SkdModel;
+use Models\UserModel;
+use Core\View;
+/*
+Skd system controller
+*/
+
+Class SkdController extends Controller
+{
+    public function __construct() 
+    {
+        parent::__construct();
+        $this->checkLogged();
+        $this->model = new SkdModel;
+    }
+        
+    public function actionIndex()
+    {
+        $data['user'] = $this->model->user->getFullName();
+        $data['admin'] = $this->model->user->checkAdmin();
+        $data['tabItems'] = $this->model->getTabItems();
+        $data['tabData'] = $this->view->getDataByTabItems($data['tabItems'],'skd');
+        $data['content'] = $this->view->generate('framework/tabs',$data);
+        $data['content'] = $this->view->generate('skd/skdView',$data);
+        echo $this->view->generate('templateView',$data);
+    }
+        
+    public function actionGetdata()
+    {
+
+       if (isset($_POST['load'])) {
+          $data['skd'] = SkdModel::allLogs();
+          $data['content'] = $this->view->generate('skd/skdView',$data);
+          echo $this->view->generate('templateView',$data);
+       }
+
+       if (isset($_POST['userLogs'])) {
+            $data['userLogs'] = SkdModel::userLogs();
+            $data['content'] = $this->view->generate('skd/skdView', $data);
+            echo $this->view->generate('templateView', $data);
+        }   
+    }
+        
+    public function actionUserlogs()
+    {
+        $iin= $this->model->user->getIin();           
+        $data = SkdModel::getUserLogs(['iin'=>$iin]);
+        $title = 'Мои проходы за месяц';
+        $columns = [
+            'num'=>'№',
+            'DateTime'=>'Дата и время',
+            'Mode'=>'Вход/выход',
+        ];
+        echo $this->view->cTable($title,$columns,$data);
+    }
+        
+    public function actionUserentranceexit()
+    {
+        $iin= $this->model->user->getIin();            
+        $data = SkdModel::getUserEntranceExit(['iin'=>$iin]);
+        $title = 'Отчет Вход - Выход по сотруднику за месяц';
+        $columns = [
+            'num'=>'№',
+            'Surname'=>'Фамилия',
+            'Firstname'=>'Имя',
+            'Division'=>'Подразделение',
+            'Date'=>'Дата',
+            'EntranceTime'=>'Вход',
+            'LeavingTime'=>'Выход',
+        ];
+        echo $this->view->cTable($title,$columns,$data);
+    }
+        
+        
+        
+    public function actionGetstudentslogs()
+    {
+        if (isset($_POST['reportType'])) {
+            if ($_POST['reportType'] == 'entranceExit') {
+                $data = SkdModel::getStudentsLogs($_POST['grade'],$_POST['date']);
+                $title = "{$_POST['grade']} класс - отчет за {$_POST['date']}";
+                $columns = [
+                            'num'=>'№',
+                            'Surname'=>'Фамилия',
+                            'Firstname'=>'Имя',
+                            'Division'=>'Класс',
+                            'EntranceTime'=>'Вход',
+                            'LeavingTime'=>'Выход',
+                            ];
+                echo $this->view->cTable($title,$columns,$data);
+            }
+            
+            if ($_POST['reportType'] == 'whoIsAtSchool') {
+                $data = SkdModel::getStudentsAtSchool($_POST['grade']);
+                $title = "{$_POST['grade']} класс - отчет за ".date('d.m.Y');
+                $columns = [
+                            'num'=>'№',
+                            'Surname'=>'Фамилия',
+                            'Firstname'=>'Имя',
+                            'Division'=>'Класс',
+                            'Status'=>'Статус',
+                           ];
+                echo $this->view->cTable($title,$columns,$data);
+            }
+            if ($_POST['reportType'] == 'studentByPeriod') {
+                $data = SkdModel::getStudentLogsByPeriod($_POST['studentID'],$_POST['startDate'],$_POST['endDate']);
+                $title = "Отчет по учащемуся за период с {$_POST['startDate']} по {$_POST['endDate']}";
+                $columns = [
+                 'num'=>'№',
+                 'Surname'=>'Фамилия',
+                 'Firstname'=>'Имя',
+                 'Division'=>'Класс',
+                 'Date'=>'Дата',
+                 'EntranceTime'=>'Вход',
+                 'LeavingTime'=>'Выход',
+                ];
+                echo $this->view->cTable($title,$columns,$data);
+            }
+        }
+    }
+        
+        public function actionGetstudentslist()
+        {
+            if (isset($_POST['grade']))
+            {
+                $data = SkdModel::getStudentsList($_POST['grade']);
+                echo $this->view->createSelectOptions($data,'FIO', 'UserID');
+            }
+           
+        }
+        
+        public function actionGetstafflist()
+        {
+            if (isset($_POST['divisionId']))
+            {
+                $data = SkdModel::getStaffList($_POST['divisionId']);
+                echo $this->view->createSelectOptions($data,'FIO', 'UserID');
+            }
+           
+        }
+        
+        
+        
+        public function actionGetdivisionlist()
+        {
+            $data = SkdModel::getDivisionList();
+            $data = $this->view->createSelectOptions($data,'Name', 'Id');
+            $data = '<option data-id="">Все подразделения</option>'."\n".$data;
+            echo $data;
+        }
+        
+        
+        public function actionGetstafflogs()
+        {
+            if ($_POST['staffReportType'] == 'staffEntranceExit')
+            {
+                if (isset($_POST['divisionId']))
+                {
+                    $data = SkdModel::getDivisionStaffLogs($_POST['date'],$_POST['divisionId']);
+                }
+                else
+                {
+                    $data = SkdModel::getStaffLogs($_POST['date']);
+                }
+                $title = "Отчет по сотрудникам за {$_POST['date']}";
+                $columns = [
+                 'num'=>'№',
+                 'Surname'=>'Фамилия',
+                 'Firstname'=>'Имя',
+                 'Division'=>'Подразделение',
+                 'EntranceTime'=>'Вход',
+                 'LeavingTime'=>'Выход',
+                ];
+                echo $this->view->cTable($title,$columns,$data);
+            }
+            
+            if ($_POST['staffReportType'] == 'staffWhoIsAtSchool')
+            {
+
+                if (isset($_POST['divisionId']))
+                {
+                    $data = SkdModel::getDivisionStaffAtSchool($_POST['divisionId']);
+                }
+                else
+                {
+                    $data = SkdModel::getStaffAtSchool();
+                }
+                
+                $title = "Кто в школе";
+                
+                $columns = [
+                    'num'=>'№',
+                    'Surname'=>'Фамилия',
+                    'Firstname'=>'Имя',
+                    'Division'=>'Подразделение',
+                    'Status'=>'Статус',
+                    ];
+                
+                echo $this->view->cTable($title,$columns,$data);
+                
+            }
+            
+            if ($_POST['staffReportType'] == 'personByPeriod')
+            {
+                if ($_POST['typePersonByPeriod'] == 'enEx')
+                {
+                    $data = SkdModel::getStudentLogsByPeriod($_POST['personID'],$_POST['startDate'],$_POST['endDate']);
+                    $title = "Отчет по сотруднику за период с {$_POST['startDate']} по {$_POST['endDate']}";
+                    $columns = [
+                        'num'=>'№',
+                        'Surname'=>'Фамилия',
+                        'Firstname'=>'Имя',
+                        'Division'=>'Подразделение',
+                        'Date'=>'Дата',
+                        'EntranceTime'=>'Вход',
+                        'LeavingTime'=>'Выход',
+                        ];
+                    echo $this->view->cTable($title,$columns,$data);
+                }
+                
+                if ($_POST['typePersonByPeriod'] == 'trace')
+                {
+                    $data = SkdModel::getPersonLogs($_POST['personID'],$_POST['startDate'],$_POST['endDate']);
+                    $columns = [
+                        'num'=>'№',
+                        'DateTime'=>'Дата и время',
+                        'Mode'=>'Вход/выход',
+                        ]; 
+                    echo $this->view->cTable('Проходы сотрудника за указанный период',$columns, $data);
+                }
+            }
+        }
+}

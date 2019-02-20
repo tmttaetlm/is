@@ -1,0 +1,12 @@
+{
+    "name": "vladimir/application",
+    "authors": [
+        {
+            "name": "Vladimir",
+            "email": "vlmart@bk.ru"
+        }
+    ],
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.3"
+    }
+}

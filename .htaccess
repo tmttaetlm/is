@@ -1,0 +1,17 @@
+# Устанавливаем опции
+#-ExecCGI запрещает запуск CGI скриптов
+#-Indexes запрещает показывать содержимое каталогов
+#-Includes запрещает SSI (Server Side Include)
+Options All -ExecCGI -Indexes -Includes
+
+#Установка кодировки
+AddDefaultCharset utf-8
+
+#Включаем реврайт
+RewriteEngine on
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^(.*)$ index.php [L]
