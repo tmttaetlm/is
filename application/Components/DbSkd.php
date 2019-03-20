@@ -67,4 +67,20 @@ class DbSkd
         }
     }
 
+    public function updateQuery($tsql,$params){
+        try{
+            $stmt = $this->db->prepare($tsql);
+            foreach ($params as $key => $value) 
+            {
+                $bindKey = ':' . $key;
+                $stmt->bindValue($bindKey, $params[$key]);
+            }
+            $stmt->execute();
+        }
+        catch(Exception $e)  
+        {   
+            die( print_r( $e->getMessage() ) );   
+        }
+    }
+
 }

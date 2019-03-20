@@ -344,7 +344,8 @@ ui-tabs {
 }
 .ui-tabs input[id="userControl"]:checked ~ .content .userControl,
 .ui-tabs input[id="studentControl"]:checked ~ .content .studentControl,
-.ui-tabs input[id="staffControl"]:checked ~ .content .staffControl, 
+.ui-tabs input[id="staffControl"]:checked ~ .content .staffControl,
+.ui-tabs input[id="generalControl"]:checked ~ .content .generalControl,  
 .ui-tabs input[id="monitoring"]:checked ~ .content .monitoring,
 .ui-tabs input[id="inventory"]:checked ~ .content .inventory,
 .ui-tabs input[id="seach"]:checked ~ .content .seach,
@@ -611,4 +612,55 @@ div #msg p {
     border-radius: 10px;
     border: 2px solid #00a0db;
     text-align: center;
+}
+
+
+
+/*SKD GeneralControl style */
+.content .generalControl .container{
+    display: flex;
+}
+.content .generalControl .box-1{
+    flex: 2;
+    
+}
+.content .generalControl .box-2{
+    flex: 1;
+    margin-left: 10px;
+}
+
+
+
+.content .generalControl .container table{
+    margin: 0 auto;
+    border: 1px solid black;
+    
+}
+.content .generalControl .container td, .content .generalControl .container th {
+    border: 1px solid black;
+    padding: 3px;
+}
+
+.content .generalControl .container caption{
+    text-align: center;
+    font-size: 20px;
+}
+
+.but{
+    display: inline-block;
+}
+
+.gcButtons{
+    margin: 20px auto;
+    width: 300px;
+}
+
+.gcReportType{
+    margin-bottom: 10px;
+    margin-left: 220px;
+}
+
+.gcReportControls{
+    margin-top: 8px;
+    margin-left: 100px;
 }

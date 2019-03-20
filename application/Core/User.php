@@ -108,6 +108,20 @@ class User
         }
 
     }
+
+    public function hasPrivilege($privilege)
+    {
+        $priveleges = $this->getPriveleges();
+        if (in_array($privilege, $priveleges))
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+
+    }
     
 
     public function getAllUsers()

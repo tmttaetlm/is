@@ -218,7 +218,7 @@ function changeHandler(obj)
     }
     
     //admin roleSettings
-    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs" || obj.id == "fasCanSeach" || obj.id == "adminPanel" ){
+    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments"){
         var roleList = document.getElementById('roleList');
         if (roleList.selectedIndex ==-1) {
             alert('Выберите роль, для которой настраиваете права!');
@@ -254,7 +254,25 @@ function changeHandler(obj)
             });
         }, param);
     }
+    
+    //SkdGeneralControl
+    if (obj.name == "comment")
+    {
+        var param = 'id='+obj.dataset.id + '&' + 'comment='+obj.value;
+        ajax('/skd/Writecomment', function(data){
+            if (data!='ok'){
+                alert('Комментарий не сохранен!');
+            }
+            }, 
+        param);
+    }
 
+    if (obj.name == "tab"){
+        if (obj.id == 'generalControl'){
+            getPeopleCount();
+        }
+    }
+    
 }
 
 function showPermissions() {
@@ -450,7 +468,29 @@ function clickHandler(obj)
         
     }
     
-    //FAS clics
+    //General control clicks
+    if (obj.name == "generalControlGetData"){
+            getPeopleCount();
+    }
+    
+    if (obj.name == "generalControlGetReport"){
+        params = 'option1='+getSelectedRadio('gcReportType') + '&option2=' + getSelectedRadio('gcReportType2');
+        ajax('/skd/getgeneralcontrolreport', function(data){
+            document.body.querySelector('.generalControl').querySelector('.results').innerHTML =data;
+        },params);
+    }
+    
+    if (obj.name == "getDumpButton"){
+        let dumpForm = document.getElementById('dump');
+        dumpForm.who.value = getSelectedRadio('gcReportType');
+        dumpForm.where.value = getSelectedRadio('gcReportType2');
+        dumpForm.submit();
+    }
+    
+
+    
+    
+    //FAS clicks
 
     if (obj.name == "fasSeach")
     {
@@ -711,9 +751,58 @@ document.addEventListener("click", function (e) {
 });
 } 
 
+//Get people count
+function getPeopleCount(){
+ajax('/skd/getgeneraldata', function(data){
+    let dataObj = JSON.parse(data);
+    let headers = {who:'',
+                   inside:'В школе',
+                   amount:'Из',
+                  };
+    let table = createTable(headers,dataObj);
+    let title = document.createElement('caption');
+    let cellText = document.createTextNode('Количество');
+    title.appendChild(cellText);
+    table.appendChild(title);
+    document.body.querySelector('.generalControl').querySelector('#numberOfPeople').innerHTML ='';
+    document.body.querySelector('.generalControl').querySelector('#numberOfPeople').appendChild(table);
+    });
+}
 
 
+//Functions for SKD system, general control module
 
+function createTable(headers,data){
+    //create elements
+    let table = document.createElement('table');
+    let tableHeader = document.createElement('thead');
+    let tableBody = document.createElement('tbody');
+    let row = document.createElement('tr');
+    
+    //fill headers
+    for(let key in headers) {
+        let cell = document.createElement('th');
+        let cellText = document.createTextNode(headers[key]);
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+    };
+    tableHeader.appendChild(row);
+    table.appendChild(tableHeader);
 
+    //fill rows
+    data.forEach(rowData =>{
+        let row = document.createElement('tr');
+        for(let key in headers) {
+            let cell = document.createElement('td');
+            let cellText = document.createTextNode(rowData[key]);
+            cell.appendChild(cellText);
+            row.appendChild(cell);
+        }
+        table.appendChild(row);
+    })
+    
+    //return table
+    return table;
+}
 
 

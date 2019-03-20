@@ -174,6 +174,7 @@ Class SkdController extends Controller
                  'Division'=>'Подразделение',
                  'EntranceTime'=>'Вход',
                  'LeavingTime'=>'Выход',
+                 'Comment'=>'Комментарий'
                 ];
                 echo $this->view->cTable($title,$columns,$data);
             }
@@ -198,6 +199,7 @@ Class SkdController extends Controller
                     'Firstname'=>'Имя',
                     'Division'=>'Подразделение',
                     'Status'=>'Статус',
+                    'Comment'=>'Комментарий'
                     ];
                 
                 echo $this->view->cTable($title,$columns,$data);
@@ -234,4 +236,69 @@ Class SkdController extends Controller
                 }
             }
         }
+
+        public function actionGetgeneraldata(){
+            $data = SkdModel::getGeneralData();
+            header("Content-type:application/json");
+            echo json_encode($data);
+        }
+
+        public function actionGetgeneralcontrolreport(){
+            $dataFromDb = SkdModel::getGCReport($_POST['option1'],$_POST['option2']);
+            $columns = [
+                'num'=>'№',
+                'Name'=>'Фамилия',
+                'Firstname'=>'Имя',
+                'Division'=>'Подразделение',
+                'IsInside'=>'Статус',
+                'LogTime'=>'Время',
+                'Address'=>'Комментарий'
+
+                ]; 
+            
+            //If user can edit comments, let show him Select
+            if ($this->model->user->hasPrivilege('skdGeneralControlCanEditComments') and $_POST['option1']=='gcStaff'){
+                
+                foreach ($dataFromDb as $key=>$value){
+                    $data = [
+                        'name' => 'comment',
+                        'id' => $dataFromDb[$key]['ID'],
+                        'selected' => $dataFromDb[$key]['Address'],
+                        'items' => [
+                            $dataFromDb[$key]['Address'],
+                            '',
+                            'Б/С',
+                            'Б/Л',
+                            'Отпуск',
+                            'Отгул',
+                            'Декрет',
+                            'Академ',
+                            'Забыл карту'
+                        ],
+                    ];
+                    $result = $this->view->generate('framework/select', $data);
+                    $dataFromDb[$key]['Address'] = $result;
+                }
+            };
+
+            echo $this->view->cTable('Все сотрудники',$columns, $dataFromDb,'users');
+            
+        }
+
+        public function actionGetgcexport(){
+            SkdModel::getDump($_POST["who"],$_POST["where"]);
+        }
+        
+        
+        public function actionWritecomment()
+        {
+            if (isset($_POST['id'])){
+                SkdModel::writeComment($_POST['id'],$_POST['comment']);
+                echo 'ok';
+            }
+        }
+            
+        
+
+        
 }

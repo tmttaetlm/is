@@ -4,6 +4,11 @@ namespace Models;
 use Core\Model;
 use Components\DbSkd;
 
+
+use PhpOffice\PhpSpreadsheet\Helper\Sample;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 class SkdModel extends Model {
     
     public static function allLogs()
@@ -120,6 +125,11 @@ class SkdModel extends Model {
         if (in_array("skdCanBrowseStaffLogs", $userPriveleges)) {
             $tabs['staffControl']='Контроль сотрудников';
         }
+
+        if (in_array("skdCanBrowseGeneralControl", $userPriveleges)) {
+            $tabs['generalControl']='Общий контроль';
+        }
+
         return $tabs;
     }
  
@@ -155,7 +165,7 @@ class SkdModel extends Model {
 		WHERE L.Mode = 2 and L.DateTime >= :dateStart2 AND L.DateTime <= :dateEnd2) AS Temp2
 		WHERE Temp2.DayEventQty=1
 
-        SELECT Et.UserId, P.Name AS Surname, P.Firstname AS Firstname, 
+        SELECT Et.UserId, P.Name AS Surname, P.Firstname AS Firstname, P.Address AS Comment, 
                D.Name AS Division, CONVERT(Varchar, Et.TimeEvent, 108) As EntranceTime, CONVERT(Varchar, Lv. TimeEvent, 108) As LeavingTime FROM @@Entering As Et
         FULL JOIN @@Leaving Lv ON  Et.EventKey=Lv.EventKey
         FULL JOIN dbo.pList P ON Et.UserId = P.ID 
@@ -203,7 +213,7 @@ class SkdModel extends Model {
 		WHERE L.Mode = 2 and L.DateTime >= :dateStart2 AND L.DateTime <= :dateEnd2) AS Temp2
 		WHERE Temp2.DayEventQty=1
 
-        SELECT Et.UserId, P.Name AS Surname, P.Firstname AS Firstname, 
+        SELECT Et.UserId, P.Name AS Surname, P.Firstname AS Firstname, P.Address AS Comment, 
                D.Name AS Division, CONVERT(Varchar, Et.TimeEvent, 108) As EntranceTime, CONVERT(Varchar, Lv. TimeEvent, 108) As LeavingTime FROM @@Entering As Et
         FULL JOIN @@Leaving Lv ON  Et.EventKey=Lv.EventKey
         FULL JOIN dbo.pList P ON Et.UserId = P.ID 
@@ -355,10 +365,10 @@ class SkdModel extends Model {
         $params['date'] = date("Ymd",strtotime("-3 days"));
         //КТО В ШКОЛЕ
         $tsql = "
-        SELECT F.MaxID, F.UserID, F.Surname, F.Firstname, F.Division, (F.Event+' '+F.EventTime) As Status
+        SELECT F.MaxID, F.UserID, F.Surname, F.Firstname, F.Division, F.Comment, (F.Event+' '+F.EventTime) As Status
         FROM
         (SELECT Result.MaxID, Result.UserId, (convert(varchar, DateTime, 108) +'  ' +convert(varchar, DateTime, 106)) AS EventTime,
-        P.Name AS Surname, P.Firstname AS Firstname, D.Name AS Division, 
+        P.Name AS Surname, P.Firstname AS Firstname, D.Name AS Division, P.Address AS Comment,  
         CASE
             WHEN GateLog.Mode=1 THEN 'В школе с'
             WHEN GateLog.Mode=2 THEN 'Отсутствует с'
@@ -388,10 +398,10 @@ class SkdModel extends Model {
         $params['divisionId'] = $divisionId;
         //КТО В ШКОЛЕ
         $tsql = "
-        SELECT F.DivisionId, F.MaxID, F.UserID, F.Surname, F.Firstname, F.Division, (F.Event+' '+F.EventTime) As Status
+        SELECT F.DivisionId, F.MaxID, F.UserID, F.Surname, F.Firstname, F.Division, F.Comment, (F.Event+' '+F.EventTime) As Status
         FROM
         (SELECT Result.MaxID, Result.UserId, (convert(varchar, DateTime, 108) +'  ' +convert(varchar, DateTime, 106)) AS EventTime,
-        P.Name AS Surname, P.Firstname AS Firstname, D.Name AS Division, D.Id As DivisionId,
+        P.Name AS Surname, P.Firstname AS Firstname, D.Name AS Division, D.Id As DivisionId, P.Address AS Comment,
         CASE
             WHEN GateLog.Mode=1 THEN 'В школе с'
             WHEN GateLog.Mode=2 THEN 'Отсутствует с'
@@ -470,4 +480,244 @@ class SkdModel extends Model {
         return $data;
     }
     
+    public static function getGeneralData(){
+        $tsql = "
+        --Возвращает количество работников
+        SELECT COUNT(*) AS number FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1
+        AND D.Name NOT LIKE '%[A-O]'
+
+        UNION ALL
+
+        --Возвращает количество работников, кто находится в школе
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1
+        AND D.Name NOT LIKE '%[A-O]'
+        AND P.IsInside = 1
+
+        UNION ALL
+
+        --Возвращает количество учащихся
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]'
+
+        UNION ALL
+
+        --Возвращает количество учащихся, кто находится в школе
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1
+        AND D.Name LIKE '%[A-O]'
+        AND P.IsInside = 1;";
+
+        $db = DbSkd::getInstance();
+        $result = $db->execQuery($tsql);
+
+        $staff = $result[0]['number'];
+        $staffInside = $result[1]['number'];
+       
+        $students = $result[2]['number'];
+        $studentsInside = $result[3]['number'];
+
+        $total = $result[0]['number' ] + $result[2]['number'];
+        $totalInside = $result[3]['number'] + $result[1]['number'];
+
+        $data = [
+                    [ 'who' => 'Сотрудники',
+                      'amount' => $staff,
+                      'inside' => $staffInside,
+                    ],   
+                    [ 'who' => 'Учащиеся',
+                      'amount' => $students,
+                      'inside' => $studentsInside,
+                    ],
+                    [ 'who' => 'Всего',
+                      'amount' => $total,
+                      'inside' => $totalInside,
+                    ],
+                ];   
+        return $data;
+    }
+
+    public static function getGCReport($option1,$option2){
+        //$params['date'] = date("Ymd",strtotime("-14 days"));
+        
+        $who="";
+        switch ($option1) {
+            case "gcStaff":
+                $who= " AND D.Name NOT LIKE '%[A-O]'";
+                break;
+            case "gcStudents":
+                $who= " AND D.Name LIKE '%[A-O]'";
+                break;
+        }
+        
+        $where="";
+        switch ($option2) {
+            case "inside":
+                $where= " AND P.IsInside=1";
+                break;
+            case "outside":
+                $where= " AND P.IsInside=2";
+                break;
+        }
+
+        $tsql = "
+        --
+        SELECT P.ID,P.Name,P.Firstname,D.Name AS Division, P.Address, convert(varchar(20),P.LogTime,113) As LogTime,
+        CASE 
+        WHEN P.IsInside=1 THEN 'В школе'
+        WHEN P.IsInside=2 THEN 'Отсутствует'
+        END
+        AS IsInside
+        FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE Company = 1" . $who . $where . " ORDER BY D.Name,P.Name";
+
+        //var_dump($tsql); die();
+        $db = DbSkd::getInstance();
+        $data = $db->execQuery($tsql);
+        $data = self::addRowNumbers($data);
+        return $data;
+        
+
+    }
+
+    public static function getDump($who,$where){
+        require_once ROOT.'/application/vendor/phpoffice/phpspreadsheet/src/Bootstrap.php';
+        $helper = new Sample();
+        $spreadsheet = new Spreadsheet();
+
+        // Set document properties
+        $spreadsheet->getProperties()->setCreator('Система СКД')
+        ->setLastModifiedBy('Система СКД')
+        ->setTitle('Выгрузка по сотрудников и учащимся')
+        ->setSubject('Выгрузка по сотрудников и учащимся')
+        ->setDescription('Выгрузка по сотрудников и учащимся')
+        ->setKeywords('office 2007 openxml php')
+        ->setCategory('Отчет');
+
+        // Add data from model
+        $arrayData = self::getGCReport($who,$where);
+        
+        // Width for cells
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
+
+        $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
+        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Выгрузка из системы СКД по состоянию на: '. date("d.m.Y H:i:s"));
+        //Put headers
+        $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
+        $spreadsheet->getActiveSheet()->setCellValue('B2', 'Фамилия');
+        $spreadsheet->getActiveSheet()->setCellValue('C2', 'Имя');
+        $spreadsheet->getActiveSheet()->setCellValue('D2', 'Подразделение');
+        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Статус');
+        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Последний проход');
+        $spreadsheet->getActiveSheet()->setCellValue('G2', 'Комментарий');
+
+        //Put data into cells
+        foreach ($arrayData as $elem) {
+            $i = $elem['num'] + 2;
+            $spreadsheet->getActiveSheet()->setCellValue('A' . $i, $elem['num']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['Name']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['Firstname']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['Division']);
+            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['IsInside']);
+            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['LogTime']);
+            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['Address']);
+        }
+
+        // Rename worksheet
+        $spreadsheet->getActiveSheet()->setTitle('Выгрузка');
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Xlsx)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Выгрузка.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        //styling
+        /* 
+        $styleArray = [
+            'font' => [
+                'bold' => true,
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                'rotation' => 90,
+                'startColor' => [
+                    'argb' => 'FFA0A0A0',
+                ],
+                'endColor' => [
+                    'argb' => 'FFFFFFFF',
+                ],
+            ],
+        ];
+
+        */
+        $styleData = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $styleHeaders = [
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'font' => [
+                'bold' => true,
+            ],
+        ];
+        
+        $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:G2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:G'.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->setAutoFilter('B2:G'.$i);
+
+
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public static function writeComment($id,$comment){
+        $params['id'] = $id;
+        $params['comment'] = $comment;
+        $tsql = "
+        --Обновляет поле Address (записывает туда комментарий) 
+        UPDATE dbo.pList
+        SET Address = :comment
+        WHERE ID = :id";
+        $db = DbSkd::getInstance();
+        $data = $db->updateQuery($tsql,$params);
+    }
 }
