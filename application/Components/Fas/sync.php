@@ -27,7 +27,7 @@ class FasSync {
     
     private function clearDb() {
         $query = "
-        DELETE FROM `isdb`.`fixedAsset`;";
+        TRUNCATE TABLE `isdb`.`fixedAsset`;";
         $this->db->IUDquery($query);
     }
 
@@ -82,6 +82,15 @@ class FasSync {
             $data[] = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
             //sn
             $data[] = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
+            //comment
+            $data[] = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+            //registrationDate
+            $data[] = $worksheet->getCellByColumnAndRow(10, $row)->getValue();
+            //accountablePersonIin
+            $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
+            //locationCode
+            $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue();
+
         }
         
         //Deletes all '#NULL!' values
@@ -98,11 +107,11 @@ class FasSync {
     
     private function multiInsert($data)
     {
-        $numRows = count($data)/8; 
+        $numRows = count($data)/12; 
 
         while ($numRows > 5000)
         {
-            $d = array_splice($data,0,5000*8);
+            $d = array_splice($data,0,5000*12);
             $this->writeData(5000,$d);
             $numRows -=5000;
         }  
@@ -118,13 +127,13 @@ class FasSync {
     {
     	$placeHolders='';
     	for ($i=1; $i <= $numRows; $i++)
-	{
-            $placeHolders.= '(?,?,?,?,?,?,?,?),';
+	    {
+            $placeHolders.= '(?,?,?,?,?,?,?,?,?,?,?,?),';
     	}
 
     	$placeHolders = mb_substr($placeHolders, 0, -1);
         //make query
-        $query = "INSERT INTO fixedAsset(invNumber,barcode,description,dateFix,iin,person,location,sn) VALUES ".$placeHolders;
+        $query = "INSERT INTO fixedAsset(invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode) VALUES ".$placeHolders;
         $this->db->InsertDataByQ($query, $data);
     }
     

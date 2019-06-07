@@ -3,6 +3,9 @@
  */
 'use strict'
 
+//Create a storage object
+var isStorage = {};
+
 window.onload = function() {
     
     //Catches clicks and send to handler
@@ -15,6 +18,10 @@ window.onload = function() {
         changeHandler(event.target);
     });
 
+    //Catches getting focus
+    document.addEventListener("focusin", function (event) {
+        focusInHandler(event.target);
+    });
 
 
 /*    
@@ -108,6 +115,38 @@ window.onload = function() {
     
 }
 
+//Keyboard focusInHandler
+function focusInHandler(obj){
+    if (obj.classList.contains('inv-select-location')){
+        if (obj.length == 1){
+            let newOption;
+            isStorage.inventoryRooms.forEach(row => {
+                newOption = new Option(row.location, row.locationCode);
+                obj.appendChild(newOption);
+            });
+
+        }
+
+    };
+    if (obj.classList.contains('inv-select-comment')){
+        if (obj.length == 1){
+            let newOption;
+            newOption = new Option('-нет-', 0);
+            obj.appendChild(newOption);
+            isStorage.inventoryComments.forEach(row => {
+                newOption = new Option(row.comment, row.id);
+                obj.appendChild(newOption);
+            });
+
+        }
+
+    }
+
+
+   
+}
+
+
 
 
 //Keyboard hanler
@@ -160,6 +199,39 @@ function changeHandler(obj)
         
         
     }
+
+    if (obj.name == "invSeachType")
+    {
+        let seachBy = obj.options[obj.selectedIndex].dataset.type;
+        let seachField = document.getElementById("invSeachField");
+        let ob = {"seachBy":seachBy};
+        let invSeachList = [] , person;
+        seachField.value = '';
+        
+        if (seachBy == 'person') {
+            ajaxJson('/fas/getInvPeopleList', function(data){
+                 autocomplete(seachField, data);
+            }, ob);
+        }
+
+        if (seachBy == 'invNumber') {
+            autocomplete(seachField, []);
+        }
+        
+        if (seachBy == 'location') {
+            ajaxJson('/fas/getInvLocationList', function(data){
+                 autocomplete(seachField, data);
+            }, ob);
+        }        
+        
+        if (seachBy == 'fixedAsset') {
+            ajaxJson('/fas/getInvFixedAssetList', function(data){
+                 autocomplete(seachField, data);
+            }, ob);
+        }        
+
+    }
+
     
     if (obj.name == "role")
     {
@@ -218,7 +290,7 @@ function changeHandler(obj)
     }
     
     //admin roleSettings
-    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments"){
+    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="fasInvControl"){
         var roleList = document.getElementById('roleList');
         if (roleList.selectedIndex ==-1) {
             alert('Выберите роль, для которой настраиваете права!');
@@ -271,6 +343,35 @@ function changeHandler(obj)
         if (obj.id == 'generalControl'){
             getPeopleCount();
         }
+        if (obj.id == 'inventory'){
+            extendWrapper();
+            getInventoryRooms();
+            getInventoryComments();
+        }
+        if (obj.id == 'inventoryControl'){
+            getInventoryPeople();
+        }
+    }
+
+    //Inventory change location and comments
+    if (obj.classList.contains('inv-select-location')){
+        var param = 'locationCode='+obj.value + '&id='+obj.dataset.id;
+        ajax('/fas/inventoryChangeLocation', function(data){
+            if (data != 'true'){
+                alert('Ошибка, изменения не сохранены');
+            }
+        }, param);
+    }
+    if (obj.classList.contains('inv-select-comment')){
+        if (obj.dataset.id == 0){
+            obj.value = '';
+        } 
+        var param = 'commentId='+obj.value + '&id='+obj.dataset.id;
+        ajax('/fas/inventoryChangeComment', function(data){
+            if (data != 'true'){
+                alert('Ошибка, изменения не сохранены');
+            }
+        }, param);
     }
     
 }
@@ -521,11 +622,58 @@ function clickHandler(obj)
 	    param = 'fixedAsset=' + encodeURIComponent(document.getElementById('seachField').value);
             ajax('/fas/seach', function(data){document.getElementById('results').innerHTML = data}, param);
         }
+
+        extendWrapper();
+    }
+
+
+    //Inventory clicks
+
+    if (obj.name == "invSeach"){
+        loadInvData();
+        extendWrapper();                
+    }
+
+    if (obj.name == "inventoryUpdate"){
+        ajax('/fas/getInventoryData', function(data){document.getElementById('inventoryResults').innerHTML = data},param);
+    }
+    if (obj.name == "inventoryFinish"){
+        ajax('/fas/InventoryFinish', function(data){
+            if (data == true) {
+                alert('Поздравляем! Вы завершили инвентаризацию.');
+                obj.disabled = true;
+            }
+            else{
+                alert('Для завершения инвентаризации необходимо отсканировать все основные средства!');
+            };
+        },param);
         
-        document.querySelectorAll('.wrapper')[1].style.width = '1250px';
-        document.querySelector('.content').style.width = '1250px';
-        document.querySelector('.ui-tabs').style.width = '1250px';
+    }
+
+    if (obj.name == "invSaveChanges"){
+        let newOwner = document.getElementById('invChangeOwner').value;
         
+        if (isStorage.inventoryPeople.indexOf(newOwner) != -1){
+            let params = 'invNumber=' + isStorage.invCurrentInventoryNum;
+            params += '&newOwner=' + newOwner;
+            ajax('/fas/invChangeOwner', function(data){
+                loadInvData();}, 
+                params);
+            document.getElementById('dialogWindowBackground').style.display = 'none';;
+        } else{
+            alert('Сотрудник не найден');
+        }
+    }
+
+    if (obj.classList.contains('invLink')){
+        let dialogWindowBackground = document.getElementById('dialogWindowBackground');
+        dialogWindowBackground.style.display = 'block';
+        isStorage.invCurrentInventoryNum = obj.innerText;
+    }
+    
+    if (obj.id == 'closeDialogWindow'){
+        let dialogWindowBackground = document.getElementById('dialogWindowBackground');
+        dialogWindowBackground.style.display = 'none';
     }
     
     //Admin clicks
@@ -555,8 +703,13 @@ function clickHandler(obj)
         ajax('/admin/deleteRole', function(data){alert(data); getRoles();}, param);
     }
     
-
-    
+    //inventory control
+    if (obj.id == "getInvExport"){
+        let invExportForm = document.getElementById('invExportForm');
+        //dumpForm.who.value = getSelectedRadio('gcReportType');
+        //dumpForm.where.value = getSelectedRadio('gcReportType2');
+        invExportForm.submit();
+    }
 
     
 }
@@ -604,6 +757,59 @@ function getStudentsList()
     var params = 'grade='+document.getElementById('grade').value + document.getElementById('litera').value;
     ajax('/skd/getStudentsList', function(data){elem.innerHTML=data; }, params);
 }
+
+
+function getInventoryRooms(){
+    let ob = {};
+    ajaxJson('/fas/getFasRooms', function(data){
+        isStorage.inventoryRooms = data;
+    }, ob);
+}
+
+function getInventoryComments(){
+    let ob = {};
+    ajaxJson('/fas/getFasComments', function(data){
+        isStorage.inventoryComments = data;
+    }, ob);
+}
+
+function getInventoryPeople(){
+    let ob = {};
+    ajaxJson('/fas/getInvPeopleList', function(data){
+        isStorage.inventoryPeople = data;
+        let invChangeOwner = document.getElementById('invChangeOwner');
+        autocomplete(invChangeOwner,isStorage.inventoryPeople);
+    }, ob);
+}
+
+function loadInvData(){
+    let seachType = document.getElementById('invSeachType');
+    let param;
+    seachType = seachType.options[seachType.selectedIndex].dataset.type;
+    if (seachType=='person') {
+        param = 'person=' + document.getElementById('invSeachField').value;
+        ajax('/fas/invSeach', function(data){document.getElementById('invResults').innerHTML = data}, param);
+    }
+
+    if (seachType=='invNumber') {
+        param = 'invNumber=' + document.getElementById('invSeachField').value;
+        ajax('/fas/invSeach', function(data){document.getElementById('invResults').innerHTML = data}, param);
+    }
+
+    if (seachType=='location') {
+        param = 'location=' + document.getElementById('invSeachField').value;
+        ajax('/fas/invseach', function(data){document.getElementById('invResults').innerHTML = data}, param);
+    }
+    
+    if (seachType=='fixedAsset') {
+    param = 'fixedAsset=' + encodeURIComponent(document.getElementById('invSeachField').value);
+        ajax('/fas/invseach', function(data){document.getElementById('invResults').innerHTML = data}, param);
+    }
+
+}
+
+
+
 
 
 //Функция отправки Ajax запроса на сервер
@@ -805,4 +1011,8 @@ function createTable(headers,data){
     return table;
 }
 
-
+function extendWrapper(){
+    document.querySelectorAll('.wrapper')[1].style.width = '1300px';
+    document.querySelector('.content').style.width = '1300px';
+    document.querySelector('.ui-tabs').style.width = '1300px';
+}

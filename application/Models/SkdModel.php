@@ -599,9 +599,9 @@ class SkdModel extends Model {
         // Set document properties
         $spreadsheet->getProperties()->setCreator('Система СКД')
         ->setLastModifiedBy('Система СКД')
-        ->setTitle('Выгрузка по сотрудников и учащимся')
-        ->setSubject('Выгрузка по сотрудников и учащимся')
-        ->setDescription('Выгрузка по сотрудников и учащимся')
+        ->setTitle('Выгрузка по сотрудникам и учащимся')
+        ->setSubject('Выгрузка по сотрудникам и учащимся')
+        ->setDescription('Выгрузка по сотрудникам и учащимся')
         ->setKeywords('office 2007 openxml php')
         ->setCategory('Отчет');
 
