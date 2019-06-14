@@ -117,7 +117,14 @@ class FasController extends Controller
 
     public function actionGetinvexport()
     {
-       FasModel::getInvExport();
+        if (isset($_POST['invReportType'])){
+            if ($_POST['invReportType']=='people'){
+                FasModel::getInvPeopleExport($_POST['invReportType']);
+            }else{
+                FasModel::getInvExport($_POST['invReportType']);
+            }  
+        }  
+        
     }
 
     public function actionGetInvpeoplelist()
@@ -134,7 +141,7 @@ class FasController extends Controller
             'location'=>'Местонахождение',
             'barcode'=>'Штрих-код',
             'dateFix'=>'Дата закрепления',
-            'sn'=>'Серийный номер',
+            'barcodeScanned'=>'Штрих-код отсканирован',
         ];
         if (isset($_POST['person'])){
             $data = $this->model->invSeachByPerson($_POST['person']);
@@ -174,5 +181,26 @@ class FasController extends Controller
     {
         return $this->model->getInvFixedAssetList();
     }   
-
+    
+    public function actionInvChangeScannedStatus()
+    {
+        if (isset($_POST['id'])){
+            $this->model->InvChangeScannedStatus($_POST['id'],$_POST['status'],$_SESSION['userIin']);
+        }
+    }
+    
+    public function actionInvTransmitAssets()
+    {
+        if (isset($_POST['invTransmittingPerson'])){
+            echo $this->model->transmitAssets($_POST['invTransmittingPerson'],$_POST['invReceivingPerson']);
+        }
+    }
+    
+    public function actionStartInventory(){
+        echo $this->model->startInventory();
+    }   
+    
+    public function actionStopInventory(){
+        echo $this->model->stopInventory();
+    }   
 }

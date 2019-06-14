@@ -290,7 +290,7 @@ function changeHandler(obj)
     }
     
     //admin roleSettings
-    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="fasInvControl"){
+    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="fasInvControl"|| obj.id =="fasInvStart"){
         var roleList = document.getElementById('roleList');
         if (roleList.selectedIndex ==-1) {
             alert('Выберите роль, для которой настраиваете права!');
@@ -350,6 +350,7 @@ function changeHandler(obj)
         }
         if (obj.id == 'inventoryControl'){
             getInventoryPeople();
+            extendWrapper();
         }
     }
 
@@ -675,6 +676,36 @@ function clickHandler(obj)
         let dialogWindowBackground = document.getElementById('dialogWindowBackground');
         dialogWindowBackground.style.display = 'none';
     }
+    if (obj.id == 'transferAssets'){
+        let invTransmittingPerson = document.getElementById('invTransmittingPerson').value;
+        let invReceivingPerson = document.getElementById('invReceivingPerson').value;
+        let r = confirm("Вы уверены что хотите выполнить передачу основных средств?");
+        if (r == true) {
+            let param = 'invTransmittingPerson=' + invTransmittingPerson + '&invReceivingPerson=' + invReceivingPerson;
+            ajax('/fas/invTransmitAssets', function(data){
+                if (data=='1'){
+                    document.getElementById('invResults').innerHTML ='';
+                    alert('Передача ОС выполнена успешно');   
+                }else{
+                    alert('При выполнении запроса возникла ошибка');
+                }
+            }, param);
+        }
+        
+    }
+    
+
+    //Barcode
+    if (obj.classList.contains('invCheckbox')){
+        let r = confirm("Вы уверены что хотите изменить статус?");
+        if (r == false) {
+            obj.checked = !obj.checked;
+        }else{
+            param = 'id=' + obj.value + '&status='+obj.checked;
+            ajax('/fas/invChangeScannedStatus', function(data){}, param);
+        }
+    }
+
     
     //Admin clicks
     if (obj.name == "adminAddRole") {
@@ -710,7 +741,28 @@ function clickHandler(obj)
         //dumpForm.where.value = getSelectedRadio('gcReportType2');
         invExportForm.submit();
     }
-
+    if (obj.id == "startInventory"){
+        let param = {};
+        let r = confirm("Вы уверены что хотите начать новую инвентаризацию? ВСЕ ТАБЛИЦЫ ПРЕДЫДУЩЕЙ ИНВЕНТАРИЗАЦИИ ОЧИСТЯТСЯ!");
+        if (r == true) {
+            ajax('/fas/startInventory', function(data){
+                if(data =='1'){
+                    alert('Вы начали новую инвентаризацию! Вкладка Инвентаризация доступна пользователям.');
+                }
+            }, param);
+        }
+        
+    }
+    if (obj.id == "stopInventory"){
+        let param = {};
+        let r = confirm("Вы уверены что хотите завершить инвентаризацию? В этом случае никто не сможет проводить инвентаризацию вплоть до начала новой.");
+        if (r == true){
+            ajax('/fas/stopInventory', function(data){
+                if(data =='1'){
+                alert('Вы завершили инвентаризацию! ');
+            }}, param);
+        }
+    }
     
 }
 
@@ -779,7 +831,22 @@ function getInventoryPeople(){
         isStorage.inventoryPeople = data;
         let invChangeOwner = document.getElementById('invChangeOwner');
         autocomplete(invChangeOwner,isStorage.inventoryPeople);
+        fillTransmittingFields();
     }, ob);
+}
+
+function fillTransmittingFields(){
+    let invTransmittingPerson = document.getElementById('invTransmittingPerson');
+    let invReceivingPerson = document.getElementById('invReceivingPerson');
+    let newOption;
+    isStorage.inventoryPeople.forEach(row => {
+        newOption = new Option(row);
+        invTransmittingPerson.appendChild(newOption);
+    });
+    isStorage.inventoryPeople.forEach(row => {
+        newOption = new Option(row);
+        invReceivingPerson.appendChild(newOption);
+    });
 }
 
 function loadInvData(){

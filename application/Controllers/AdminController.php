@@ -22,7 +22,7 @@ class AdminController extends Controller{
     public function actionIndex()
     {
         $data['tabItems']['userControl'] = 'Управление пользователями';
-        if ($this->model->user->getIin() == '880929350366') {
+        if ($this->model->user->getIin() == '841208350084') {
             $data['tabItems']['roleSettings']='Настройка ролей';
         }
         

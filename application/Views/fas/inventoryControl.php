@@ -1,6 +1,31 @@
+<?php 
+    if ($data['canInvStart']==true){ 
+        echo '<span>Управление процессом инвентаризации:</span>';
+        echo '<button id="startInventory">Начать</button>';
+        echo '<button id="stopInventory">Завершить</button><br><br>';
+    }
+?>
+
 <form id="invExportForm" method="post"  action="/fas/getInvExport" class="but">
+    <label for="invReportType">Выберите тип отчета:</label>
+    <select name="invReportType">
+        <option value="allAssets">Все ОС</option>
+        <option value="unscannedAssets">Неотсканированнные ОС</option>
+        <option value="people">Сотрудники</option>
+    </select> 
 </form>
-<button id="getInvExport">Выгрузить в Exel</button>
+<button id="getInvExport">Сформировать</button>
+<br/>
+<form id="invTransferAssets" method="post"  action="/fas/invTransferAssets" class="but">
+    <label for="invTransmittingPerson">Передать все ОС сотрудника:</label>
+    <select name="invTransmittingPerson" id="invTransmittingPerson">
+    </select>
+    <label for="invReceivingPerson">сотруднику:</label>
+    <select name="invReceivingPerson" id="invReceivingPerson">
+    </select> 
+</form>
+<button id="transferAssets">Передать</button>
+
 
 <div class="autocomplete">
     <label for="invSeachType">Поиск по </label>
