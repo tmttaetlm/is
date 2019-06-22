@@ -563,7 +563,7 @@ div .controls{
   z-index: 99;
   /*position the autocomplete items to be the same width as the container:*/
   top: 100%;
-  left: 0;
+  left: 350px;
   right: 0;
   width: 400px;
 }

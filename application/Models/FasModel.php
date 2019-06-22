@@ -60,7 +60,8 @@ class FasModel extends Model
 
     public function index() {
         $updateInfo = '<p class="fasUpdateInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: '.date('d.m.Y H:i',$this->getModificationDate())."</p>\n<br>";
-        $data['lastUpdate'] = date('d.m.Y H:i',$this->getStartedDate());
+        $data['lastUpdate'] = date('d.m.Y H:i',$this->getModificationDate());
+        $data['inventoryStartedAt'] = date('d.m.Y H:i',$this->getStartedDate());
         $data['tabItems']['monitoring']='Мои ОС';
         $userPriveleges = $this->user->getPriveleges();
         if (in_array("fasCanSeach", $userPriveleges)) {
@@ -202,6 +203,13 @@ class FasModel extends Model
     //Inventory data
     public function getInventoryData(){
         $result = $this->getFixedAssetsInventory($this->user->getIin());
+        $rowNumber = 0;
+        foreach($result as $row){
+            if ($row['newLocation']==''){
+                $result[$rowNumber]['newLocation'] = $row['location'];
+            };
+            $rowNumber += 1;
+        };
         $result = $this->addRowNumbers($result);
         if (!$this->checkInventoryFinished()){
             $result = $this->addSelectTags($result);
@@ -357,7 +365,7 @@ class FasModel extends Model
         $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
 
         $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
-        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Выгрузка из системы СКД по состоянию на: '. date("d.m.Y H:i:s"));
+        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Отчет по инвентаризации ОС школы на: '. date("d.m.Y H:i:s"));
         //Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
         $spreadsheet->getActiveSheet()->setCellValue('B2', 'Инвентарный номер');
@@ -368,7 +376,7 @@ class FasModel extends Model
         $spreadsheet->getActiveSheet()->setCellValue('G2', 'Балансовая дата');
 
         //aditional colomns
-        $spreadsheet->getActiveSheet()->setCellValue('H2', 'Дата запкрепления');
+        $spreadsheet->getActiveSheet()->setCellValue('H2', 'Дата закрепления');
         $spreadsheet->getActiveSheet()->setCellValue('I2', 'ИИН ответственного');
         $spreadsheet->getActiveSheet()->setCellValue('J2', 'ИИН экс-ответсвенного');
         $spreadsheet->getActiveSheet()->setCellValue('K2', 'Код местонахождения');
@@ -507,12 +515,20 @@ class FasModel extends Model
 
     public function invChangeOwner($invNumber, $newOwner){
         $db = Db::getDb();
+
         $query = "UPDATE fixedAssetInventory SET 
                   person = :newOwner,
                   exIin = iin,
                   iin = (SELECT iin from finishedInventory WHERE person = :newOwner2)
                   WHERE invNumber = :invNumber";
         $db->IUDQuery($query,['invNumber'=>$invNumber, 'newOwner'=>$newOwner, 'newOwner2'=>$newOwner]);
+        
+        //Set for receiving person status FINISHED NO
+        $query = "UPDATE finishedInventory SET 
+        finishedValue = 'NO'
+        WHERE person = :newOwner";
+        $db->IUDQuery($query,['newOwner'=>$newOwner]);
+
         return true;
     }
 
@@ -695,6 +711,19 @@ class FasModel extends Model
                   iin = (SELECT iin from finishedInventory WHERE person = :invReceivingPerson2)
                   WHERE person = :transmittingPerson";
         $db->IUDQuery($query,['transmittingPerson'=>$transmittingPerson, 'invReceivingPerson'=>$invReceivingPerson, 'invReceivingPerson2'=>$invReceivingPerson]);
+        
+        //Set for transmitting person status FINISHED YES
+        $query = "UPDATE finishedInventory SET 
+        finishedValue = 'YES'
+        WHERE person = :transmittingPerson";
+        $db->IUDQuery($query,['transmittingPerson'=>$transmittingPerson]);
+
+        //Set for receiving person status FINISHED NO
+        $query = "UPDATE finishedInventory SET 
+        finishedValue = 'NO'
+        WHERE person = :invReceivingPerson";
+        $db->IUDQuery($query,['invReceivingPerson'=>$invReceivingPerson]);
+        
         return true;
     }
 
