@@ -11,3 +11,7 @@
 
 <br/>
 <button name="adminDeleteRole">Удалить выбранную роль</button> <br/>
+<hr/>
+<label for="deleteOldEntriesDate">Удалить старые записи о проходах до </label>
+<input type="date" id="deleteOldEntriesDate" value='2018-01-01'>
+<button name="deleteOldEntries">Удалить</button>

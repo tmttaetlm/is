@@ -36,6 +36,7 @@ class FasController extends Controller
                 'barcode'=>'Штрих-код',
                 'dateFix'=>'Дата закрепления',
                 'sn'=>'Серийный номер',
+                'comment'=>'Комментарий',
             ];
     
         if (isset($_POST['invNumber'])){
@@ -120,7 +121,10 @@ class FasController extends Controller
         if (isset($_POST['invReportType'])){
             if ($_POST['invReportType']=='people'){
                 FasModel::getInvPeopleExport($_POST['invReportType']);
-            }else{
+            }elseif($_POST['invReportType']=='movement'){
+                FasModel::getInvMovement();
+            }
+            elseif(($_POST['invReportType']=='allAssets') || ($_POST['invReportType']=='unscannedAssets')){
                 FasModel::getInvExport($_POST['invReportType']);
             }  
         }  
@@ -139,6 +143,7 @@ class FasController extends Controller
             'description' => 'Наименование ОС',
             'person'=>'Ответственный',
             'location'=>'Местонахождение',
+            'newLocation'=>'Новое местонахождение',
             'barcode'=>'Штрих-код',
             'dateFix'=>'Дата закрепления',
             'barcodeScanned'=>'Штрих-код отсканирован',

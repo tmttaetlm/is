@@ -65,6 +65,7 @@ class SkdModel extends Model {
         $data = $db->execQuery($tsql);
         return $data;
     }
+
     
     public static function getUserEntranceExit($params)
     {

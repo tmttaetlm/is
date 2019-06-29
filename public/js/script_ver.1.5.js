@@ -58,7 +58,7 @@ window.onload = function() {
         document.getElementById('selectDayEnd').value = today;
         document.getElementById('selectDayEnd').setAttribute("max", today);
         var minDateStudent = getInputDate(-31);
-        var minDatePerson = getInputDate(-100);
+        var minDatePerson = getInputDate(-150);
         document.getElementById('selectDayStart').setAttribute("min", minDateStudent);
         document.getElementById('selectDayEnd').setAttribute("min", minDateStudent);
     }
@@ -589,6 +589,22 @@ function clickHandler(obj)
         dumpForm.submit();
     }
     
+    if (obj.name == "deleteOldEntries"){
+        let r = confirm("Вы уверены что хотите удалить все записи записи до " + document.getElementById('deleteOldEntriesDate').value + "?");
+        if (r == true){
+            params = 'date='+document.getElementById('deleteOldEntriesDate').value;
+            ajax('/admin/deleteOldEntries', function(data){
+               if  (data = 'NULL'){
+                   alert('Запрос выполнен успешно');
+               }
+               else{
+                   alert('Во время выполнения запроса возникла ошибка, запрос не был выполнен');
+               };
+            },params);
+        }
+
+    }
+    
 
     
     
@@ -737,8 +753,6 @@ function clickHandler(obj)
     //inventory control
     if (obj.id == "getInvExport"){
         let invExportForm = document.getElementById('invExportForm');
-        //dumpForm.who.value = getSelectedRadio('gcReportType');
-        //dumpForm.where.value = getSelectedRadio('gcReportType2');
         invExportForm.submit();
     }
     if (obj.id == "startInventory"){

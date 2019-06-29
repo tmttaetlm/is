@@ -11,6 +11,7 @@
     <select name="invReportType">
         <option value="allAssets">Все ОС</option>
         <option value="unscannedAssets">Неотсканированнные ОС</option>
+        <option value="movement">Движение ОС</option>
         <option value="people">Сотрудники</option>
     </select> 
 </form>

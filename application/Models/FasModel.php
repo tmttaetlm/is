@@ -95,7 +95,7 @@ class FasModel extends Model
             'location'=>'Местонахождение',
             'dateFix'=>'Дата закрепления',
             'sn'=>'Серийный номер',
-            
+            'comment'=>'Комментарий',
             ];
         
         $data['tabData']['monitoring'] = $updateInfo.$this->view->cTable($title,$columns, $result,'fasResultTable');
@@ -235,7 +235,7 @@ class FasModel extends Model
         $result = $db->selectQuery($query,['iin'=>$this->user->getIin()]);
         
         if ($result[0]['count'] == 0){
-            $query = "UPDATE finishedInventory SET finishedValue = 'YES' WHERE iin = :iin";
+            $query = "UPDATE finishedInventory SET finishedValue = 'YES', finishedAt = NOW() WHERE iin = :iin";
             $db->IUDQuery($query,['iin'=>$this->user->getIin()]);
             return true;
         }
@@ -453,6 +453,143 @@ class FasModel extends Model
         exit;
     }
 
+    public static function getInvMovementData(){
+        $db = Db::getDb();
+        $query = "SELECT invNumber, description,currentResponsible, priorOwner,barcode,priorLocation, currentLocation, accountablePerson, whoScanned, concat_ws(';',iin,currentLocationCode,barcode) AS txtFor1C
+        FROM
+        (SELECT t1.invNumber, t1.description, t1.person AS currentResponsible, t1.iin,  t3.person AS priorOwner, t1.barcode, 
+        CASE
+        WHEN newLocation IS NOT NULL THEN Location
+        WHEN newLocation IS NULL THEN newlocation
+        END
+        AS priorLocation,
+        CASE
+        WHEN newLocation IS NOT NULL THEN newLocation
+        WHEN newLocation IS NULL THEN location
+        END
+        AS currentLocation,
+        CASE
+        WHEN newLocationCode IS NOT NULL THEN newLocationCode
+        WHEN newLocationCode IS NULL THEN locationCode
+        END
+        AS currentLocationCode,
+        t4.person AS accountablePerson, t2.person AS whoScanned
+        FROM isdb.fixedAssetInventory t1
+        LEFT JOIN isdb.finishedInventory t2 ON t1.iinWhoScanned=t2.iin
+        LEFT JOIN isdb.finishedInventory t3 ON t1.exIin=t3.iin
+        LEFT JOIN isdb.finishedInventory t4 ON t1.accountablePersonIin=t4.iin
+        WHERE (exIin IS NOT NULL OR newLocationCode IS NOT NULL)
+        ORDER BY accountablePersonIin, t1.iin, currentLocation) AS tempQuery";
+        $result = $db->selectQuery($query);
+        return $result;
+    }
+
+    public static function getInvMovement(){
+        require_once ROOT.'/application/vendor/phpoffice/phpspreadsheet/src/Bootstrap.php';
+        $helper = new Sample();
+        $spreadsheet = new Spreadsheet();
+
+        // Set document properties
+        $spreadsheet->getProperties()->setCreator('Система УОС')
+        ->setLastModifiedBy('Система УОС')
+        ->setTitle('Выгрузка таблицы инвентаризации')
+        ->setSubject('Выгрузка таблицы инвентаризации')
+        ->setDescription('Выгрузка таблицы инвентаризации')
+        ->setKeywords('office 2007 openxml php')
+        ->setCategory('Отчет');
+
+        // Add data from model
+        $arrayData = self::getInvMovementData();
+        
+        // Width for cells
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
+
+        $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
+        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Отчет по движению ОС школы на: '. date("d.m.Y H:i:s"));
+        //Put headers
+        $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
+        $spreadsheet->getActiveSheet()->setCellValue('B2', 'Инвентарный номер');
+        $spreadsheet->getActiveSheet()->setCellValue('C2', 'Наименование');
+        $spreadsheet->getActiveSheet()->setCellValue('D2', 'Текущий владелец');
+        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Прежний владелец');
+        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Штрих-код');
+        $spreadsheet->getActiveSheet()->setCellValue('G2', 'Текущее местонахождение');
+
+        //aditional colomns
+        $spreadsheet->getActiveSheet()->setCellValue('H2', 'Прежнее местонахождение');
+        $spreadsheet->getActiveSheet()->setCellValue('I2', 'МОЛ');
+        $spreadsheet->getActiveSheet()->setCellValue('J2', 'Инвентаризатор');
+        $spreadsheet->getActiveSheet()->setCellValue('K2', 'Код 1C');
+
+        //Put data into cells
+        $i=2;
+        foreach ($arrayData as $elem) {
+            $i++;
+            $spreadsheet->getActiveSheet()->setCellValue('A' . $i, $i-2);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['invNumber']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['description']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['currentResponsible']);
+            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['priorOwner']);
+            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['barcode']);
+            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['currentLocation']);
+
+            $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['priorLocation']);
+            $spreadsheet->getActiveSheet()->setCellValue('I' . $i, $elem['accountablePerson']);
+            $spreadsheet->getActiveSheet()->setCellValue('J' . $i, $elem['whoScanned']);
+            $spreadsheet->getActiveSheet()->setCellValue('K' . $i, $elem['txtFor1C']);
+        }
+
+        // Rename worksheet
+        $spreadsheet->getActiveSheet()->setTitle('Выгрузка');
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // Redirect output to a client’s web browser (Xlsx)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Выгрузка.xlsx"');
+        header('Cache-Control: max-age=0');
+        
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        $styleData = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $styleHeaders = [
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'font' => [
+                'bold' => true,
+            ],
+        ];
+        
+        $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:K2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:K'.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->setAutoFilter('B2:K'.$i);
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
     public static function getInvExportData(){
         $db = Db::getDb();
         $query = "SELECT * FROM isdb.fixedAssetInventory";
@@ -525,7 +662,8 @@ class FasModel extends Model
         
         //Set for receiving person status FINISHED NO
         $query = "UPDATE finishedInventory SET 
-        finishedValue = 'NO'
+        finishedValue = 'NO',
+        finishedAt = NULL
         WHERE person = :newOwner";
         $db->IUDQuery($query,['newOwner'=>$newOwner]);
 
@@ -611,15 +749,18 @@ class FasModel extends Model
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
 
-        $spreadsheet->getActiveSheet()->mergeCells('A1:C1');
+        $spreadsheet->getActiveSheet()->mergeCells('A1:E1');
         $spreadsheet->getActiveSheet()->setCellValue('A1', 'Выгрузка сотрудников по состоянию на: '. date("d.m.Y H:i:s"));
         //Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
         $spreadsheet->getActiveSheet()->setCellValue('B2', 'ИИН');
         $spreadsheet->getActiveSheet()->setCellValue('C2', 'ФИО');
         $spreadsheet->getActiveSheet()->setCellValue('D2', 'Статус');
+        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Время завершения');
 
         //Put data into cells
         $i=2;
@@ -629,6 +770,7 @@ class FasModel extends Model
             $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['iin']);
             $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['person']);
             $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['finishedValue']);
+            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['finishedAt']);
         }
 
         // Rename worksheet
@@ -662,8 +804,8 @@ class FasModel extends Model
         ];
         
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:D2')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:D'.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->getStyle('A2:E2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:E'.$i)->applyFromArray($styleData);
         $spreadsheet->getActiveSheet()->setAutoFilter('B2:D'.$i);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -714,13 +856,15 @@ class FasModel extends Model
         
         //Set for transmitting person status FINISHED YES
         $query = "UPDATE finishedInventory SET 
-        finishedValue = 'YES'
+        finishedValue = 'YES',
+        finishedAt = NOW()
         WHERE person = :transmittingPerson";
         $db->IUDQuery($query,['transmittingPerson'=>$transmittingPerson]);
 
         //Set for receiving person status FINISHED NO
         $query = "UPDATE finishedInventory SET 
-        finishedValue = 'NO'
+        finishedValue = 'NO',
+        finishedAt = NULL
         WHERE person = :invReceivingPerson";
         $db->IUDQuery($query,['invReceivingPerson'=>$invReceivingPerson]);
         

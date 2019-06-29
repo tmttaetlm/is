@@ -107,5 +107,7 @@ class AdminController extends Controller{
         echo json_encode($permissions);
     }
 
-    
+    public function actionDeleteOldEntries(){
+        echo $this->model->deleteOldEntries($_POST['date']);
+    }
 }

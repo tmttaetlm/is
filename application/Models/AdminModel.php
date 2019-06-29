@@ -4,6 +4,7 @@ namespace Models;
 
 use Core\Model;
 use Components\Db;
+use Components\DbSkd;
 
 
 /**
@@ -90,6 +91,16 @@ class AdminModel extends Model{
         if ($mode == 'disable') {
             $db->IUDquery("DELETE FROM rolePermission WHERE idRole = :idRole AND idPermission = :idPermission", ['idRole'=>$roleId,'idPermission'=>$privId]);
         }
+    }
+
+    public static function deleteOldEntries($date){
+        $date = str_replace('-', '', $date); 
+        $date.= ' 00:00:00';
+        $params['date'] = $date;
+        $tsql = "DELETE FROM dbo.GateLog WHERE DateTime <= :date";
+        $db = DbSkd::getInstance();
+        $result = $data = $db->updateQuery($tsql,$params);
+        return $result;
     }
     
 }
