@@ -487,8 +487,7 @@ class SkdModel extends Model {
         SELECT COUNT(*) AS number FROM dbo.pList P
         INNER JOIN dbo.pDivision D
         ON P.Section = D.ID
-        WHERE P.Company = 1
-        AND D.Name NOT LIKE '%[A-O]'
+        WHERE P.Company = 1 AND D.Name NOT LIKE '%[A-O]'
 
         UNION ALL
 
@@ -496,9 +495,7 @@ class SkdModel extends Model {
         SELECT COUNT(*) FROM dbo.pList P
         INNER JOIN dbo.pDivision D
         ON P.Section = D.ID
-        WHERE P.Company = 1
-        AND D.Name NOT LIKE '%[A-O]'
-        AND P.IsInside = 1
+        WHERE P.Company = 1 AND D.Name NOT LIKE '%[A-O]' AND P.IsInside = 1
 
         UNION ALL
 
@@ -514,9 +511,23 @@ class SkdModel extends Model {
         SELECT COUNT(*) FROM dbo.pList P
         INNER JOIN dbo.pDivision D
         ON P.Section = D.ID
-        WHERE P.Company = 1
-        AND D.Name LIKE '%[A-O]'
-        AND P.IsInside = 1;";
+        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]' AND P.IsInside = 1;
+        
+        UNION ALL
+
+        --Возвращает количество учащихся из интерната
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]' --AND Поля для определения интернат или нет
+
+        UNION ALL
+
+        --Возвращает количество учащихся из интерната, кто находится в школе
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]' AND P.IsInside = 1 --AND Поля для определения интернат или нет;";
 
         $db = DbSkd::getInstance();
         $result = $db->execQuery($tsql);
@@ -527,7 +538,13 @@ class SkdModel extends Model {
         $students = $result[2]['number'];
         $studentsInside = $result[3]['number'];
 
-        $total = $result[0]['number' ] + $result[2]['number'];
+        $studentsDormitory = $result[4]['number'];
+        $studentsDormitoryInside = $result[5]['number'];
+
+        $studentsNotDormitory = $students - $studentsDormitory;
+        $studentsNotDormitoryInside = $studentsInside - $studentsDormitoryInside;
+
+        $total = $result[0]['number'] + $result[2]['number'];
         $totalInside = $result[3]['number'] + $result[1]['number'];
 
         $data = [
