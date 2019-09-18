@@ -511,7 +511,7 @@ class SkdModel extends Model {
         SELECT COUNT(*) FROM dbo.pList P
         INNER JOIN dbo.pDivision D
         ON P.Section = D.ID
-        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]' AND P.IsInside = 1;
+        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]' AND P.IsInside = 1
         
         UNION ALL
 
