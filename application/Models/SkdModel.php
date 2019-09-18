@@ -506,7 +506,8 @@ class SkdModel extends Model {
         SELECT COUNT(*) FROM dbo.pList P
         INNER JOIN dbo.pDivision D
         ON P.Section = D.ID
-        WHERE P.Company = 1 AND D.Name LIKE '%[A-O]'
+        WHERE P.Company = 1 
+        AND D.Name LIKE '%[A-O]'
 
         UNION ALL
 
@@ -516,7 +517,28 @@ class SkdModel extends Model {
         ON P.Section = D.ID
         WHERE P.Company = 1
         AND D.Name LIKE '%[A-O]'
-        AND P.IsInside = 1;";
+        AND P.IsInside = 1
+        
+        UNION ALL
+
+        --Возвращает количество учащихся из интерната
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1 
+        AND D.Name LIKE '%[A-O]'
+        AND P.Post = 7 
+
+        UNION ALL
+
+        --Возвращает количество учащихся из интерната, кто находится в школе
+        SELECT COUNT(*) FROM dbo.pList P
+        INNER JOIN dbo.pDivision D
+        ON P.Section = D.ID
+        WHERE P.Company = 1
+        AND D.Name LIKE '%[A-O]'
+        AND P.IsInside = 1
+        AND P.Post = 7;";
 
         $db = DbSkd::getInstance();
         $result = $db->execQuery($tsql);
@@ -527,6 +549,9 @@ class SkdModel extends Model {
         $students = $result[2]['number'];
         $studentsInside = $result[3]['number'];
 
+        $studentsDormitory = $result[4]['number'];
+        $studentsDormitoryInside = $result[5]['number'];
+
         $total = $result[0]['number' ] + $result[2]['number'];
         $totalInside = $result[3]['number'] + $result[1]['number'];
 
@@ -535,9 +560,13 @@ class SkdModel extends Model {
                       'amount' => $staff,
                       'inside' => $staffInside,
                     ],   
-                    [ 'who' => 'Учащиеся',
-                      'amount' => $students,
-                      'inside' => $studentsInside,
+                    [ 'who' => 'Учащиеся(город)',
+                      'amount' => $students - $studentsDormitory,
+                      'inside' => $studentsInside - $studentsDormitoryInside,
+                    ],
+                    [ 'who' => "Учащиеся(интернат)",
+                      'amount' => $studentsDormitory,
+                      'inside' => $studentsDormitoryInside,
                     ],
                     [ 'who' => 'Всего',
                       'amount' => $total,
