@@ -418,7 +418,7 @@ div .controls{
 .reportSelect{
     display: block;
     margin: 0 auto;
-    width: 90%;
+    width: 70%;
     padding: 10px;
     border-radius: 10px;
     border: 2px solid #00a0db;
@@ -622,7 +622,7 @@ div #msg p {
     display: flex;
 }
 .content .generalControl .box-1{
-    flex: 2;
+    flex: 1.75;
     
 }
 .content .generalControl .box-2{
@@ -658,7 +658,8 @@ div #msg p {
 
 .gcReportControls{
     margin-top: 8px;
-    margin-left: 100px;
+    margin-left: auto;
+    width: 500px;
 }
 
 
@@ -745,7 +746,6 @@ div #msg p {
 }
 
 .gcButtons{
-    margin: 0px 0px;
-    width: 0px;
-    text-align: left;
+    margin: 20px auto 15px;
+    width: 150px;
 }
