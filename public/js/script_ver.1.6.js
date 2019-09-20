@@ -1053,6 +1053,8 @@ document.addEventListener("click", function (e) {
 });
 } 
 
+
+//Get people count
 function updateData(){
     ajax('/skd/getgeneraldata', function(data){
         let dataObj = JSON.parse(data);
@@ -1070,12 +1072,13 @@ function updateData(){
         });
 }
 
-//Get people count
+//Realtime refreshing people count
 function getPeopleCount(){
     updateData();
     timerID = setInterval(updateData, 3000);
 }
 
+//Stop realtime refreshing
 function resetTimer(timerID){
     clearInterval(timerID);
 }
