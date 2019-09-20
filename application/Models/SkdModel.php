@@ -579,14 +579,24 @@ class SkdModel extends Model {
     public static function getGCReport($option1,$option2){
         //$params['date'] = date("Ymd",strtotime("-14 days"));
         
-        $who="";
+        $who=""; $accommodation=", '' AS Accommodation";
         switch ($option1) {
             case "gcStaff":
                 $who= " AND D.Name NOT LIKE '%[A-O]'";
                 break;
             case "gcStudents":
                 $who= " AND D.Name LIKE '%[A-O]'";
+                $accommodation = ", 
+                                CASE 
+                                WHEN P.Post=7 THEN 'Интернат' ELSE 'Город'
+                                END AS Accommodation";
                 break;
+            default:
+                $accommodation = ", 
+                                CASE 
+                                WHEN D.Name NOT LIKE '%[A-O]' THEN ''
+                                WHEN P.Post=7 AND D.Name LIKE '%[A-O]' THEN 'Интернат' ELSE 'Город'
+                                END AS Accommodation";
         }
         
         $where="";
@@ -606,7 +616,7 @@ class SkdModel extends Model {
         WHEN P.IsInside=1 THEN 'В школе'
         WHEN P.IsInside=2 THEN 'Отсутствует'
         END
-        AS IsInside
+        AS IsInside" . $accommodation . "
         FROM dbo.pList P
         INNER JOIN dbo.pDivision D
         ON P.Section = D.ID
@@ -642,13 +652,19 @@ class SkdModel extends Model {
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        if ($who == "gcStaff") {
+            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true); //Колонка "Комментарий"
+        } else {
+            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true); //Колонка "Проживание"
+            $spreadsheet->getActiveSheet()->getColumnDimension('H')->setAutoSize(true); //Колонка "Комментарий"
+        }
+        
         $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
 
-        $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
+        $spreadsheet->getActiveSheet()->mergeCells('A1:H1');
         $spreadsheet->getActiveSheet()->setCellValue('A1', 'Выгрузка из системы СКД по состоянию на: '. date("d.m.Y H:i:s"));
         //Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
@@ -657,7 +673,13 @@ class SkdModel extends Model {
         $spreadsheet->getActiveSheet()->setCellValue('D2', 'Подразделение');
         $spreadsheet->getActiveSheet()->setCellValue('E2', 'Статус');
         $spreadsheet->getActiveSheet()->setCellValue('F2', 'Последний проход');
-        $spreadsheet->getActiveSheet()->setCellValue('G2', 'Комментарий');
+        if ($who == "gcStaff") {
+            $spreadsheet->getActiveSheet()->setCellValue('G2', 'Комментарий');
+        } else {
+            $spreadsheet->getActiveSheet()->setCellValue('G2', 'Проживание');
+            $spreadsheet->getActiveSheet()->setCellValue('H2', 'Комментарий');
+        }
+        
 
         //Put data into cells
         foreach ($arrayData as $elem) {
@@ -668,7 +690,14 @@ class SkdModel extends Model {
             $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['Division']);
             $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['IsInside']);
             $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['LogTime']);
-            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['Address']);
+            if ($who == "gcStaff") {
+                $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['Address']);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['Accommodation']);
+                $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['Address']);
+            }
+            
+
         }
 
         // Rename worksheet
@@ -727,10 +756,16 @@ class SkdModel extends Model {
             ],
         ];
         
+        if ($who == "gcStaff") {
+            $area = 'G';
+        } else {
+            $area = 'H';
+        }
+
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:G2')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:G'.$i)->applyFromArray($styleData);
-        $spreadsheet->getActiveSheet()->setAutoFilter('B2:G'.$i);
+        $spreadsheet->getActiveSheet()->getStyle('A2:'.$area.'2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:'.$area.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->setAutoFilter('B2:'.$area.$i);
 
 
 

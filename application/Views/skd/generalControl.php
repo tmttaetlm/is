@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="gcButtons">
-            <button name="generalControlGetReport" class="but">Показать</button>
+            <!--<button name="generalControlGetReport" class="but">Показать</button>-->
             <form id="dump" method="post"  action="/skd/getgcexport" class="but">
                 <input type="hidden" name="who">
                 <input type="hidden" name="where">
@@ -37,7 +37,7 @@
     <div  class="box-2 reportSelect">
         <div id='numberOfPeople'></div>
         <br/>
-        <button name="generalControlGetData" class="sendQuery">Обновить</button>
+        <!--<button name="generalControlGetData" class="sendQuery">Обновить</button>-->
     </div>    
 </div>
 

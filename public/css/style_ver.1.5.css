@@ -601,7 +601,7 @@ table.users tr:hover td{
 
 div #msg p {
     color:red;
-    align: center;
+    align-content: center;
 }
 
 
@@ -649,11 +649,6 @@ div #msg p {
 
 .but{
     display: inline-block;
-}
-
-.gcButtons{
-    margin: 20px auto;
-    width: 300px;
 }
 
 .gcReportType{
@@ -749,3 +744,8 @@ div #msg p {
     cursor:pointer;
 }
 
+.gcButtons{
+    margin: 0px 0px;
+    width: 0px;
+    text-align: left;
+}

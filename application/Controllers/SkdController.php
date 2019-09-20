@@ -252,10 +252,14 @@ Class SkdController extends Controller
                 'Division'=>'Подразделение',
                 'IsInside'=>'Статус',
                 'LogTime'=>'Время',
+                'Accommodation'=>'Проживание',
                 'Address'=>'Комментарий'
-
                 ]; 
             
+            if ($_POST['option1'] == "gcStaff") {
+                unset($columns['Accommodation']);
+            };
+
             //If user can edit comments, let show him Select
             if ($this->model->user->hasPrivilege('skdGeneralControlCanEditComments') and $_POST['option1']=='gcStaff'){
                 

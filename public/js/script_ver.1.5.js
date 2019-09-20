@@ -4,7 +4,8 @@
 'use strict'
 
 //Create a storage object
-var isStorage = {};
+var isStorage = {},
+    timerID = 0;
 
 window.onload = function() {
     
@@ -163,6 +164,9 @@ function keyHandler(obj)
 //Change Handler
 function changeHandler(obj)
 {
+
+    clearInterval(timerID);
+
     if (obj.name == "fasSeachType")
     {
         var seachBy = obj.options[obj.selectedIndex].dataset.type;
@@ -347,10 +351,12 @@ function changeHandler(obj)
             extendWrapper();
             getInventoryRooms();
             getInventoryComments();
+            resetTimer(timerID);
         }
         if (obj.id == 'inventoryControl'){
             getInventoryPeople();
             extendWrapper();
+            resetTimer(timerID);
         }
     }
 
@@ -406,6 +412,7 @@ function clickHandler(obj)
 {  
     
     if (obj.id == "userControl") {
+        clearInterval(timerID);
         param ='null'
         ajax('/admin/updateUserList', function(data){document.body.querySelector('#results').innerHTML =  data;},param);
     }
@@ -413,17 +420,20 @@ function clickHandler(obj)
     
     if (obj.id == "personByPeriod")
     {
+        console.log('222');
         staffHideReportElements();
         document.getElementById('personSet').classList.remove('hide');
         getStaffList();
     }
     if (obj.id == "staffWhoIsAtSchool")
     {
+        console.log('333');
         staffHideReportElements();
     }
     
     if (obj.id == "staffEntranceExit")
     {
+        console.log('444');
         staffHideReportElements();
         document.getElementById('staffSelectDay').classList.remove('hide');
     }
@@ -431,6 +441,7 @@ function clickHandler(obj)
     
     if (obj.name == "showUserList")
     {
+        console.log('555');
         ajax('/admin/userlist', function(data){document.body.querySelector('#results').innerHTML =  data;});
     }
     
@@ -443,9 +454,11 @@ function clickHandler(obj)
     //Get user logs
     if (obj.name == "skdUserLogs") {
         if (getSelectedRadio('userReportType')=='userEntranceExit'){
+            console.log('666');
             ajax('/skd/UserEntranceExit', function(data){document.body.querySelector('.userControl').querySelector('.results').innerHTML =  data;});
         }
         if (getSelectedRadio('userReportType')=='userLogs'){
+            console.log('777');
             ajax('/skd/UserLogs', function(data){document.body.querySelector('.userControl').querySelector('.results').innerHTML =  data;});
         }
         
@@ -454,6 +467,7 @@ function clickHandler(obj)
     //Get students logs
     if (obj.name == "getStudentsLogs")
     {
+        console.log('000');
         //Добавляем класс в параметры
         var params = 'grade='+document.getElementById('grade').value + document.getElementById('litera').value;
         
@@ -494,6 +508,7 @@ function clickHandler(obj)
     //Get staff logs
     if (obj.name == "getStaffLogs")
     {
+        console.log('111');
         //Добавляем тип отчета в параметры
         var reportType = getSelectedRadio('staffReportType'); 
         params = 'staffReportType='+ reportType;
@@ -571,16 +586,16 @@ function clickHandler(obj)
     }
     
     //General control clicks
-    if (obj.name == "generalControlGetData"){
-            getPeopleCount();
-    }
+    /*if (obj.name == "generalControlGetData"){
+        getPeopleCount();
+    }*/
     
-    if (obj.name == "generalControlGetReport"){
+    /*if (obj.name == "generalControlGetReport"){
         params = 'option1='+getSelectedRadio('gcReportType') + '&option2=' + getSelectedRadio('gcReportType2');
         ajax('/skd/getgeneralcontrolreport', function(data){
             document.body.querySelector('.generalControl').querySelector('.results').innerHTML =data;
         },params);
-    }
+    }*/
     
     if (obj.name == "getDumpButton"){
         let dumpForm = document.getElementById('dump');
@@ -1038,24 +1053,32 @@ document.addEventListener("click", function (e) {
 });
 } 
 
-//Get people count
-function getPeopleCount(){
-ajax('/skd/getgeneraldata', function(data){
-    let dataObj = JSON.parse(data);
-    let headers = {who:'',
-                   inside:'В школе',
-                   amount:'Из',
-                  };
-    let table = createTable(headers,dataObj);
-    let title = document.createElement('caption');
-    let cellText = document.createTextNode('Количество');
-    title.appendChild(cellText);
-    table.appendChild(title);
-    document.body.querySelector('.generalControl').querySelector('#numberOfPeople').innerHTML ='';
-    document.body.querySelector('.generalControl').querySelector('#numberOfPeople').appendChild(table);
-    });
+function updateData(){
+    ajax('/skd/getgeneraldata', function(data){
+        let dataObj = JSON.parse(data);
+        let headers = {who:'',
+                       inside:'В школе',
+                       amount:'Из',
+                      };
+        let table = createTable(headers,dataObj);
+        let title = document.createElement('caption');
+        let cellText = document.createTextNode('Количество');
+        title.appendChild(cellText);
+        table.appendChild(title);
+        document.body.querySelector('.generalControl').querySelector('#numberOfPeople').innerHTML ='';
+        document.body.querySelector('.generalControl').querySelector('#numberOfPeople').appendChild(table);
+        });
 }
 
+//Get people count
+function getPeopleCount(){
+    updateData();
+    timerID = setInterval(updateData, 3000);
+}
+
+function resetTimer(timerID){
+    clearInterval(timerID);
+}
 
 //Functions for SKD system, general control module
 
