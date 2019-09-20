@@ -3,7 +3,7 @@
     <head>
         <title>Информационные системы NIS Kostanay</title>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="/public/css/style_ver.1.6.css">
+        <link rel="stylesheet" type="text/css" href="/public/css/style_ver.1.5.css">
     </head>
     <body>
         <header>
