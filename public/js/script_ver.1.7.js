@@ -589,8 +589,9 @@ function clickHandler(obj)
     /*if (obj.name == "generalControlGetData"){
         getPeopleCount();
     }*/
-    
+    console.log(obj.name);
     if (obj.name == "generalControlGetReport"){
+        console.log('generalControlGetReport');
         params = 'option1='+getSelectedRadio('gcReportType') + '&option2=' + getSelectedRadio('gcReportType2');
         ajax('/skd/getgeneralcontrolreport', function(data){
             document.body.querySelector('.generalControl').querySelector('.results').innerHTML =data;
