@@ -590,12 +590,12 @@ function clickHandler(obj)
         getPeopleCount();
     }*/
     
-    /*if (obj.name == "generalControlGetReport"){
+    if (obj.name == "generalControlGetReport"){
         params = 'option1='+getSelectedRadio('gcReportType') + '&option2=' + getSelectedRadio('gcReportType2');
         ajax('/skd/getgeneralcontrolreport', function(data){
             document.body.querySelector('.generalControl').querySelector('.results').innerHTML =data;
         },params);
-    }*/
+    }
     
     if (obj.name == "getDumpButton"){
         let dumpForm = document.getElementById('dump');
