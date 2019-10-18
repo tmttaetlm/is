@@ -114,7 +114,7 @@ class SkdModel extends Model {
     
     
     
-    //
+    //Edit here for bot
     public function getTabItems()
     {
         $tabs = [];
@@ -126,11 +126,12 @@ class SkdModel extends Model {
         if (in_array("skdCanBrowseStaffLogs", $userPriveleges)) {
             $tabs['staffControl']='Контроль сотрудников';
         }
-
         if (in_array("skdCanBrowseGeneralControl", $userPriveleges)) {
             $tabs['generalControl']='Общий контроль';
         }
-
+        if (in_array("skdCanAddParentContact", $userPriveleges)) {
+            $tabs['addParentContact']='Контактные данные родителей';
+        }
         return $tabs;
     }
  

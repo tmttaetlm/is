@@ -346,6 +346,7 @@ ui-tabs {
 .ui-tabs input[id="studentControl"]:checked ~ .content .studentControl,
 .ui-tabs input[id="staffControl"]:checked ~ .content .staffControl,
 .ui-tabs input[id="generalControl"]:checked ~ .content .generalControl,  
+.ui-tabs input[id="addParentContact"]:checked ~ .content .addParentContact,  
 .ui-tabs input[id="monitoring"]:checked ~ .content .monitoring,
 .ui-tabs input[id="inventory"]:checked ~ .content .inventory,
 .ui-tabs input[id="seach"]:checked ~ .content .seach,

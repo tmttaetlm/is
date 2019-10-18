@@ -294,7 +294,7 @@ function changeHandler(obj)
     }
     
     //admin roleSettings
-    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="fasInvControl"|| obj.id =="fasInvStart"){
+    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="skdCanAddParentContact" || obj.id =="fasInvControl"|| obj.id =="fasInvStart"){
         var roleList = document.getElementById('roleList');
         if (roleList.selectedIndex ==-1) {
             alert('Выберите роль, для которой настраиваете права!');
@@ -303,7 +303,7 @@ function changeHandler(obj)
         }
         var roleId = roleList.options[roleList.selectedIndex].dataset.id;
         var privId = obj.dataset.id;
-
+        console.log(roleId.privId);
         if (obj.checked) {
             var param ='privId='+privId +'&roleId='+roleId+'&mode=enable';
             ajax('/admin/setPrivToRole', function(data){alert('Привелегия добавлена');}, param);
