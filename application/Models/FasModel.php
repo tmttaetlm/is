@@ -346,8 +346,8 @@ class FasModel extends Model
         // Width for cells
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
@@ -362,6 +362,7 @@ class FasModel extends Model
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
 
         $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
@@ -369,48 +370,47 @@ class FasModel extends Model
         //Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
         $spreadsheet->getActiveSheet()->setCellValue('B2', 'Инвентарный номер');
-        $spreadsheet->getActiveSheet()->setCellValue('C2', 'Штрих-код');
-        $spreadsheet->getActiveSheet()->setCellValue('D2', 'Описание');
-        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Закреплен за');
-        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Местонахождение');
-        $spreadsheet->getActiveSheet()->setCellValue('G2', 'Балансовая дата');
-
-        //aditional colomns
+        $spreadsheet->getActiveSheet()->setCellValue('C2', 'Описание');
+        $spreadsheet->getActiveSheet()->setCellValue('D2', 'Штрих-код');
+        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Серийный №');
+        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Закреплен за');
+        $spreadsheet->getActiveSheet()->setCellValue('G2', 'ИИН ответственного');
         $spreadsheet->getActiveSheet()->setCellValue('H2', 'Дата закрепления');
-        $spreadsheet->getActiveSheet()->setCellValue('I2', 'ИИН ответственного');
-        $spreadsheet->getActiveSheet()->setCellValue('J2', 'ИИН экс-ответсвенного');
-        $spreadsheet->getActiveSheet()->setCellValue('K2', 'Код местонахождения');
+        $spreadsheet->getActiveSheet()->setCellValue('I2', 'Местонахождение');
+        $spreadsheet->getActiveSheet()->setCellValue('J2', 'Код местонахождения');
+        $spreadsheet->getActiveSheet()->setCellValue('K2', 'Балансовая дата');
         $spreadsheet->getActiveSheet()->setCellValue('L2', 'МОЛ ИИН');
-        $spreadsheet->getActiveSheet()->setCellValue('M2', 'Серийный №');
-        $spreadsheet->getActiveSheet()->setCellValue('N2', 'Время сканирования');
-        $spreadsheet->getActiveSheet()->setCellValue('O2', 'ИИН кто сканировал');
+        $spreadsheet->getActiveSheet()->setCellValue('M2', 'Время сканирования');
+        $spreadsheet->getActiveSheet()->setCellValue('N2', 'ИИН кто сканировал');
+        $spreadsheet->getActiveSheet()->setCellValue('O2', 'ФИО кто сканировал');
         $spreadsheet->getActiveSheet()->setCellValue('P2', 'Новое местонахождение');
         $spreadsheet->getActiveSheet()->setCellValue('Q2', 'Код нового местонахождения');
-        $spreadsheet->getActiveSheet()->setCellValue('R2', 'Комментарий');
+        $spreadsheet->getActiveSheet()->setCellValue('R2', 'ИИН экс-ответсвенного');
+        $spreadsheet->getActiveSheet()->setCellValue('S2', 'Комментарий');
 
         //Put data into cells
         $i=2;
         foreach ($arrayData as $elem) {
             $i++;
             $spreadsheet->getActiveSheet()->setCellValue('A' . $i, $i-2);
-            $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['invNumber']);
-            $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['barcode']);
-            $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['description']);
-            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['person']);
-            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['location']);
-            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['registrationDate']);
-
-            $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['dateFix']);
-            $spreadsheet->getActiveSheet()->setCellValue('I' . $i, $elem['iin']);
-            $spreadsheet->getActiveSheet()->setCellValue('J' . $i, $elem['exIin']);
-            $spreadsheet->getActiveSheet()->setCellValue('K' . $i, $elem['locationCode']);
-            $spreadsheet->getActiveSheet()->setCellValue('L' . $i, $elem['accountablePersonIin']);
-            $spreadsheet->getActiveSheet()->setCellValue('M' . $i, $elem['sn']);
-            $spreadsheet->getActiveSheet()->setCellValue('N' . $i, $elem['scannedTime']);
-            $spreadsheet->getActiveSheet()->setCellValue('O' . $i, $elem['iinWhoScanned']);
-            $spreadsheet->getActiveSheet()->setCellValue('P' . $i, $elem['newLocation']);
-            $spreadsheet->getActiveSheet()->setCellValue('Q' . $i, $elem['newLocationCode']);
-            $spreadsheet->getActiveSheet()->setCellValue('R' . $i, $elem['comment']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['invNumber']);//Инвентарный номер
+            $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['description']);//Описание
+            $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['barcode']);//Штрих-код
+            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['sn']);//Серийный №
+            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['person']);//Закреплен за
+            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['iin']);//ИИН ответственного
+            $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['dateFix']);//Дата закрепления
+            $spreadsheet->getActiveSheet()->setCellValue('I' . $i, $elem['location']);//Местонахождение
+            $spreadsheet->getActiveSheet()->setCellValue('J' . $i, $elem['locationCode']);//Код местонахождения
+            $spreadsheet->getActiveSheet()->setCellValue('K' . $i, $elem['registrationDate']);//Балансовая дата
+            $spreadsheet->getActiveSheet()->setCellValue('L' . $i, $elem['accountablePersonIin']);//МОЛ ИИН
+            $spreadsheet->getActiveSheet()->setCellValue('M' . $i, $elem['scannedTime']);//Время сканирования
+            $spreadsheet->getActiveSheet()->setCellValue('N' . $i, $elem['iinWhoScanned']);//ИИН кто сканировал
+            $spreadsheet->getActiveSheet()->setCellValue('O' . $i, $elem['personWhoScanned']);//ФИО кто сканировал
+            $spreadsheet->getActiveSheet()->setCellValue('P' . $i, $elem['newLocation']);//Новое местонахождение
+            $spreadsheet->getActiveSheet()->setCellValue('Q' . $i, $elem['newLocationCode']);//Код нового местонахождения
+            $spreadsheet->getActiveSheet()->setCellValue('R' . $i, $elem['exIin']);//ИИН экс-ответсвенного
+            $spreadsheet->getActiveSheet()->setCellValue('S' . $i, $elem['comment']);//Комментарий
         }
 
         // Rename worksheet
@@ -444,9 +444,9 @@ class FasModel extends Model
         ];
         
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:R2')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:R'.$i)->applyFromArray($styleData);
-        $spreadsheet->getActiveSheet()->setAutoFilter('B2:R'.$i);
+        $spreadsheet->getActiveSheet()->getStyle('A2:S2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:S'.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->setAutoFilter('B2:S'.$i);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
@@ -592,7 +592,13 @@ class FasModel extends Model
 
     public static function getInvExportData(){
         $db = Db::getDb();
-        $query = "SELECT * FROM isdb.fixedAssetInventory";
+        $query = "
+                SELECT fAI.*, fI.person AS personWhoScanned
+                FROM isdb.fixedAssetInventory fAI
+                LEFT JOIN isdb.finishedInventory fI
+                ON fAI.iinWhoScanned = fI.iin
+                ORDER BY fAI.localionCode, fAI.person
+                ";
         $result = $db->selectQuery($query);
         return $result;
     }
