@@ -42,5 +42,4 @@ class View
         return $result;
     }
     
-    
 }
