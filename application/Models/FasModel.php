@@ -245,12 +245,33 @@ class FasModel extends Model
         
         
     }
-
-    public function checkInventoryFinished(){
+    //MTdev
+    public function CancelInventoryFinish(){
         $db = Db::getDb();
-        $query = "SELECT finishedValue FROM finishedInventory WHERE iin = :iin";
+        $query = "SELECT COUNT(*) AS count FROM finishedInventory WHERE iin = :iin AND finishedValue = 'YES'";
         $result = $db->selectQuery($query,['iin'=>$this->user->getIin()]);
-        if (isset($result[0]['finishedValue']) and  ($result[0]['finishedValue']=='YES')){
+        
+        if ($result[0]['count'] != 0){
+            $query = "UPDATE finishedInventory SET finishedValue = 'NO', finishedAt = null WHERE iin = :iin";
+            $db->IUDQuery($query,['iin'=>$this->user->getIin()]);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public function checkInventoryFinished($person = null){
+        $db = Db::getDb();
+        if ($person === null) {
+            $query = "SELECT finishedValue FROM finishedInventory WHERE iin = :iin";
+            $param['iin'] = $this->user->getIin();
+        } else {
+            $query = "SELECT finishedValue FROM finishedInventory WHERE person = :person";
+            $param['person'] = $person;
+        }
+        $result = $db->selectQuery($query,$param);
+        if (isset($result[0]['finishedValue']) and ($result[0]['finishedValue']=='YES')){
             return true;
         }
         else{
@@ -341,6 +362,9 @@ class FasModel extends Model
         elseif($reportType=='unscannedAssets'){
             $arrayData = self::getInvUnscannedData();
         }
+        elseif($reportType=='unfixedAssets'){
+            $arrayData = self::getInvUnfixedData();
+        }
             
         
         // Width for cells
@@ -358,11 +382,6 @@ class FasModel extends Model
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
 
         $spreadsheet->getActiveSheet()->mergeCells('A1:F1');
@@ -372,21 +391,16 @@ class FasModel extends Model
         $spreadsheet->getActiveSheet()->setCellValue('B2', 'Инвентарный номер');
         $spreadsheet->getActiveSheet()->setCellValue('C2', 'Описание');
         $spreadsheet->getActiveSheet()->setCellValue('D2', 'Штрих-код');
-        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Серийный №');
-        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Закреплен за');
-        $spreadsheet->getActiveSheet()->setCellValue('G2', 'ИИН ответственного');
-        $spreadsheet->getActiveSheet()->setCellValue('H2', 'Дата закрепления');
-        $spreadsheet->getActiveSheet()->setCellValue('I2', 'Местонахождение');
-        $spreadsheet->getActiveSheet()->setCellValue('J2', 'Код местонахождения');
-        $spreadsheet->getActiveSheet()->setCellValue('K2', 'Балансовая дата');
-        $spreadsheet->getActiveSheet()->setCellValue('L2', 'МОЛ ИИН');
-        $spreadsheet->getActiveSheet()->setCellValue('M2', 'Время сканирования');
-        $spreadsheet->getActiveSheet()->setCellValue('N2', 'ИИН кто сканировал');
-        $spreadsheet->getActiveSheet()->setCellValue('O2', 'ФИО кто сканировал');
-        $spreadsheet->getActiveSheet()->setCellValue('P2', 'Новое местонахождение');
-        $spreadsheet->getActiveSheet()->setCellValue('Q2', 'Код нового местонахождения');
-        $spreadsheet->getActiveSheet()->setCellValue('R2', 'ИИН экс-ответсвенного');
-        $spreadsheet->getActiveSheet()->setCellValue('S2', 'Комментарий');
+        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Закреплен за');
+        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Дата закрепления');
+        $spreadsheet->getActiveSheet()->setCellValue('G2', 'Местонахождение');
+        $spreadsheet->getActiveSheet()->setCellValue('H2', 'Балансовая дата');
+        $spreadsheet->getActiveSheet()->setCellValue('I2', 'МОЛ ИИН');
+        $spreadsheet->getActiveSheet()->setCellValue('J2', 'Время сканирования');
+        $spreadsheet->getActiveSheet()->setCellValue('K2', 'ФИО кто сканировал');
+        $spreadsheet->getActiveSheet()->setCellValue('L2', 'Новое местонахождение');
+        $spreadsheet->getActiveSheet()->setCellValue('M2', 'ИИН экс-ответсвенного');
+        $spreadsheet->getActiveSheet()->setCellValue('N2', 'Комментарий');
 
         //Put data into cells
         $i=2;
@@ -396,21 +410,16 @@ class FasModel extends Model
             $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['invNumber']);//Инвентарный номер
             $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['description']);//Описание
             $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['barcode']);//Штрих-код
-            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['sn']);//Серийный №
-            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['person']);//Закреплен за
-            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['iin']);//ИИН ответственного
-            $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['dateFix']);//Дата закрепления
-            $spreadsheet->getActiveSheet()->setCellValue('I' . $i, $elem['location']);//Местонахождение
-            $spreadsheet->getActiveSheet()->setCellValue('J' . $i, $elem['locationCode']);//Код местонахождения
-            $spreadsheet->getActiveSheet()->setCellValue('K' . $i, $elem['registrationDate']);//Балансовая дата
-            $spreadsheet->getActiveSheet()->setCellValue('L' . $i, $elem['accountablePersonIin']);//МОЛ ИИН
-            $spreadsheet->getActiveSheet()->setCellValue('M' . $i, $elem['scannedTime']);//Время сканирования
-            $spreadsheet->getActiveSheet()->setCellValue('N' . $i, $elem['iinWhoScanned']);//ИИН кто сканировал
-            $spreadsheet->getActiveSheet()->setCellValue('O' . $i, $elem['personWhoScanned']);//ФИО кто сканировал
-            $spreadsheet->getActiveSheet()->setCellValue('P' . $i, $elem['newLocation']);//Новое местонахождение
-            $spreadsheet->getActiveSheet()->setCellValue('Q' . $i, $elem['newLocationCode']);//Код нового местонахождения
-            $spreadsheet->getActiveSheet()->setCellValue('R' . $i, $elem['exIin']);//ИИН экс-ответсвенного
-            $spreadsheet->getActiveSheet()->setCellValue('S' . $i, $elem['comment']);//Комментарий
+            $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['person']);//Закреплен за
+            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['dateFix']);//Дата закрепления
+            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['location']);//Местонахождение
+            $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['registrationDate']);//Балансовая дата
+            $spreadsheet->getActiveSheet()->setCellValue('I' . $i, $elem['accountablePersonIin']);//МОЛ ИИН
+            $spreadsheet->getActiveSheet()->setCellValue('J' . $i, $elem['scannedTime']);//Время сканирования
+            $spreadsheet->getActiveSheet()->setCellValue('K' . $i, $elem['personWhoScanned']);//ФИО кто сканировал
+            $spreadsheet->getActiveSheet()->setCellValue('L' . $i, $elem['newLocation']);//Новое местонахождение
+            $spreadsheet->getActiveSheet()->setCellValue('M' . $i, $elem['exIin']);//ИИН экс-ответсвенного
+            $spreadsheet->getActiveSheet()->setCellValue('N' . $i, $elem['comment']);//Комментарий
         }
 
         // Rename worksheet
@@ -444,9 +453,9 @@ class FasModel extends Model
         ];
         
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:S2')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:S'.$i)->applyFromArray($styleData);
-        $spreadsheet->getActiveSheet()->setAutoFilter('B2:S'.$i);
+        $spreadsheet->getActiveSheet()->getStyle('A2:N2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:N'.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->setAutoFilter('B2:N'.$i);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
@@ -593,11 +602,12 @@ class FasModel extends Model
     public static function getInvExportData(){
         $db = Db::getDb();
         $query = "
-                SELECT fAI.*, fI.person AS personWhoScanned
+                SELECT fAI.invNumber, fAI.description, fAI.barcode, fAI.person, fAI.dateFix, 
+                       fAI.location, fAI.registrationDate, fAI.accountablePersonIin, fAI.scannedTime, 
+                       fAI.newLocation, fAI.exIin, fAI.comment, fI.person AS personWhoScanned
                 FROM isdb.fixedAssetInventory fAI
                 LEFT JOIN isdb.finishedInventory fI
                 ON fAI.iinWhoScanned = fI.iin
-                ORDER BY fAI.localionCode, fAI.person
                 ";
         $result = $db->selectQuery($query);
         return $result;
@@ -605,7 +615,32 @@ class FasModel extends Model
 
     public static function getInvUnscannedData(){
         $db = Db::getDb();
-        $query = "SELECT * FROM isdb.fixedAssetInventory WHERE barcodeScanned IS NULL";
+        //$query = "SELECT * FROM isdb.fixedAssetInventory WHERE barcodeScanned IS NULL";
+        $query = "
+                SELECT fAI.invNumber, fAI.description, fAI.barcode, fAI.person, fAI.dateFix, 
+                       fAI.location, fAI.registrationDate, fAI.accountablePersonIin, fAI.scannedTime, 
+                       fAI.newLocation, fAI.exIin, fAI.comment, fI.person AS personWhoScanned
+                FROM isdb.fixedAssetInventory fAI
+                LEFT JOIN isdb.finishedInventory fI
+                ON fAI.iinWhoScanned = fI.iin
+                WHERE fAI.barcodeScanned IS NULL
+                ";
+        $result = $db->selectQuery($query);
+        return $result;
+    }
+
+    public static function getInvUnfixedData(){
+        $db = Db::getDb();
+        //$query = "SELECT * FROM isdb.fixedAssetInventory WHERE barcodeScanned IS NULL";
+        $query = "
+                SELECT fAI.invNumber, fAI.description, fAI.barcode, fAI.person, fAI.dateFix, 
+                       fAI.location, fAI.registrationDate, fAI.accountablePersonIin, fAI.scannedTime, 
+                       fAI.newLocation, fAI.exIin, fAI.comment, fI.person AS personWhoScanned
+                FROM isdb.fixedAssetInventory fAI
+                LEFT JOIN isdb.finishedInventory fI
+                ON fAI.iinWhoScanned = fI.iin
+                WHERE fAI.person IS NULL
+                ";
         $result = $db->selectQuery($query);
         return $result;
     }
@@ -623,7 +658,12 @@ class FasModel extends Model
 
     public function invSeachByPerson($person) {
         $db = Db::getDb();
-	    $data = $db->selectQuery("SELECT * FROM fixedAssetInventory WHERE person = :person ORDER BY description",['person'=>$person]);  
+        $query = "SELECT fai.id, fai.iin, fai.invNumber, fai.description, fai.person, fai.location, fai.newLocation, fai.barcode, fai.dateFix, fai.barcodeScanned, 
+                  (SELECT DISTINCT CONCAT(SUBSTRING(fi.person,1,LOCATE(' ',fi.person)),SUBSTRING(fi.person,LOCATE(' ',fi.person)+1,1),'.',SUBSTRING(fi.person,LOCATE(' ',fi.person,LOCATE(' ',fi.person)+1)+1,1),'.') 
+                   FROM finishedInventory fi WHERE fi.iin = fai.iinWhoScanned) AS whoScanned
+                  FROM fixedAssetInventory fai
+                  WHERE person = :person ORDER BY description";
+	    $data = $db->selectQuery($query,['person'=>$person]);  
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
@@ -635,12 +675,18 @@ class FasModel extends Model
             }
             $data[$i]['barcodeScanned'] ='<input type="checkbox" class="invCheckbox" value='.$data[$i]['id'].$endStr;
         }
+        $this->checkInventoryFinished($data[0]['iin']);
         return $data;
     }
 
     public function invSeachByInvNumber($invNumber) {
         $db = Db::getDb();
-	    $data = $db->selectQuery("SELECT * FROM fixedAssetInventory WHERE invNumber = :invNumber",['invNumber'=>$invNumber]);  
+        $query = "SELECT id, invNumber, description, person, location, newLocation, barcode, dateFix, barcodeScanned, 
+                  (SELECT DISTINCT CONCAT(SUBSTRING(person,1,LOCATE(' ',person)),SUBSTRING(person,LOCATE(' ',person)+1,1),'.',SUBSTRING(person,LOCATE(' ',person,LOCATE(' ',person)+1)+1,1),'.') 
+                   FROM finishedInventory fi WHERE fi.iin = fai.iin) AS whoScanned
+                  FROM fixedAssetInventory fai
+                  WHERE invNumber = :invNumber";
+	    $data = $db->selectQuery($query,['invNumber'=>$invNumber]);  
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
@@ -700,7 +746,12 @@ class FasModel extends Model
     }
     public function invSeachByLocation($location) {
         $db = Db::getDb();
-	    $data = $db->selectQuery("SELECT * FROM fixedAssetInventory WHERE location = :location ORDER BY person,description",['location'=>$location]);
+        $query = "SELECT id, invNumber, description, person, location, newLocation, barcode, dateFix, barcodeScanned, 
+                  (SELECT DISTINCT CONCAT(SUBSTRING(person,1,LOCATE(' ',person)),SUBSTRING(person,LOCATE(' ',person)+1,1),'.',SUBSTRING(person,LOCATE(' ',person,LOCATE(' ',person)+1)+1,1),'.') 
+                   FROM finishedInventory fi WHERE fi.iin = fai.iin) AS whoScanned
+                  FROM fixedAssetInventory fai
+                  WHERE location = :location ORDER BY person,description";
+	    $data = $db->selectQuery($query,['location'=>$location]);
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
@@ -717,7 +768,12 @@ class FasModel extends Model
 
     public function invSeachByFixedAsset($fixedAsset) {
         $db = Db::getDb();
-	    $data = $db->selectQuery("SELECT * FROM fixedAssetInventory WHERE description = :fixedAsset",['fixedAsset'=>$fixedAsset]);
+        $query = "SELECT id, invNumber, description, person, location, newLocation, barcode, dateFix, barcodeScanned, 
+                  (SELECT DISTINCT CONCAT(SUBSTRING(person,1,LOCATE(' ',person)),SUBSTRING(person,LOCATE(' ',person)+1,1),'.',SUBSTRING(person,LOCATE(' ',person,LOCATE(' ',person)+1)+1,1),'.') 
+                   FROM finishedInventory fi WHERE fi.iin = fai.iin) AS whoScanned
+                  FROM fixedAssetInventory fai
+                  WHERE description = :fixedAsset";
+	    $data = $db->selectQuery($query,['fixedAsset'=>$fixedAsset]);
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
@@ -749,24 +805,28 @@ class FasModel extends Model
         // Add data from model
         $arrayData = self::getInvPeopleData();
  
-            
-        
         // Width for cells
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
         $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(28);
 
-        $spreadsheet->getActiveSheet()->mergeCells('A1:E1');
-        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Выгрузка сотрудников по состоянию на: '. date("d.m.Y H:i:s"));
+        $spreadsheet->getActiveSheet()->mergeCells('A1:H1');
+        $spreadsheet->getActiveSheet()->setCellValue('A1', 'Статистика по инвентаризации ОС школы по состоянию на: '. date("d.m.Y H:i:s"));
         //Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A2', '№');
         $spreadsheet->getActiveSheet()->setCellValue('B2', 'ИИН');
         $spreadsheet->getActiveSheet()->setCellValue('C2', 'ФИО');
-        $spreadsheet->getActiveSheet()->setCellValue('D2', 'Статус');
-        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Время завершения');
+        $spreadsheet->getActiveSheet()->setCellValue('D2', 'Инвентаризация');
+        $spreadsheet->getActiveSheet()->setCellValue('E2', 'Время');
+        $spreadsheet->getActiveSheet()->setCellValue('F2', 'Отсканированные ОС');
+        $spreadsheet->getActiveSheet()->setCellValue('G2', 'Все ОС');
+        $spreadsheet->getActiveSheet()->setCellValue('H2', 'Прогресс');
 
         //Put data into cells
         $i=2;
@@ -775,8 +835,11 @@ class FasModel extends Model
             $spreadsheet->getActiveSheet()->setCellValue('A' . $i, $i-2);
             $spreadsheet->getActiveSheet()->setCellValue('B' . $i, $elem['iin']);
             $spreadsheet->getActiveSheet()->setCellValue('C' . $i, $elem['person']);
-            $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['finishedValue']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . $i, $elem['finishedValue'] == 'YES' ? "Завершена" : "Не завершена");
             $spreadsheet->getActiveSheet()->setCellValue('E' . $i, $elem['finishedAt']);
+            $spreadsheet->getActiveSheet()->setCellValue('F' . $i, $elem['scannedFa']);
+            $spreadsheet->getActiveSheet()->setCellValue('G' . $i, $elem['allFa']);
+            $spreadsheet->getActiveSheet()->setCellValue('H' . $i, $elem['progress']);
         }
 
         // Rename worksheet
@@ -810,8 +873,8 @@ class FasModel extends Model
         ];
         
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:E2')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A2:E'.$i)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->getStyle('A2:H2')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A2:H'.$i)->applyFromArray($styleData);
         $spreadsheet->getActiveSheet()->setAutoFilter('B2:D'.$i);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -821,7 +884,20 @@ class FasModel extends Model
 
     public static function getInvPeopleData(){
         $db = Db::getDb();
-        $query = "SELECT * FROM isdb.finishedInventory";
+        //$query = "SELECT * FROM isdb.finishedInventory";
+        $query = "SELECT *,
+                  CASE
+                      WHEN (scannedFa/allFA) IS NULL
+                      THEN 'Нет закрепленных ОС'
+                      ELSE CONCAT(ROUND((scannedFa/allFA*100),1),'%')
+                  END AS progress 
+                  FROM (SELECT *, 
+                        (SELECT count(barcodeScanned) 
+                         FROM isdb.fixedAssetInventory 
+                         WHERE iin=FI.iin) AS scannedFa, 
+                        (SELECT count(iin) FROM isdb.fixedAssetInventory WHERE iin=FI.iin) AS allFa 
+                         FROM isdb.finishedInventory AS FI) AS Stats
+                  ORDER BY person";
         $result = $db->selectQuery($query);
         return $result;
     }

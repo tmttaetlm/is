@@ -10,7 +10,8 @@
     <label for="invReportType">Выберите тип отчета:</label>
     <select name="invReportType">
         <option value="allAssets">Все ОС</option>
-        <option value="unscannedAssets">Неотсканированнные ОС</option>
+        <option value="unscannedAssets">Неотсканированные ОС</option>
+        <option value="unfixedAssets">Незакрепленные ОС</option>
         <option value="movement">Движение ОС</option>
         <option value="people">Сотрудники</option>
     </select> 
@@ -38,6 +39,7 @@
     </select>
     <input type="text" id="invSeachField" name="invSeachField" placeholder="Поиск...">
     <button name="invSeach">Найти</button>
+    <button name="cancelFas" id="cancelFas" class="hide" <?php if(!$data['inventoryFinished']){ echo 'disabled';}?>>Отмена завершения инвентаризации</button>
 </div>
 <div class="results" id="invResults">
 </div>

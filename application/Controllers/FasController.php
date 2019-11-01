@@ -96,7 +96,15 @@ class FasController extends Controller
     {
         echo $this->model->InventoryFinish();
     }
-    
+    public function actionCancelInventoryFinish()
+    {
+        echo $this->model->CancelInventoryFinish();
+    }
+    public function actionCheckInventoryFinish()
+    {
+        echo $this->model->checkInventoryFinished($_POST['person']);
+    }
+
     public function actionGetFasRooms()
     {
         echo $this->model->getFasRooms();
@@ -124,7 +132,7 @@ class FasController extends Controller
             }elseif($_POST['invReportType']=='movement'){
                 FasModel::getInvMovement();
             }
-            elseif(($_POST['invReportType']=='allAssets') || ($_POST['invReportType']=='unscannedAssets')){
+            elseif(($_POST['invReportType']=='allAssets') || ($_POST['invReportType']=='unscannedAssets') || ($_POST['invReportType']=='unfixedAssets')){
                 FasModel::getInvExport($_POST['invReportType']);
             }  
         }  
@@ -144,8 +152,9 @@ class FasController extends Controller
             'person'=>'Ответственный',
             'location'=>'Местонахождение',
             'newLocation'=>'Новое местонахождение',
+            'whoScanned'=>'Инвентаризатор',
             'barcode'=>'Штрих-код',
-            'dateFix'=>'Дата закрепления',
+            //'dateFix'=>'Дата закрепления',
             'barcodeScanned'=>'Штрих-код отсканирован',
         ];
         if (isset($_POST['person'])){

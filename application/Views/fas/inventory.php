@@ -7,7 +7,7 @@
 <div class="inventoryPanel">
     <div class="inventoryButtons">
         <button name="inventoryUpdate">Обновить</button>
-        <button name="inventoryFinish" <?php if($data['inventoryFinished']){ echo 'disabled';}?>>Завершить инвентаризацию</button>
+        <button name="inventoryFinish" id="inventoryFinish" <?php if($data['inventoryFinished']){ echo 'disabled';}?>>Завершить инвентаризацию</button>
     </div>
 </div>
 
