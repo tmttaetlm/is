@@ -1,12 +1,8 @@
 <table class="<?php echo $data['class']; ?>">
-    <caption>
-        <?php echo $data['caption']; ?>
-    </caption>
+    <caption><?php echo $data['caption']; ?></caption>
     <tr>
     <?php foreach ($data['columns'] as $column=>$header):?>
-        <th>
-            <?php echo $header;?>
-        </th>
+        <th><?php echo $header;?></th>
     <?php endforeach;?>
     </tr>
     <?php foreach ($data['tableData'] as $row):?>

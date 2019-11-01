@@ -35,14 +35,12 @@
     <br/>
     <input type="radio" id="studentByPeriod" name="reportType" value="studentByPeriod"/>
     <label for="studentByPeriod">По ученику за период</label>
-        
-    
-    <SELECT type="select" id="selectStudent" class ="hide">
-    </SELECT>
-    <label id="studentByPeriodcal" class = "hide"> c: <input type="date" id="selectDayStart"> по:<input type="date" id="selectDayEnd"></label>
-    
-    <br/>
-    <br/>
+    <div class="hide" id="studentSet">
+        <SELECT type="select" id="selectStudent">
+        </SELECT>
+        <label id="studentByPeriodcal"> c: <input type="date" id="selectDayStart"> по:<input type="date" id="selectDayEnd"></label>
+        <br/>
+    </div>
     </div>
     <button name="getStudentsLogs" class="sendQuery">Отправить запрос</button>
  </div>
