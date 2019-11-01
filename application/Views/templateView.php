@@ -3,7 +3,7 @@
     <head>
         <title>Информационные системы NIS Kostanay</title>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="/public/css/style_ver.1.7.css">
+        <link rel="stylesheet" type="text/css" href="/public/css/style_ver.2.3.css">
     </head>
     <body>
         <header>
@@ -27,8 +27,9 @@
 <?php echo $data['content']; ?>
        
         <footer>
-        </footer>
         <p class="copyright">Copyright © 2019 NIS Kostanay</p>
-        <script type="module" src="/public/js/script_ver.1.8.js"></script>
+        </footer>
+        <script src="/public/js/script_ver.2.5.js"></script>
+        
     </body>
 </html>
