@@ -615,7 +615,7 @@ function clickHandler(obj)
     }*/
     if (obj.name == "generalControlGetReport"){
         params = 'option1='+getSelectedRadio('gcReportType') + '&option2=' + getSelectedRadio('gcReportType2');
-        console.log(params);
+        //console.log(params);
         ajax('/skd/getgeneralcontrolreport', function(data){
             document.body.querySelector('.generalControl').querySelector('.results').innerHTML =data;
         },params);
@@ -701,6 +701,7 @@ function clickHandler(obj)
     }
     //MTdev
     if (obj.name == "cancelFas"){
+        param = 'person=' + document.getElementById('invSeachField').value;
         ajax('/fas/CancelInventoryFinish', function(data){
             if (data == true) {
                 alert('Завершение инвентаризации отменено.');
@@ -714,7 +715,8 @@ function clickHandler(obj)
 
     if (obj.name == "inventoryUpdate"){
         ajax('/fas/getInventoryData', function(data){document.getElementById('inventoryResults').innerHTML = data},param);
-        ajax('/fas/CheckInventoryFinish', function(data){document.getElementById('inventoryFinish').disabled = !data;}, param);
+        param = 'person=';
+        ajax('/fas/CheckInventoryFinish', function(invCheck){document.getElementById('inventoryFinish').disabled = invCheck}, param);
     }
     if (obj.name == "inventoryFinish"){
         ajax('/fas/InventoryFinish', function(data){
@@ -872,7 +874,7 @@ function getStaffList()
 {
     var sl = document.getElementById('selectDivision');
     var params = 'divisionId='+sl.options[sl.selectedIndex].dataset.id;
-    console.log(sl.options[sl.selectedIndex].dataset.id);
+    //console.log(sl.options[sl.selectedIndex].dataset.id);
     ajax('/skd/getStaffList', function(data){document.getElementById('selectPerson').innerHTML=data; }, params);
 }
 
@@ -933,7 +935,7 @@ function loadInvData(){
     if (seachType=='person') {
         param = 'person=' + document.getElementById('invSeachField').value;
         ajax('/fas/invSeach', function(data){document.getElementById('invResults').innerHTML = data}, param);
-        ajax('/fas/CheckInventoryFinish', function(data){document.getElementById('cancelFas').disabled = !data;}, param);
+        ajax('/fas/CheckInventoryFinish', function(data){document.getElementById('cancelFas').disabled = !data}, param);
         document.getElementById('cancelFas').classList.remove('hide');
     }
 
