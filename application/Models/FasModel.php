@@ -71,7 +71,7 @@ class FasModel extends Model
         if ($this->getInventoryStatus()) {
             $data['tabItems']['inventory'] = 'Инвентаризация';
             $data['inventoryData'] = $this->getInventoryData();
-            $data['inventoryFinished'] = $this->checkInventoryFinished();
+            $data['inventoryFinished'] = $this->checkInventoryFinished("");
             $data['tabData']['inventory'] =  $this->view->generate('fas/inventory',$data);
         }
 
@@ -211,7 +211,7 @@ class FasModel extends Model
             $rowNumber += 1;
         };
         $result = $this->addRowNumbers($result);
-        if (!$this->checkInventoryFinished()){
+        if (!$this->checkInventoryFinished("")){
             $result = $this->addSelectTags($result);
         };
         $columns = [
@@ -246,14 +246,20 @@ class FasModel extends Model
         
     }
     //MTdev
-    public function CancelInventoryFinish(){
+    public function CancelInventoryFinish($person){
         $db = Db::getDb();
-        $query = "SELECT COUNT(*) AS count FROM finishedInventory WHERE iin = :iin AND finishedValue = 'YES'";
-        $result = $db->selectQuery($query,['iin'=>$this->user->getIin()]);
+
+        $query = "SELECT COUNT(*) AS count FROM finishedInventory WHERE person = :person AND finishedValue = 'YES'";
+        $param['person'] = $person;
+        //$query = "SELECT COUNT(*) AS count FROM finishedInventory WHERE iin = :iin AND finishedValue = 'YES'";
+        //$param['iin'] = $this->user->getIin();
+
+        $result = $db->selectQuery($query,$param);
         
         if ($result[0]['count'] != 0){
-            $query = "UPDATE finishedInventory SET finishedValue = 'NO', finishedAt = null WHERE iin = :iin";
-            $db->IUDQuery($query,['iin'=>$this->user->getIin()]);
+            $param['person'] = $person;
+            $query = "UPDATE finishedInventory SET finishedValue = 'NO', finishedAt = null WHERE person = :person";
+            $db->IUDQuery($query,$param);
             return true;
         }
         else {
@@ -261,9 +267,9 @@ class FasModel extends Model
         }
     }
 
-    public function checkInventoryFinished($person = null){
+    public function checkInventoryFinished($person){
         $db = Db::getDb();
-        if ($person === null) {
+        if ($person == "") {
             $query = "SELECT finishedValue FROM finishedInventory WHERE iin = :iin";
             $param['iin'] = $this->user->getIin();
         } else {
@@ -271,10 +277,9 @@ class FasModel extends Model
             $param['person'] = $person;
         }
         $result = $db->selectQuery($query,$param);
-        if (isset($result[0]['finishedValue']) and ($result[0]['finishedValue']=='YES')){
+        if ($result[0]['finishedValue']=='YES') {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -675,7 +680,7 @@ class FasModel extends Model
             }
             $data[$i]['barcodeScanned'] ='<input type="checkbox" class="invCheckbox" value='.$data[$i]['id'].$endStr;
         }
-        $this->checkInventoryFinished($data[0]['iin']);
+        $this->checkInventoryFinished("");
         return $data;
     }
 

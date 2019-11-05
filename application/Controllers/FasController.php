@@ -98,7 +98,7 @@ class FasController extends Controller
     }
     public function actionCancelInventoryFinish()
     {
-        echo $this->model->CancelInventoryFinish();
+        echo $this->model->CancelInventoryFinish($_POST['person']);
     }
     public function actionCheckInventoryFinish()
     {
