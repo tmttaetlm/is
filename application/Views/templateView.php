@@ -29,7 +29,7 @@
         <footer>
         <p class="copyright">Copyright © 2019 NIS Kostanay</p>
         </footer>
-        <script src="/public/js/script_ver.2.5.js"></script>
+        <script src="/public/js/script_ver.2.6.js"></script>
         
     </body>
 </html>
