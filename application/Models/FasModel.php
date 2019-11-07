@@ -113,27 +113,27 @@ class FasModel extends Model
     
     public function seachByInvNumber($invNumber) {
         $db = Db::getDb();
-	return $db->selectQuery("SELECT * FROM fixedAsset WHERE invNumber = :invNumber",['invNumber'=>$invNumber]);
+	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE invNumber = :invNumber",['invNumber'=>$invNumber]);
     }
     
     public function seachByBarcode($barcode) {
         $db = Db::getDb();
-	return $db->selectQuery("SELECT * FROM fixedAsset WHERE barcode = :barcode",['barcode'=>$barcode]);
+	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE barcode = :barcode",['barcode'=>$barcode]);
     }
     
     public function seachByPerson($person) {
         $db = Db::getDb();
-	return $db->selectQuery("SELECT * FROM fixedAsset WHERE person = :person ORDER BY description",['person'=>$person]);  
+	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE person = :person ORDER BY description",['person'=>$person]);  
     }
     
     public function seachByLocation($location) {
         $db = Db::getDb();
-	return $db->selectQuery("SELECT * FROM fixedAsset WHERE location = :location ORDER BY person,description",['location'=>$location]);
+	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE location = :location ORDER BY person,description",['location'=>$location]);
     }
 
     public function seachByFixedAsset($fixedAsset) {
         $db = Db::getDb();
-	return $db->selectQuery("SELECT * FROM fixedAsset WHERE description = :fixedAsset",['fixedAsset'=>$fixedAsset]);
+	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE description = :fixedAsset",['fixedAsset'=>$fixedAsset]);
     }     
     
     public function getPeople() {
@@ -672,13 +672,13 @@ class FasModel extends Model
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
-            if ($data[$i]['barcodeScanned']=='Yes'){
-                $endStr = ' checked>';
-            }
-            else{
-                $endStr = '>';
-            }
-            $data[$i]['barcodeScanned'] ='<input type="checkbox" class="invCheckbox" value='.$data[$i]['id'].$endStr;
+            $dataForInput = [
+                'name' => 'barcodeScanned',
+                'id' => $data[$i]['id'],
+                'class' => 'invCheckbox',
+                'checked' => $data[$i]['barcodeScanned']=='Yes' ? 'checked' : '',
+            ];
+            $data[$i]['barcodeScanned'] = $this->view->generate('framework/inputChkBox', $dataForInput);
         }
         $this->checkInventoryFinished("");
         return $data;
@@ -688,21 +688,20 @@ class FasModel extends Model
         $db = Db::getDb();
         $query = "SELECT id, invNumber, description, person, location, newLocation, barcode, dateFix, barcodeScanned, 
                   (SELECT DISTINCT CONCAT(SUBSTRING(person,1,LOCATE(' ',person)),SUBSTRING(person,LOCATE(' ',person)+1,1),'.',SUBSTRING(person,LOCATE(' ',person,LOCATE(' ',person)+1)+1,1),'.') 
-                   FROM finishedInventory fi WHERE fi.iin = fai.iin) AS whoScanned
+                   FROM finishedInventory fi WHERE fi.iin = fai.iinWhoScanned) AS whoScanned
                   FROM fixedAssetInventory fai
                   WHERE invNumber = :invNumber";
 	    $data = $db->selectQuery($query,['invNumber'=>$invNumber]);  
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
-            if ($data[$i]['barcodeScanned']=='Yes'){
-                $endStr = ' checked>';
-            }
-            else{
-                $endStr = '>';
-            }
-            $data[$i]['barcodeScanned'] ='<input type="checkbox" class="invCheckbox" value='.$data[$i]['id'].$endStr;
-            
+            $dataForInput = [
+                'name' => 'barcodeScanned',
+                'id' => $data[$i]['id'],
+                'class' => 'invCheckbox',
+                'checked' => $data[$i]['barcodeScanned']=='Yes' ? 'checked' : '',
+            ];
+            $data[$i]['barcodeScanned'] = $this->view->generate('framework/inputChkBox', $dataForInput);
         }
         return $data;
     }
@@ -753,20 +752,20 @@ class FasModel extends Model
         $db = Db::getDb();
         $query = "SELECT id, invNumber, description, person, location, newLocation, barcode, dateFix, barcodeScanned, 
                   (SELECT DISTINCT CONCAT(SUBSTRING(person,1,LOCATE(' ',person)),SUBSTRING(person,LOCATE(' ',person)+1,1),'.',SUBSTRING(person,LOCATE(' ',person,LOCATE(' ',person)+1)+1,1),'.') 
-                   FROM finishedInventory fi WHERE fi.iin = fai.iin) AS whoScanned
+                   FROM finishedInventory fi WHERE fi.iin = fai.iinWhoScanned) AS whoScanned
                   FROM fixedAssetInventory fai
                   WHERE location = :location ORDER BY person,description";
 	    $data = $db->selectQuery($query,['location'=>$location]);
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
-            if ($data[$i]['barcodeScanned']=='Yes'){
-                $endStr = ' checked>';
-            }
-            else{
-                $endStr = '>';
-            }
-            $data[$i]['barcodeScanned'] ='<input type="checkbox" class="invCheckbox" value='.$data[$i]['id'].$endStr;
+            $dataForInput = [
+                'name' => 'barcodeScanned',
+                'id' => $data[$i]['id'],
+                'class' => 'invCheckbox',
+                'checked' => $data[$i]['barcodeScanned']=='Yes' ? 'checked' : '',
+            ];
+            $data[$i]['barcodeScanned'] = $this->view->generate('framework/inputChkBox', $dataForInput);
         }
         return $data;
     }
@@ -775,20 +774,20 @@ class FasModel extends Model
         $db = Db::getDb();
         $query = "SELECT id, invNumber, description, person, location, newLocation, barcode, dateFix, barcodeScanned, 
                   (SELECT DISTINCT CONCAT(SUBSTRING(person,1,LOCATE(' ',person)),SUBSTRING(person,LOCATE(' ',person)+1,1),'.',SUBSTRING(person,LOCATE(' ',person,LOCATE(' ',person)+1)+1,1),'.') 
-                   FROM finishedInventory fi WHERE fi.iin = fai.iin) AS whoScanned
+                   FROM finishedInventory fi WHERE fi.iin = fai.iinWhoScanned) AS whoScanned
                   FROM fixedAssetInventory fai
                   WHERE description = :fixedAsset";
 	    $data = $db->selectQuery($query,['fixedAsset'=>$fixedAsset]);
         $dataCount = count($data);
         for ($i = 0; $i < $dataCount; $i++){
             $data[$i]['invNumber'] = '<span class="invLink">'.$data[$i]['invNumber'].'</span>';
-            if ($data[$i]['barcodeScanned']=='Yes'){
-                $endStr = ' checked>';
-            }
-            else{
-                $endStr = '>';
-            }
-            $data[$i]['barcodeScanned'] ='<input type="checkbox" class="invCheckbox" value='.$data[$i]['id'].$endStr;
+            $dataForInput = [
+                'name' => 'barcodeScanned',
+                'id' => $data[$i]['id'],
+                'class' => 'invCheckbox',
+                'checked' => $data[$i]['barcodeScanned']=='Yes' ? 'checked' : '',
+            ];
+            $data[$i]['barcodeScanned'] = $this->view->generate('framework/inputChkBox', $dataForInput);
         }
         return $data;
     }

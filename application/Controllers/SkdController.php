@@ -120,6 +120,42 @@ Class SkdController extends Controller
                 ];
                 echo $this->view->cTable($title,$columns,$data);
             }
+
+            if ($_POST['reportType'] == 'contactList') {
+                $data = SkdModel::getStudentContactList($_POST['grade']);
+                $title = "Список номеров телефонов родителей учащихся {$_POST['grade']} класса";
+                $columns = [
+                 'num'=>'№',
+                 'Surname'=>'Фамилия',
+                 'Firstname'=>'Имя',
+                 'Contact1'=>'Номер телефона',
+                 'ChatID1'=>'Привязан',
+                 'Subscribe1'=>'Подписан',
+                 'Contact2'=>'Номер телефона',
+                 'ChatID2'=>'Привязан',
+                 'Subscribe2'=>'Подписан'
+                ];
+
+                foreach ($data as $key=>$value){
+                    $dataForInput = [
+                        'name' => 'contact1',
+                        'id' => $data[$key]['ID'],
+                        'value' => $data[$key]['Contact1'],
+                    ];
+                    $result = $this->view->generate('framework/input', $dataForInput);
+                    $data[$key]['Contact1'] = $result;
+                    
+                    $dataForInput = [
+                        'name' => 'contact2',
+                        'id' => $data[$key]['ID'],
+                        'value' => $data[$key]['Contact2'],
+                    ];
+                    $result = $this->view->generate('framework/input', $dataForInput);
+                    $data[$key]['Contact2'] = $result;
+                }
+
+                echo $this->view->cTable($title,$columns,$data,'mtCaption');
+            }
         }
     }
         
@@ -302,8 +338,15 @@ Class SkdController extends Controller
                 echo 'ok';
             }
         }
-            
         
+        //MTdev
+        public function actionWritecontact()
+        {
+            if (isset($_POST['id'])){
+                $result = SkdModel::writeContact($_POST['id'],$_POST['contact'],$_POST['name']);
+                echo $result;
+            }
+        }
 
         
 }

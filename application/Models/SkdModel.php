@@ -114,7 +114,7 @@ class SkdModel extends Model {
     
     
     
-    //Edit here for bot
+    //
     public function getTabItems()
     {
         $tabs = [];
@@ -129,8 +129,9 @@ class SkdModel extends Model {
         if (in_array("skdCanBrowseGeneralControl", $userPriveleges)) {
             $tabs['generalControl']='Общий контроль';
         }
+        //MTdev
         if (in_array("skdCanAddParentContact", $userPriveleges)) {
-            $tabs['addParentContact']='Контактные данные родителей';
+            $tabs['addParentContact']='Telegram-бот';
         }
         return $tabs;
     }
@@ -362,6 +363,27 @@ class SkdModel extends Model {
         return $data;
     }
     
+    //MTdev
+    public static function getStudentContactList($grade)
+    {
+        $tsql = "SELECT P.ID, P.Name AS Surname, P.Firstname AS Firstname, D.Name AS Division, 
+                        P.HomePhone AS Contact1, P.WorkPhone AS Contact2, 
+                        CASE P.Chat_ID1 WHEN 0 THEN 'Нет' ELSE 'Да' END AS ChatID1,
+                        CASE P.Chat_ID2 WHEN 0 THEN 'Нет' ELSE 'Да' END AS ChatID2,
+                        CASE P.IsSubscribed1 WHEN 0 THEN 'Нет' ELSE 'Да' END AS Subscribe1,
+                        CASE P.IsSubscribed2 WHEN 0 THEN 'Нет' ELSE 'Да' END AS Subscribe2
+                FROM dbo.pList P 
+                INNER JOIN dbo.pDivision D ON P.Section = D.ID
+                WHERE D.Name = :grade 
+                ORDER BY P.Name";
+        $params['grade'] = $grade;
+        $db = DbSkd::getInstance();
+        $data = $db->execQuery($tsql,$params);
+        $data = self::addRowNumbers($data);
+        
+        return $data;
+    }
+
     public static function getStaffAtSchool()
     {
         $params['date'] = date("Ymd",strtotime("-3 days"));
@@ -774,7 +796,7 @@ class SkdModel extends Model {
         $writer->save('php://output');
         exit;
     }
-
+    
     public static function writeComment($id,$comment){
         $params['id'] = $id;
         $params['comment'] = $comment;
@@ -785,5 +807,65 @@ class SkdModel extends Model {
         WHERE ID = :id";
         $db = DbSkd::getInstance();
         $data = $db->updateQuery($tsql,$params);
+    }
+
+    //MTdev
+    public static function writeContact($id,$contact,$name){
+        $delChars = ["+", "(", ")", " "];
+        $contact = str_replace($delChars, "", $contact);
+        $contact = $contact == '7' ? '' : $contact;
+        $phone = $name == 'contact1' ? "HomePhone" : "WorkPhone";
+        $num = $name == 'contact1' ? "1" : "2";
+        
+        if (!empty($contact)) {
+            $tparams['contact1'] = $contact;
+            $tparams['contact2'] = $contact;
+            $tsql = "
+            SELECT HomePhone AS Phone, Chat_ID1 AS ChatId, IsSubscribed1 As Subscription
+            FROM dbo.pList
+            WHERE HomePhone = :contact1 AND Chat_ID1<>0
+            UNION
+            SELECT WorkPhone, Chat_ID2, IsSubscribed2
+            FROM dbo.pList
+            WHERE WorkPhone = :contact2 AND Chat_ID2<>0
+            ";
+            $db = DbSkd::getInstance();
+            $tdata = $db->execQuery($tsql,$tparams);
+            if (!empty($tdata)) {
+                $chatId = $tdata[0]['ChatId'];
+                $subscr = $tdata[0]['Subscription'];
+                $сparams['id'] = $id;
+                $tsql = "
+                SELECT HomePhone, WorkPhone
+                FROM dbo.pList
+                WHERE ID = :id 
+                ";
+                $db = DbSkd::getInstance();
+                $сdata = $db->execQuery($tsql,$сparams);
+                if ($сdata[0]['HomePhone'] == $contact || $сdata[0]['WorkPhone'] == $contact) {
+                    return "Данный номер телефона уже записан для текущего ученика!";
+                }
+            } else {
+                $chatId = '0';
+                $subscr = '0';
+            }
+        } else {
+            $chatId = '0';
+            $subscr = '0';
+        }
+
+        $params['id'] = $id;
+        $params['contact'] = $contact;
+        $tsql = "
+        UPDATE dbo.pList
+        SET ".$phone." = :contact, Chat_ID".$num." = ".$chatId.", IsSubscribed".$num." = ".$subscr."
+        WHERE ID = :id";
+        if ($contact==''||strlen($contact)==11) {
+            $db = DbSkd::getInstance();
+            $data = $db->updateQuery($tsql,$params);
+            return "ok";
+        } else {
+            return "Некорректный номер телефона!";
+        }
     }
 }
