@@ -720,11 +720,15 @@ function clickHandler(obj)
     }
 
     if (obj.name == "inventoryFinish"){
-        $txt = "Вы уверены, что хотите завершить инвентаризацию? \nЗавершая инвентаризацию, Вы подтверждаете, что все основные средства находятся у Вас в кабинете, в Вашем распоряжении, в полной комплектности и исправном состоянии. После завершения у Вас закроется доступ на редактирование таблицы инвентаризации, а также вход в мобильное приложение \"NIS Barcode Scanner\"";
-        if (confirm($txt)) {
+        let txt = "Вы уверены, что хотите завершить инвентаризацию? \nЗавершая инвентаризацию, Вы подтверждаете, что все основные средства находятся у Вас в кабинете, в Вашем распоряжении, в полной комплектности и исправном состоянии. После завершения у Вас закроется доступ на редактирование таблицы инвентаризации, а также вход в мобильное приложение \"NIS Barcode Scanner\"";
+        let r = confirm(txt);
+        if (r == true) {
             ajax('/fas/InventoryFinish', function(data){
                 if (data == true) {
                     alert('Поздравляем! Вы завершили инвентаризацию.');
+                    ajax('/fas/getInventoryData', function(data){document.getElementById('inventoryResults').innerHTML = data},param);
+                    param = 'person=';
+                    ajax('/fas/CheckInventoryFinish', function(invCheck){document.getElementById('inventoryFinish').disabled = invCheck}, param);
                     obj.disabled = true;
                 }
                 else{
