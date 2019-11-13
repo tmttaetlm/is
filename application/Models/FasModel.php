@@ -229,22 +229,31 @@ class FasModel extends Model
         return $this->view->cTable($title,$columns, $result,'fasResultTable');
     }
 
-    public function InventoryFinish(){
+    public function InventoryFinish($person){
+        
+        if ($person == "") {
+            $where = "WHERE iin = :iin";
+            $param['iin'] = $this->user->getIin();
+        } else {
+            $where = "WHERE person = :person";
+            $param['person'] = $person;
+        }
+        
         $db = Db::getDb();
-        $query = 'SELECT COUNT(*) AS count FROM fixedAssetInventory WHERE iin = :iin AND barcodeScanned IS NULL';
-        $result = $db->selectQuery($query,['iin'=>$this->user->getIin()]);
+        $query = 'SELECT COUNT(*) AS count FROM fixedAssetInventory '.$where.' AND barcodeScanned IS NULL';
+        $result = $db->selectQuery($query,$param);
         
         if ($result[0]['count'] == 0){
-            $query = "UPDATE finishedInventory SET finishedValue = 'YES', finishedAt = NOW() WHERE iin = :iin";
-            $db->IUDQuery($query,['iin'=>$this->user->getIin()]);
+            $query = "UPDATE finishedInventory SET finishedValue = 'YES', finishedAt = NOW() ".$where;
+            $db->IUDQuery($query,$param);
             return true;
         }
         else {
             return false;
         }
         
-        
     }
+
     //MTdev
     public function CancelInventoryFinish($person){
         $db = Db::getDb();
@@ -492,7 +501,7 @@ class FasModel extends Model
         LEFT JOIN isdb.finishedInventory t2 ON t1.iinWhoScanned=t2.iin
         LEFT JOIN isdb.finishedInventory t3 ON t1.exIin=t3.iin
         LEFT JOIN isdb.finishedInventory t4 ON t1.accountablePersonIin=t4.iin
-        WHERE (exIin IS NOT NULL OR newLocationCode IS NOT NULL)
+        WHERE (exIin IS NOT NULL OR newLocation IS NOT NULL)
         ORDER BY accountablePersonIin, t1.iin, currentLocation) AS tempQuery";
         $result = $db->selectQuery($query);
         return $result;
