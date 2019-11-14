@@ -26,7 +26,6 @@ class AdminController extends Controller{
             $data['tabItems']['roleSettings']='Настройка ролей';
         }
         
-        
         $data['admin'] = $this->model->user->checkAdmin();
         $data['users'] = $this->model->getUserList();
         $data['roles'] = $this->model->getRoles2();
