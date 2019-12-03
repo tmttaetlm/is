@@ -18,12 +18,12 @@ class FasModel extends Model
         $this->view = $view;
     }
     
-    private function getFixedAssets($iin) {
+    public function getFixedAssets($iin) {
         $db = Db::getDb();
 	return $db->selectQuery("SELECT * FROM fixedAsset WHERE iin = :iin ORDER BY description",['iin'=>$iin]);
     }
 
-    private function getFixedAssetsInventory($iin) {
+    public function getFixedAssetsInventory($iin) {
         $db = Db::getDb();
         $query = "SELECT A.id, A.invNumber, A.barcode, A.description, A.iin, A.location,A.locationCode, A.newLocation, A.newLocationCode, A.sn, A.registrationDate, A.comment,  
                   CONCAT(SUBSTRING(U.person, 1, POSITION(' ' IN U.person)+1),'.') as whoScanned,
@@ -43,72 +43,18 @@ class FasModel extends Model
         return $db->selectQuery($query,['iin'=>$iin]);
     }
     
-    private function getModificationDate() 
+    public function getModificationDate() 
     {
         $db = Db::getDb();
         $result = $db->selectQuery("SELECT dateTimeValue FROM info WHERE `key` = '1cFileLastUpdate';");
         return strtotime($result[0]['dateTimeValue']);
     }
 
-    private function getStartedDate() 
+    public function getStartedDate() 
     {
         $db = Db::getDb();
         $result = $db->selectQuery("SELECT dateTimeValue FROM info WHERE `key` = 'fasInventoryStarted';");
         return strtotime($result[0]['dateTimeValue']);
-    }
-
-
-    public function index() {
-        $updateInfo = '<p class="fasUpdateInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: '.date('d.m.Y H:i',$this->getModificationDate())."</p>\n<br>";
-        $data['lastUpdate'] = date('d.m.Y H:i',$this->getModificationDate());
-        $data['inventoryStartedAt'] = date('d.m.Y H:i',$this->getStartedDate());
-        $data['tabItems']['monitoring']='Мои ОС';
-        $userPriveleges = $this->user->getPriveleges();
-        if (in_array("fasCanSeach", $userPriveleges)) {
-            $data['tabItems']['seach'] = 'Поиск в БД';
-        }
-        //Inventory
-        if ($this->getInventoryStatus()) {
-            $data['tabItems']['inventory'] = 'Инвентаризация';
-            $data['inventoryData'] = $this->getInventoryData();
-            $data['inventoryFinished'] = $this->checkInventoryFinished("");
-            $data['tabData']['inventory'] =  $this->view->generate('fas/inventory',$data);
-        }
-
-        //InventoryControl
-        if (in_array("fasInvControl", $userPriveleges)) {
-            $data['tabItems']['inventoryControl'] = 'Инв. контроль';
-            $data['canInvStart'] = $this->user->hasPrivilege('fasInvStart');
-            $data['tabData']['inventoryControl'] =  $this->view->generate('fas/inventoryControl',$data);
-        }
-
-
-        //set the title of the table
-        $title = 'ОC закрепленные за сотрудником: <u>'.$this->user->getFullName().'</u>'; 
-        //get user fixed assets from the Data Base 
-        $result = $this->getFixedAssets($this->user->getIin());
-        $result = $this->addRowNumbers($result);
-        $columns = [
-            'num'=>'№',
-            'invNumber'=>'Инвентарный номер',
-            'description'=>'Описание',
-            'location'=>'Местонахождение',
-            'dateFix'=>'Дата закрепления',
-            'sn'=>'Серийный номер',
-            'comment'=>'Комментарий',
-            ];
-        
-        $data['tabData']['monitoring'] = $updateInfo.$this->view->cTable($title,$columns, $result,'fasResultTable');
-        
-        $data['tabData']['seach'] = $this->view->generate('fas/seach',$data);
-        $data['content'] = $this->view->generate('framework/tabs',$data);
-        $data['systemTitle'] = 'Учет основных средств';
-        $data['content'] = $this->view->generate('framework/system',$data);
-        $data['user'] = $this->user->getFullName();
-        $data['admin'] = $this->user->checkAdmin();
-        
-        echo $this->view->generate('templateView',$data);
-        
     }
     
     public function seachByInvNumber($invNumber) {
@@ -177,7 +123,7 @@ class FasModel extends Model
     
     
     //Add select tags
-    private function addSelectTags($data){
+    public function addSelectTags($data){
          $c=count($data);
          
          for($i=0;$i<$c;$i++){
@@ -1005,7 +951,8 @@ class FasModel extends Model
             `fixedAsset`.`accountablePersonIin`,
             `fixedAsset`.`sn`,
             `fixedAsset`.`registrationDate`
-        FROM `isdb`.`fixedAsset`;";
+        FROM `isdb`.`fixedAsset`
+        WHERE `isdb`.`fixedAsset`.`account` != 2410 AND `isdb`.`fixedAsset`.`account` != 2419;";
         $db->IUDQuery($query);
         
         $query = "INSERT INTO `isdb`.`finishedInventory`
