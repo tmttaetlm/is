@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="box-1 reportSelect">
+    <div class="box-1 paramSelect">
         <p>Тип отчета:</p>
         <div class="gcReportControls">
             <div class="but">
@@ -34,7 +34,7 @@
         </div>
 
     </div>
-    <div  class="box-2 reportSelect">
+    <div  class="box-2 paramSelect">
         <div id='numberOfPeople'></div>
         <br/>
         <!--<button name="generalControlGetData" class="sendQuery">Обновить</button>-->

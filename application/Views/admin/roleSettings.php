@@ -1,6 +1,6 @@
 <input type = "text" id="newRole" placeholder="Введите название новой роли..." />
 <button name="adminAddRole">Добавить</button> <br/>
-<select multiple id="roleList" size=10>
+<select multiple id="roleList" size=9 style="height: auto;">
 </select>
 <div class="permSettings">
     <?php foreach($data['permissions'] as $permission):?>

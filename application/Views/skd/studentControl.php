@@ -1,5 +1,5 @@
  <div class ="controls">
-    <div class="gradeSelect">
+    <div class="paramSelect">
      <p>Выберите класс:</p>
         <div class="grades">
         <select id="grade" name="grade">
@@ -24,7 +24,7 @@
         </select>
         </div>    
     </div>
-    <div class="reportSelect">
+    <div class="paramSelect">
     <p>Укажите тип отчета:</p>
     <input type="radio" checked="checked" id="entranceExit" name="reportType" value="entranceExit"/>
     <label for="entranceExit">Вход-выход учащихся за день</label>

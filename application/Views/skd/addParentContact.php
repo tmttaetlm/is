@@ -1,5 +1,5 @@
 <div>
-    <div class="gradeSelectM">
+    <div class="paramSelect">
      <p>Выберите класс:</p>
         <div class="grades">
         <select id="gradeM" name="gradeM">

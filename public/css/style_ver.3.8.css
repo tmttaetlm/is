@@ -1,0 +1,829 @@
+/*Main CSS file */
+
+/*CSS reset*/
+body, div, ul, ol, li, h1, h2, h3, h4, h5, h6, form, fieldset, input, textarea, p, th, td {
+	margin: 0;
+	padding: 0;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* Fonts */
+@font-face {
+    font-family: Roboto-regular; /* Имя шрифта */
+    src: url(/public/fonts/font_roboto_regular.woff); /* Путь к файлу со шрифтом */
+   }
+  
+@font-face {
+    font-family: Roboto-bold; /* Имя шрифта */
+    src: url(/public/fonts/font_roboto_bold.woff); /* Путь к файлу со шрифтом */
+   }
+
+/* Common styles */
+article, aside, footer, header, main, nav, section{
+    display: block;
+}
+html{
+    height: 100%;	
+}
+
+
+body {
+    font: 17px Roboto-Regular;
+    line-height: 1.2;
+    letter-spacing: normal;
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+}
+.wrapper {
+    width: 960px;
+    margin: 0 auto;
+    
+}
+
+
+
+/* Header */
+header {
+    height: 60px;
+    background: #5e852c;
+}
+.logo {
+    height: 60px;
+    width: 120px;
+    float: left;
+}
+
+.logo h1 a {
+    display: block;
+    font-size: 30px;
+    text-align: center;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logo h2 a {
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.title h1 a {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #ffffff;
+    float:left;
+    text-decoration: none;
+}
+
+.user{
+    background-image: url(../images/user.png);
+    background-repeat: no-repeat;
+    background-position: right;
+    height: 24px;
+    float: right;
+    margin-top: 18px;
+}
+.user a{
+    margin-right: 30px;
+    font-size: 15px;
+    color:#ffffff;
+}
+
+
+.slider{
+	height: 300px;
+	width: 100%;
+	background: #f5e8d6;
+    margin-bottom: 20px;
+}
+
+#slides{
+	position: relative;
+	height:300px;
+    list-style-type: none;
+}
+
+.slide{
+	position: absolute;
+	background-repeat: no-repeat;
+	width: 960px;
+	height: 300px;
+	left: 0;
+	right: 0;
+	margin: auto;
+	opacity: 0;
+	z-index: 1;
+
+	 -webkit-transition: opacity 1s;
+ 	-moz-transition: opacity 1s;
+ 	-o-transition: opacity 1s;
+ 	transition: opacity 1s;
+}
+
+.slide:nth-of-type(1){
+	background-image: url(../images/skd_slide.jpg);
+}
+.slide:nth-of-type(2){
+	background-image: url(../images/fas_slide.jpg);
+}
+
+
+.slide_desc{
+	width: 430px;
+	height: 150px;
+	background-color: rgba(0, 0, 0, 0.5);
+	margin: 70px auto;
+	padding: 10px;
+
+
+}
+
+.slide_desc h2{
+	margin-top: 15px;
+	font-size: 20px;
+	color: white;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.slide_desc p{
+	color: white;
+	margin-top: 20px;
+    text-align: center;
+}
+
+.showing{
+	opacity: 1;
+	z-index: 2
+}
+
+/* Content */
+.mainContent{
+    min-height: calc(100px*2);
+    /*min-height: 120px;*/
+}
+
+.content-login{
+    min-height: calc(100vh - 300px);
+}
+
+
+.systemsColLeft{
+    float:left;
+    width: 50%;
+}
+.systemsColRight{
+    float:right;
+    width: 50%;
+}
+#skdItem a{
+    background-image: url(../images/turniket2.png);
+}
+#fasItem a{
+    background-image: url(../images/fas.png);
+}
+/*MTdev*/
+#secItem a{
+    background-image: url(../images/security.png);
+}
+
+.systems a{
+    display:block;
+    width: 100%;
+    height: 100px;
+    border: 1px solid #a7a7a7;
+    background-repeat: no-repeat;
+    background-position: left 5px top 5px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    padding-left: 115px;
+    padding-top: 38px;
+    box-sizing: border-box;
+    color: #a7a7a7;
+    overflow: hidden;
+    transition: 0.3s;
+}
+.systems a:hover{
+    background-color: #fafaf9;
+    color: #95c93d;
+    transition: 0.5s;
+}
+
+footer {
+    height: 70px;
+    margin-top: 20px;
+    background: #f5f5f4;
+}
+.copyright {
+    color: #5e852c;
+    text-align: center;
+    padding-top: 25px;
+}
+
+.login {
+    width: 450px;
+    height: 280px;
+    border: 1px solid #a7a7a7;
+    margin: 100px auto 0;
+    border-radius: 5px;
+    background-color:white;
+}
+
+.login p {
+    display: block;
+    text-align: center;
+    margin: 0 auto;
+}
+.login h2{
+    margin-top: 30px;
+    margin-bottom: 10px;
+    color: #a7a7a7;
+    text-align: center;
+    font-size: 20px;
+}
+
+input[type=text], input[type=password] {
+    display: inline-block;
+    width: 350px;
+    padding: 5px 10px;
+    margin: 10px 50px;
+    border: 1px solid #a7a7a7;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 20px;
+}
+
+.results input[type=tel] {
+    cursor: text;
+    display: inline-block;
+    width: 150px;
+    padding: 3px 5px;
+    border: 1px solid #a7a7a7;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit],.signInButton {
+    display: block;
+    width: 250px;
+    background-color: #5e852c;
+    color: white;
+    padding: 14px 20px;
+    margin-top:20px; 
+    margin-left: 100px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.25s;
+}
+
+input[type=submit]:hover {
+    /*background-color: #4CAF50;*/
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: 0.5s;
+}
+
+.system-title{
+    height: 70px;
+    background: #f5f5f4;
+}
+
+.system-title h2{
+    color: #00a1dd;
+    text-align: center;
+    text-transform: uppercase;
+    padding-top: 20px;
+}
+
+.results{
+    background-color: white;
+    border-radius: 5px;
+}
+
+.results h3{
+    text-align: center;
+    line-height: 1.8;
+}
+
+.results table{
+    margin: 10px auto;
+    border: 1px solid black;
+    
+}
+.results td, .results th {
+    border: 1px solid black;
+    padding: 3px;
+}
+
+.results caption{
+    text-align: center;
+    font-size: 20px;
+    margin: 10px auto 5px;
+}
+
+
+.skd-menu li{
+    list-style: none;
+    display: inline;
+    margin-right: 5px;
+}
+
+
+
+
+/* Tabs style */
+ui-tabs {
+  margin: 20px auto;
+  width: 100%;
+}
+.ui-tabs > label {
+  cursor: pointer;
+  float: left;
+  margin-right: 5px;
+  margin-top:10px;
+  display: block;
+  padding: 10px 10px;
+  background-color: #ecf0f1;
+  border-radius: 20px 20px 0 0;
+  height: 20px;
+  transition: 0.15s;
+}
+.ui-tabs > label:hover {
+    margin-top:5px;
+    height: 25px;
+    transition: 0.15s;
+}
+.ui-tabs > input {
+  display: none;
+}
+.ui-tabs > input:checked + label {
+  background-color: #5e852c;
+  color: #fefefe;
+}
+.ui-tabs input[id="userControl"]:checked ~ .content .userControl,
+.ui-tabs input[id="studentControl"]:checked ~ .content .studentControl,
+.ui-tabs input[id="staffControl"]:checked ~ .content .staffControl,
+.ui-tabs input[id="generalControl"]:checked ~ .content .generalControl,  
+.ui-tabs input[id="addParentContact"]:checked ~ .content .addParentContact,  
+.ui-tabs input[id="monitoring"]:checked ~ .content .monitoring,
+.ui-tabs input[id="inventory"]:checked ~ .content .inventory,
+.ui-tabs input[id="seach"]:checked ~ .content .seach,
+.ui-tabs input[id="roleSettings"]:checked ~ .content .roleSettings,
+.ui-tabs input[id="inventoryControl"]:checked ~ .content .inventoryControl,
+/*MTdev*/
+.ui-tabs input[id="bypassControl"]:checked ~ .content .bypassControl
+{
+  display: block;
+}
+.ui-tabs .content {
+  clear: both;
+  position: relative;
+}
+.ui-tabs article {
+  width: 100%;
+  position: static;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  display: none;
+  /*min-height: 200px;*/
+  border-top: 5px solid #5e852c;
+  border-left: 1px solid #5e852c;
+  border-right: 1px solid #5e852c;
+  border-bottom:1px solid #5e852c;
+  border-radius: 0 10px 10px 10px;
+  padding: 15px;
+}
+
+.ui-tabs input, .ui-tabs select{
+    cursor: pointer;
+    font-size: 16px;    
+    background-color: white;
+    border-radius: 4px;
+    padding: 3px;
+    font: 17px Roboto-Regular;
+
+}
+.ui-tabs select{
+    width: 250px;
+    height: 30px;
+}
+
+#studentSet {
+    margin: 10px;
+}
+
+.ui-tabs button{
+    height: 35px;
+    background-color: #5e852c;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 5px 30px;
+    margin: 0 5px 0 5px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    transition: 0.25s;
+}
+.ui-tabs button:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: 0.25s;
+}
+.ui-tabs button:active {
+    background-color: #689F38;
+    /*box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);*/
+}
+
+div .controls{
+    margin: 0 auto;
+}
+
+.hide{
+    display: none;
+}
+
+.paramSelect{
+    display: block;
+    margin: 15px auto 10px;
+    width: 80%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #00a0db;
+}
+
+.paramSelect p{
+    text-align: center;
+    padding-bottom: 7px;
+    font-weight: bold;
+}
+
+.paramSelect label{
+    padding: 5px;
+    line-height: 2;
+    cursor: pointer;
+}
+
+.paramSelect input{
+    padding: 3px 3px 2px;
+    /*margin-left: 20px;*/
+    margin-top: 10px;
+}
+.paramSelect input:last-child{
+    margin-bottom: 10px;
+}
+/*
+.paramSelect select {
+    padding: 6px;
+    margin-bottom: 10px;
+}
+*/
+.paramSelect div.grades{
+    width:120px;
+    margin: 0 auto;
+}
+
+.paramSelect div.divisions{
+    width:350px;
+    margin: 0 auto;
+}
+
+.paramSelect select{
+    width:55px;
+    height:35px;
+}
+
+.sendQuery{
+    display: block;
+    margin: 0 auto;
+}
+
+#selectDivision{
+    width:350px;
+    height:35px;
+    font-size: 16px;
+    margin: 0 auto;
+}
+
+#personSet{
+    margin-left:40px;
+}
+
+
+
+/*FAS styles*/
+
+.fasSeachPanel input[type=text]{
+    display: inline-block;
+    width: 350px;
+    padding: 5px 10px;
+    margin-left:0px; 
+    border: 1px solid #a7a7a7;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 20px;
+}
+
+
+.fasResultTable{
+    background-color: white;
+    border-radius: 5px;
+    margin: 0 auto;
+}
+
+.fasResultTable h3{
+    text-align: center;
+    line-height: 1.8;
+}
+
+.fasResultTable table{
+    margin: 0 auto;
+    border: 1px solid black;
+    
+}
+.fasResultTable td, .fasResultTable th {
+    border: 1px solid black;
+    padding: 3px;
+}
+
+.fasResultTable caption{
+    text-align: center;
+    font-size: 20px;
+}
+
+/*
+    Autocomplete styles
+*/
+
+.autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+  display: inline-block;
+  width:100%;
+  margin-top: 10px;
+}
+
+/*Input styles*/
+.autocomplete input {
+/*  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  float: left;
+  width: 80%;
+  background: #f1f1f1;*/
+    
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.autocomplete input[type=text] {
+  width: 400px;
+  border-radius: 5px;
+  height: 35px;
+  margin: 10px;
+}
+
+/*Autocomplete items style*/
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 350px;
+  right: 0;
+  width: 385px;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #e9e9e9;
+}
+
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+
+table.users{
+    margin: 0 auto;
+}
+table.users tr{
+    border: 1px solid #5e852c;
+}
+table.users td{
+    /*padding: 3px 10px;*/
+    max-width: 250px;
+    width: 1px;
+}
+
+table.users tr:hover td{
+    background: rgb(226, 234, 255);/* фон строки при наведении */
+}
+
+div #msg p {
+    color:red;
+    align-content: center;
+}
+
+
+.fasUpdateInfo{
+    display: block;
+    margin: 0 auto;
+    width: 90%;
+    padding: 5px;
+    border-radius: 10px;
+    border: 2px solid #00a0db;
+    text-align: center;
+}
+
+.userFasControl{
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/*SKD GeneralControl style */
+.content .generalControl .container{
+    display: flex;
+}
+.content .generalControl .box-1{
+    flex: 1.75;
+    
+}
+.content .generalControl .box-2{
+    flex: 1;
+    margin-left: 10px;
+}
+
+.content .generalControl .container table{
+    margin: 0 auto;
+    border: 1px solid black;
+}
+.content .generalControl .container td, .content .generalControl .container th {
+    border: 1px solid black;
+    padding: 3px;
+}
+.content .generalControl .container caption{
+    text-align: center;
+    font-size: 20px;
+}
+
+.but{
+    display: inline-block;
+}
+#invTransmittingPerson{
+    margin-top: 20px;
+}
+
+.gcReportType{
+    margin-bottom: 10px;
+    margin-left: 220px;
+}
+
+.gcReportControls{
+    margin-top: 8px;
+    margin-left: auto;
+    width: 500px;
+}
+
+
+/*INVENTORY style */
+.ui-tabs .inv-select-location{
+    font-size: 14px;
+}
+
+.ui-tabs .inv-select-comment{
+    font-size: 14px;
+}
+.ui-tabs .inventoryPanel{
+   width: auto;
+}
+
+.ui-tabs .inventoryPanel .inventoryButtons {
+    margin: 0 auto;
+    margin-top: 5px;
+    width: 450px;
+ }
+
+button:disabled{
+    background-color:gray;
+}
+
+.ui-tabs .fasUpdateInfo .inventoryMessages p{
+    color:gray;
+    font-style: italic;
+    font-size: 14px;
+}
+
+.invLink{
+    color:blue;
+    cursor: pointer;
+
+}
+
+/* ширина диалогового окна и его отступы от экрана */
+.dialogWindow{
+    background: #fefefe;
+    margin:15% auto;
+    width: 410px;
+    padding: 20px;
+    border: 1px solid #888;
+}
+
+.dialogWindow input{
+    margin-left: 5px;
+}
+
+.dialogWindow button{
+    margin-left:125px;
+}
+
+.dialogWindow h3{
+    text-align: center;
+    margin-bottom: 10px;
+
+}
+
+#dialogWindowBackground {
+    display: none;
+    position:fixed;
+    z-index:1;
+    top:0; 
+    left:0;
+    width:100%;
+    height:100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8); 
+}
+
+.close{
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor:pointer;
+}
+
+.gcButtons{
+    margin: 15px auto auto 155px;
+    width: 300px;
+}
+
+.mtCaption{
+    width: 650px;
+}
+
+#newRole {
+    margin: 5px 5px 20px 5px;
+    height: 40px;
+}
+
+#roleList {
+    float: left;
+    width: 40%;
+    margin: auto 5px 5px;
+}
+
+.permSettings {
+    width: 50%;
+    float: right;
+    border: 1px solid #5e852c;
+    padding: 5px;
+    margin-right: 60px;
+    margin-bottom: 20px;
+}
+
+table.mtCaption tbody tr :nth-last-child(1) :not(input) {
+    text-align: center;
+}
+table.mtCaption tbody tr :nth-last-child(2) :not(input){
+    text-align: center;
+}
+table.mtCaption tbody tr :nth-last-child(4) :not(input){
+    text-align: center;
+}
+table.mtCaption tbody tr :nth-last-child(5) :not(input){
+    text-align: center;
+}
+/*MTdev*/
+.bypassPeriods{
+    display: inline-table;
+}

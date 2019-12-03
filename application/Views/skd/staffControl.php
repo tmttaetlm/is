@@ -1,4 +1,4 @@
-<div class="gradeSelect">
+<div class="paramSelect">
      <p>Выберите подразделение:</p>
         <div class = "divisions">
         <select id="selectDivision" name="selectDivision">
@@ -6,7 +6,7 @@
         </select>
         </div>    
 </div>    
-<div class="reportSelect">
+<div class="paramSelect">
     <p>Укажите тип отчета:</p>
     <input type="radio" checked="checked" id="staffEntranceExit" name="staffReportType" value="staffEntranceExit"/>
     <label for="staffEntranceExit">Вход-выход работников за день</label>

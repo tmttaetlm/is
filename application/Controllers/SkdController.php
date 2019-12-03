@@ -25,7 +25,8 @@ Class SkdController extends Controller
         $data['tabItems'] = $this->model->getTabItems();
         $data['tabData'] = $this->view->getDataByTabItems($data['tabItems'],'skd');
         $data['content'] = $this->view->generate('framework/tabs',$data);
-        $data['content'] = $this->view->generate('skd/skdView',$data);
+        $data['systemTitle'] = 'Система контроля посещаемости';
+        $data['content'] = $this->view->generate('framework/system',$data);
         echo $this->view->generate('templateView',$data);
     }
         
@@ -34,13 +35,13 @@ Class SkdController extends Controller
 
        if (isset($_POST['load'])) {
           $data['skd'] = SkdModel::allLogs();
-          $data['content'] = $this->view->generate('skd/skdView',$data);
+          $data['content'] = $this->view->generate('framework/system',$data);
           echo $this->view->generate('templateView',$data);
        }
 
        if (isset($_POST['userLogs'])) {
             $data['userLogs'] = SkdModel::userLogs();
-            $data['content'] = $this->view->generate('skd/skdView', $data);
+            $data['content'] = $this->view->generate('framework/system', $data);
             echo $this->view->generate('templateView', $data);
         }   
     }
@@ -74,8 +75,6 @@ Class SkdController extends Controller
         ];
         echo $this->view->cTable($title,$columns,$data);
     }
-        
-        
         
     public function actionGetstudentslogs()
     {
@@ -179,8 +178,6 @@ Class SkdController extends Controller
            
         }
         
-        
-        
         public function actionGetdivisionlist()
         {
             $data = SkdModel::getDivisionList();
@@ -188,7 +185,6 @@ Class SkdController extends Controller
             $data = '<option data-id="">Все подразделения</option>'."\n".$data;
             echo $data;
         }
-        
         
         public function actionGetstafflogs()
         {
@@ -330,7 +326,6 @@ Class SkdController extends Controller
             SkdModel::getDump($_POST["who"],$_POST["where"]);
         }
         
-        
         public function actionWritecomment()
         {
             if (isset($_POST['id'])){
@@ -348,5 +343,4 @@ Class SkdController extends Controller
             }
         }
 
-        
 }

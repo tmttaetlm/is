@@ -22,7 +22,57 @@ class FasController extends Controller
     
     public function actionIndex()
     {
-        $this->model->index();
+        //$this->model->index();
+
+        $updateInfo = '<p class="fasUpdateInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: '.date('d.m.Y H:i',$this->model->getModificationDate())."</p>\n<br>";
+        $data['lastUpdate'] = date('d.m.Y H:i',$this->model->getModificationDate());
+        $data['inventoryStartedAt'] = date('d.m.Y H:i',$this->model->getStartedDate());
+        $data['tabItems']['monitoring']='Мои ОС';
+        $userPriveleges = $this->model->user->getPriveleges();
+        if (in_array("fasCanSeach", $userPriveleges)) {
+            $data['tabItems']['seach'] = 'Поиск в БД';
+        }
+        //Inventory
+        if ($this->model->getInventoryStatus()) {
+            $data['tabItems']['inventory'] = 'Инвентаризация';
+            $data['inventoryData'] = $this->model->getInventoryData();
+            $data['inventoryFinished'] = $this->model->checkInventoryFinished("");
+            $data['tabData']['inventory'] =  $this->view->generate('fas/inventory',$data);
+        }
+
+        //InventoryControl
+        if (in_array("fasInvControl", $userPriveleges)) {
+            $data['tabItems']['inventoryControl'] = 'Инв. контроль';
+            $data['canInvStart'] = $this->model->user->hasPrivilege('fasInvStart');
+            $data['tabData']['inventoryControl'] =  $this->view->generate('fas/inventoryControl',$data);
+        }
+
+
+        //set the title of the table
+        $title = 'ОC закрепленные за сотрудником: <u>'.$this->model->user->getFullName().'</u>'; 
+        //get user fixed assets from the Data Base 
+        $result = $this->model->getFixedAssets($this->model->user->getIin());
+        $result = $this->model->addRowNumbers($result);
+        $columns = [
+            'num'=>'№',
+            'invNumber'=>'Инвентарный номер',
+            'description'=>'Описание',
+            'location'=>'Местонахождение',
+            'dateFix'=>'Дата закрепления',
+            'sn'=>'Серийный номер',
+            'comment'=>'Комментарий',
+            ];
+        
+        $data['tabData']['monitoring'] = $updateInfo.$this->view->cTable($title,$columns, $result,'fasResultTable');
+        
+        $data['tabData']['seach'] = $this->view->generate('fas/seach',$data);
+        $data['content'] = $this->view->generate('framework/tabs',$data);
+        $data['systemTitle'] = 'Учет основных средств';
+        $data['content'] = $this->view->generate('framework/system',$data);
+        $data['user'] = $this->model->user->getFullName();
+        $data['admin'] = $this->model->user->checkAdmin();
+        
+        echo $this->view->generate('templateView',$data);
     }
     
     public function actionSeach()
