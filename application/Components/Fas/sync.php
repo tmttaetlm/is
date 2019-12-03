@@ -90,6 +90,8 @@ class FasSync {
             $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
             //locationCode
             $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue();
+            //accounts
+            $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
 
         }
         
@@ -133,7 +135,7 @@ class FasSync {
 
     	$placeHolders = mb_substr($placeHolders, 0, -1);
         //make query
-        $query = "INSERT INTO fixedAsset(invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode) VALUES ".$placeHolders;
+        $query = "INSERT INTO fixedAsset(invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode,account) VALUES ".$placeHolders;
         $this->db->InsertDataByQ($query, $data);
     }
     
