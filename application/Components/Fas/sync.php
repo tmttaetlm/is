@@ -90,7 +90,7 @@ class FasSync {
             $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
             //locationCode
             $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue();
-            //accounts
+            //account
             $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
 
         }
@@ -109,7 +109,7 @@ class FasSync {
     
     private function multiInsert($data)
     {
-        $numRows = count($data)/12; 
+        $numRows = count($data)/13; 
 
         while ($numRows > 5000)
         {
@@ -130,7 +130,7 @@ class FasSync {
     	$placeHolders='';
     	for ($i=1; $i <= $numRows; $i++)
 	    {
-            $placeHolders.= '(?,?,?,?,?,?,?,?,?,?,?,?),';
+            $placeHolders .= '(?,?,?,?,?,?,?,?,?,?,?,?,?),';
     	}
 
     	$placeHolders = mb_substr($placeHolders, 0, -1);
