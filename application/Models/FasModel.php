@@ -952,7 +952,7 @@ class FasModel extends Model
             `fixedAsset`.`sn`,
             `fixedAsset`.`registrationDate`
         FROM `isdb`.`fixedAsset`
-        WHERE `isdb`.`fixedAsset`.`account` != 2410 AND `isdb`.`fixedAsset`.`account` != 2419;";
+        WHERE `isdb`.`fixedAsset`.`account` <> 2410 AND `isdb`.`fixedAsset`.`account` <> 2419;";
         $db->IUDQuery($query);
         
         $query = "INSERT INTO `isdb`.`finishedInventory`
