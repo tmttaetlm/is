@@ -427,7 +427,7 @@ ui-tabs {
     color: #ffffff;
     cursor: pointer;
     padding: 5px 30px;
-    margin: 0 5px 0 5px;
+    margin-left: 5px;
     font-size: 16px;
     border: none;
     border-radius: 4px;
@@ -500,9 +500,9 @@ div .controls{
     height:35px;
 }
 
-.sendQuery{
+.sendQuery {
     display: block;
-    margin: 0 auto;
+    margin: 0 auto !important;
 }
 
 #selectDivision{
