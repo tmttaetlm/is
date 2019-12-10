@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * This file for syncronize data with 1C
  */
 define('ROOT', '/var/www/is');
@@ -14,7 +14,8 @@ require_once ROOT.'/application/Components/Db.php';
 class FasSync {
     private $db;
 
-    public function sync() {
+    public function sync()
+    {
         $this->db = Components\Db::getDb();
         echo "PHP скрипт запущен, открываем файл выгрузки из 1С\n";
         $spreadsheet = $this->openFile(ROOT.'/application/mnt/KST_FM_1C_FA.xlsx');
@@ -22,18 +23,17 @@ class FasSync {
         $data = $this->loadData($spreadsheet);
         $this->clearDb();
         $this->multiInsert($data);
-        
     }
-    
-    private function clearDb() {
+
+    private function clearDb()
+    {
         $query = "
         TRUNCATE TABLE `isdb`.`fixedAsset`;";
         $this->db->IUDquery($query);
     }
 
-
-    private function openFile($file) 
-    { 
+    private function openFile($file)
+    {
         //Cheks if the 1C file exists and returns spreadsheet
         if (file_exists($file)) {
             $this->saveFileModificationTime($file);
@@ -41,16 +41,14 @@ class FasSync {
             $reader->setReadDataOnly(FALSE);
             $spreadsheet = $reader->load($file);
             return $spreadsheet;
-        }
-        
-        else {
+        } else {
             die('Can not open the 1C file');
         }
     }
 
     private function saveFileModificationTime($file)
     {
-        date_default_timezone_set("Asia/Almaty"); 
+        date_default_timezone_set("Asia/Almaty");
         $modTime = date ("Y-m-d H:i:s", filemtime($file));
         $query = "UPDATE info
         SET `dateTimeValue` = :modTime
@@ -58,13 +56,13 @@ class FasSync {
         $this->db->IUDquery($query,['modTime'=>$modTime]);
     }
 
-    
-    private function loadData($spreadsheet) {
+    private function loadData($spreadsheet)
+    {
         $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestRow();
-        
+
         //Reads the data from spreadsheet
-        for ($row = 1; $row <= $highestRow; $row++) 
+        for ($row = 1; $row <= $highestRow; $row++)
         {
             //invNumber
             $data[] = $worksheet->getCellByColumnAndRow(1, $row)->getFormattedValue();
@@ -90,33 +88,33 @@ class FasSync {
             $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
             //locationCode
             $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue();
-            //account
+            //accounts
             $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
-
         }
-        
+
         //Deletes all '#NULL!' values
         for ($i=0; $i < count($data); $i++)
         {
-            if ($data[$i] == '#NULL!') 
+            if ($data[$i] == '#NULL!')
             {
                 $data[$i] = NULL;
             }
         }
-        
+
         return $data;
+
     }
-    
+
     private function multiInsert($data)
     {
-        $numRows = count($data)/13; 
+        $numRows = count($data)/13;
 
         while ($numRows > 5000)
         {
-            $d = array_splice($data,0,5000*12);
+            $d = array_splice($data,0,5000*13);
             $this->writeData(5000,$d);
             $numRows -=5000;
-        }  
+        }
 
         if ($numRows > 0)
         {
@@ -124,21 +122,21 @@ class FasSync {
         }
 
     }
-    
+
     private function writeData($numRows,$data)
     {
     	$placeHolders='';
     	for ($i=1; $i <= $numRows; $i++)
 	    {
-            $placeHolders .= '(?,?,?,?,?,?,?,?,?,?,?,?,?),';
+            $placeHolders.= '(?,?,?,?,?,?,?,?,?,?,?,?,?),';
     	}
 
     	$placeHolders = mb_substr($placeHolders, 0, -1);
         //make query
+	//print_r($data);
         $query = "INSERT INTO fixedAsset(invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode,account) VALUES ".$placeHolders;
         $this->db->InsertDataByQ($query, $data);
     }
-    
 
 }
 
