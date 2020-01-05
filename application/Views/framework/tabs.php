@@ -7,8 +7,6 @@
     <?php foreach($data['tabData'] as $key=>$value):?>
             <article class="<?php echo $key;?>">
                 <?php echo $value;?>
-                <div class="results">
-                </div>    
             </article>
     <?php endforeach;?>
     </div>
