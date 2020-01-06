@@ -42,27 +42,27 @@ class Ad
     public static function getDataFromAD($login,$password)
     {
         $con = Ad::getInstance();	
-	$bind = @ldap_bind($con->ldap_con,$login,$password);
-	if ($bind) // Если удалось подключиться - выполняем поиск пользователя с данным логином и паролем
-	{
-	    $result = ldap_search($con->ldap_con,$con->ldap_base,$con->ldap_filter."=".$login);
-	    // Получение данных пользователя из АД
-	    $result_ent = ldap_get_entries($con->ldap_con,$result) or die ("Error in search in Active Directory");
-            
-            // Проверяем наличие и заполненность необходимых полей и заполняем массив
-            if (isset($result_ent[0]['nisedukziin'][0],$result_ent[0]['userprincipalname'][0],$result_ent[0]['givenname'][0],$result_ent[0]['sn'][0]))
-            {
-                $data['iin']=$result_ent[0]['nisedukziin'][0];
-                $data['login']=$result_ent[0]['userprincipalname'][0];
-                $data['firstName']=$result_ent[0]['givenname'][0];
-                $data['lastName']=$result_ent[0]['sn'][0];
-                return $data;
-            }
-            else 
-            {
-                return false;
-            }
-	}
+        $bind = @ldap_bind($con->ldap_con,$login,$password);
+        if ($bind) // Если удалось подключиться - выполняем поиск пользователя с данным логином и паролем
+        {
+            $result = ldap_search($con->ldap_con,$con->ldap_base,$con->ldap_filter."=".$login);
+            // Получение данных пользователя из АД
+            $result_ent = ldap_get_entries($con->ldap_con,$result) or die ("Error in search in Active Directory");
+                
+                // Проверяем наличие и заполненность необходимых полей и заполняем массив
+                if (isset($result_ent[0]['nisedukziin'][0],$result_ent[0]['userprincipalname'][0],$result_ent[0]['givenname'][0],$result_ent[0]['sn'][0]))
+                {
+                    $data['iin']=$result_ent[0]['nisedukziin'][0];
+                    $data['login']=$result_ent[0]['userprincipalname'][0];
+                    $data['firstName']=$result_ent[0]['givenname'][0];
+                    $data['lastName']=$result_ent[0]['sn'][0];
+                    return $data;
+                }
+                else 
+                {
+                    return false;
+                }
+        }
 
         else
         {
