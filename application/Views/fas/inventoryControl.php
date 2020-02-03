@@ -42,8 +42,8 @@
     <br>
 </div>
 <div class="userFasControl">
-    <button name="inventoryFinishForPerson" id="inventoryFinishForPerson" class="hide" <?php if(!$data['inventoryFinished']){ echo 'disabled';}?>>Завершение инвентаризации</button>
-    <button name="cancelFas" id="cancelFas" class="hide" <?php if(!$data['inventoryFinished']){ echo 'disabled';}?>>Отмена завершения инвентаризации</button>
+    <button name="inventoryFinishForPerson" id="inventoryFinishForPerson" class="hide">Завершение инвентаризации</button>
+    <button name="cancelFas" id="cancelFas" class="hide">Отмена завершения инвентаризации</button>
 </div>
 <div class="results" id="invResults">
 </div>
