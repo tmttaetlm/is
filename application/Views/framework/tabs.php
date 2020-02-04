@@ -8,7 +8,7 @@
             <article class="<?php echo $key;?>">
                 <?php echo $value;?>
                 <div class="results">
-                </div>    
+                </div>
             </article>
     <?php endforeach;?>
     </div>
