@@ -1,5 +1,5 @@
 <p class="fasUpdateInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: <?php echo $data['lastUpdate'];?></p>
-<div class="autocomplete">
+<div class="autocomplete" data-position-left="350px">
     <label for="fasSeachType">Поиск по </label>
     <select id="fasSeachType" name="fasSeachType">
         <option data-type="invNumber">инвентарному номеру</option>

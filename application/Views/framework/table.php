@@ -6,7 +6,7 @@
     <?php endforeach;?>
     </tr>
     <?php foreach ($data['tableData'] as $row):?>
-        <tr>
+        <tr data-row-id="<?php echo $row['id']?>">
             <?php foreach ($data['columns'] as $column=>$header):?>
                 <td><?php echo $row[$column]; ?></td>
             <?php endforeach; ?>

@@ -29,7 +29,7 @@
 <button id="transferAssets">Передать</button>
 
 
-<div class="autocomplete">
+<div class="autocomplete" data-position-left="350px">
     <label for="invSeachType">Поиск по </label>
     <select id="invSeachType" name="invSeachType">
         <option data-type="invNumber">инвентарному номеру</option>
@@ -41,15 +41,15 @@
     <button name="invSeach">Найти</button>
     <br>
 </div>
-<div class="userFasControl">
-    <button name="inventoryFinishForPerson" id="inventoryFinishForPerson" class="hide">Завершение инвентаризации</button>
-    <button name="cancelFas" id="cancelFas" class="hide">Отмена завершения инвентаризации</button>
+<div id="userFasControl" class="userFasControl hide">
+    <button name="inventoryFinishForPerson" id="inventoryFinishForPerson">Завершение инвентаризации</button>
+    <button name="cancelFas" id="cancelFas">Отмена завершения инвентаризации</button>
 </div>
 <div class="results" id="invResults">
 </div>
 <div id="dialogWindowBackground">
     <div class="dialogWindow">
-        <div class="autocomplete">
+        <div class="autocomplete" data-position-left="20px" data-position-top="70%">
                 <span id="closeDialogWindow" class="close">X</span>
                 <h3>Редактирование ОС</h3>
                 <input type="text" id="invChangeOwner" name="invChangeOwner" placeholder="Новый ответственный...">

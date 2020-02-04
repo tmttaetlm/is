@@ -266,5 +266,9 @@ class FasController extends Controller
     
     public function actionStopInventory(){
         echo $this->model->stopInventory();
-    }   
+    }
+    
+    public function actionGetInventoryStatus(){
+        echo $this->model->getInventoryStatus();
+    }
 }
