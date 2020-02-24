@@ -29,6 +29,6 @@
         <footer>
         <p class="copyright">Copyright © 2019 NIS Kostanay</p>
         </footer>
-        <script type="module" src="/public/js/script_ver.3.3.1.js"></script>
+        <script type="module" src="/public/js/script_ver.3.3.25.js"></script>
     </body>
 </html>
