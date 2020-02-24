@@ -133,7 +133,7 @@ class FasSync {
 
     	$placeHolders = mb_substr($placeHolders, 0, -1);
         //make query
-	
+	//print_r($data);
         $query = "INSERT INTO fixedAsset(invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode,account) VALUES ".$placeHolders;
         $this->db->InsertDataByQ($query, $data);
     }
