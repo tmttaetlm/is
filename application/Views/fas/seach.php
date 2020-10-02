@@ -3,6 +3,7 @@
     <label for="fasSeachType">Поиск по </label>
     <select id="fasSeachType" name="fasSeachType">
         <option data-type="invNumber">инвентарному номеру</option>
+        <option data-type="serialNumber">серийному номеру</option>
         <option data-type="person">ФИО</option>
         <option data-type="location">местонахождению</option>
         <option data-type="fixedAsset">основному средству</option>

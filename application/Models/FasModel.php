@@ -61,6 +61,11 @@ class FasModel extends Model
         $db = Db::getDb();
 	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE invNumber = :invNumber",['invNumber'=>$invNumber]);
     }
+
+    public function seachBySerialNumber($serialNumber) {
+        $db = Db::getDb();
+	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE sn = :serialNumber",['serialNumber'=>$serialNumber]);
+    }
     
     public function seachByBarcode($barcode) {
         $db = Db::getDb();

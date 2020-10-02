@@ -24,7 +24,7 @@ class FasController extends Controller
     {
         //$this->model->index();
 
-        $updateInfo = '<p class="fasUpdateInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: '.date('d.m.Y H:i',$this->model->getModificationDate())."</p>\n<br>";
+        $updateInfo = '<p class="commonInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: '.date('d.m.Y H:i',$this->model->getModificationDate())."</p>\n<br>";
         $data['lastUpdate'] = date('d.m.Y H:i',$this->model->getModificationDate());
         $data['inventoryStartedAt'] = date('d.m.Y H:i',$this->model->getStartedDate());
         $data['tabItems']['monitoring']='Мои ОС';
@@ -91,6 +91,12 @@ class FasController extends Controller
     
         if (isset($_POST['invNumber'])){
             $data = $this->model->seachByInvNumber($_POST['invNumber']);
+            $data  = $this->model->addRowNumbers($data );
+            echo $this->view->cTable('Результаты поиска:',$columns,$data);
+        }
+
+        if (isset($_POST['serialNumber'])){
+            $data = $this->model->seachBySerialNumber($_POST['serialNumber']);
             $data  = $this->model->addRowNumbers($data );
             echo $this->view->cTable('Результаты поиска:',$columns,$data);
         }
@@ -214,6 +220,11 @@ class FasController extends Controller
         }
         if (isset($_POST['invNumber'])){
             $data = $this->model->invSeachByInvNumber($_POST['invNumber']);
+            $data  = $this->model->addRowNumbers($data );
+            echo $this->view->cTable('Результаты поиска:',$columns,$data,'users');
+        }
+        if (isset($_POST['serialNumber'])){
+            $data = $this->model->invSeachBySerialNumber($_POST['serialNumber']);
             $data  = $this->model->addRowNumbers($data );
             echo $this->view->cTable('Результаты поиска:',$columns,$data,'users');
         }
