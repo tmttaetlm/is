@@ -20,6 +20,7 @@ Class SkdController extends Controller
         
     public function actionIndex()
     {
+        $data['radioName']='tab';
         $data['user'] = $this->model->user->getFullName();
         $data['admin'] = $this->model->user->checkAdmin();
         $data['tabItems'] = $this->model->getTabItems();

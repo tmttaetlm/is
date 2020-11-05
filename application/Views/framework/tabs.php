@@ -1,6 +1,6 @@
 <div class="ui-tabs">
     <?php foreach($data['tabItems'] as $key=>$value):?>
-    <input type="radio" name="tab" id="<?php echo $key;?>">
+    <input type="radio" name="<?php echo $data['radioName'];?>" id="<?php echo $key;?>">
         <label for="<?php echo $key;?>"><?php echo $value;?></label>	
     <?php endforeach;?>
     <div class="content">

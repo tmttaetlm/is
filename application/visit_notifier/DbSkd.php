@@ -27,7 +27,7 @@ class DbSkd {
         {
             die("Error connecting to SQL Server ".$e);
         }
-        //print_r('__construct<br>');
+        
     }
 
     //Реализация Singltone для получения одного соединения 

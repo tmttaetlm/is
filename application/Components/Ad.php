@@ -13,6 +13,7 @@ class Ad
     private $ldap_host;
     private $ldap_base;
     private $ldap_filter;
+    private $ldap_filter2;
     private $ldap_con;
 
     function __construct()
@@ -20,7 +21,8 @@ class Ad
 	//Настройки для подключения к серверу Active Directory
 	$this->ldap_host = Config::getParams('AD','host');
 	$this->ldap_base = Config::getParams('AD','base');
-	$this->ldap_filter = Config::getParams('AD','filter');
+    $this->ldap_filter = Config::getParams('AD','filter');
+    $this->ldap_filter2 = Config::getParams('AD','filter2');
         
 	//Подключаемся к серверу Active Directory
 	$this->ldap_con = ldap_connect($this->ldap_host) or die("Нет соединения с сервером Active Directory");
@@ -64,6 +66,38 @@ class Ad
                 }
         }
 
+        else
+        {
+            return false;
+        } 
+    }
+
+    //MTdev
+    //Функция возвращает массив пользователей из AD либо false
+    public static function getStaffListFromAD($role)
+    {
+        $con = Ad::getInstance();
+        $bind = ldap_bind($con->ldap_con,"share_access@kst.nis.edu.kz","Pass@KST2");
+        if ($bind) // Если удалось подключиться - выполняем поиск пользователей с данной ролью
+        {
+            $result = ldap_search($con->ldap_con,$con->ldap_base,$con->ldap_filter2."=".$role);
+            // Получение данных из АД
+            $result_ent = ldap_get_entries($con->ldap_con,$result) or die ("Error in search in Active Directory");
+            
+            // Проверяем наличие и заполненность необходимых полей и заполняем массив
+            $data = [];
+            foreach ($result_ent as $value) {
+                if (isset($value['nisedukziin'][0],$value['givenname'][0],$value['sn'][0]))
+                {
+                    $staff['iin']=$value['nisedukziin'][0];
+                    $staff['FIO']=$value['sn'][0]." ".$value['givenname'][0];
+                    $staff['mail']=$value['mail'][0];
+                    array_push($data, $staff);
+                }
+            }
+            
+            return $data;
+        }
         else
         {
             return false;
