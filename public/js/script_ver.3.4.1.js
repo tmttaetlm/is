@@ -462,7 +462,7 @@ function changeHandler(obj)
         param);
     }
     
-    if (obj.name == "tab1"){
+    if (obj.name == "tab"){
         if (obj.id == 'generalControl'){
             getPeopleCount();
         }
