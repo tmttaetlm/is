@@ -27,6 +27,7 @@ class FasController extends Controller
         $updateInfo = '<p class="commonInfo">Согласно сведениям из ИС 1С:Бухгалтерия. Последняя синхронизация: '.date('d.m.Y H:i',$this->model->getModificationDate())."</p>\n<br>";
         $data['lastUpdate'] = date('d.m.Y H:i',$this->model->getModificationDate());
         $data['inventoryStartedAt'] = date('d.m.Y H:i',$this->model->getStartedDate());
+        $data['radioName']='tab';
         $data['tabItems']['monitoring']='Мои ОС';
         $userPriveleges = $this->model->user->getPriveleges();
         if (in_array("fasCanSeach", $userPriveleges)) {
