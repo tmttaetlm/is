@@ -4,9 +4,9 @@
         <input type="text" id="personForReport" name="personForReport" placeholder="Поиск..." />
         <br>
         <input type="radio" checked="checked" id="WhoVisited" name="visitType" value="WhoVisited"/>
-        <label for="WhoVisited">Как наблюдатель</label>
+        <label for="WhoVisited">Наблюдатель</label>
         <input type="radio" id="WhoWasVisited" name="visitType" value="WhoWasVisited"/>
-        <label for="WhoWasVisited">Как посещаемый</label>
+        <label for="WhoWasVisited">Учитель</label>
         <br>
         <label for="details" id="reportDetailsLabel">Подробно</label>
         <input type="checkbox" id="reportDetails" style="margin-top: 20px; margin-right: 20px;">

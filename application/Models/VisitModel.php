@@ -44,7 +44,7 @@ class VisitModel extends Model
     }
 
     public static function getTexts($section,$property) {
-        $ini_params = parse_ini_file('/home/developer/Code/PHP/is/public/texts/'.$_COOKIE["lang"].'-lang.ini',true);
+        $ini_params = parse_ini_file(ROOT.'/public/texts/'.$_COOKIE["lang"].'-lang.ini',true);
         return $ini_params[$section][$property];
     }
 
@@ -378,21 +378,29 @@ class VisitModel extends Model
         $query = "SELECT 'Всего' status, count(id) number
         FROM isdb.evaluationTeachers
         WHERE visitDate >= :start4 AND visitDate <= :end4
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL
         UNION
         SELECT 'Запланировано', count(id)
         FROM isdb.evaluationTeachers
         WHERE visitDate >= now()
           AND visitDate >= :start2 AND visitDate <= :end2
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL
         UNION
         SELECT 'Подтверждено', count(id)
         FROM isdb.evaluationTeachers
         WHERE LEFT(confirmations,1) = '1'
           AND visitDate >= :start1 AND visitDate <= :end1
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL
         UNION
         SELECT 'В процессе', count(id)
         FROM isdb.evaluationTeachers
         WHERE visitDate <= now() AND LEFT(confirmations,1) = '0'
-          AND visitDate >= :start3 AND visitDate <= :end3;
+          AND visitDate >= :start3 AND visitDate <= :end3
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL;
         ";
         $db = Db::getDb();
         $data = $db->selectQuery($query,$localParams);
@@ -949,14 +957,24 @@ class VisitModel extends Model
             $spreadsheet->getActiveSheet()->getRowDimension($i)->setRowHeight(-1);
         }
         for ($n = 0; $n <= 15; $n++) { $common[$n] = 0; };
-        $spreadsheet->getActiveSheet()->getRowDimension(2)->setRowHeight(33);
+        $spreadsheet->getActiveSheet()->getRowDimension(2)->setRowHeight(45);
         $i = 66; //"B" letter's number in ASCII table
         foreach ($actualLessons as $lesson) {
-            $spreadsheet->getActiveSheet()->getColumnDimension(chr($i))->setWidth(11);
-            $spreadsheet->getActiveSheet()->getColumnDimension(chr($i+1))->setWidth(11);
-            $spreadsheet->getActiveSheet()->mergeCells(chr($i).'2:'.chr($i+1).'2');
-            $spreadsheet->getActiveSheet()->setCellValue(chr($i).'2', $lesson['lessonName']);
-            $spreadsheet->getActiveSheet()->getStyle(chr($i).'2:'.chr($i+1).'2')->applyFromArray($styleTopHeaders);
+            if ($i<90) {
+                $col1 = chr($i);
+                $col2 = chr($i+1);
+            } else if ($i==90) {
+                $col1 = chr($i);
+                $col2 = 'AA';
+            } else {
+                $col1 = 'A'.chr($i-26);
+                $col2 = 'A'.chr($i-25);;
+            }
+            $spreadsheet->getActiveSheet()->getColumnDimension($col1)->setWidth(11);
+            $spreadsheet->getActiveSheet()->getColumnDimension($col2)->setWidth(11);
+            $spreadsheet->getActiveSheet()->mergeCells($col1.'2:'.$col2.'2');
+            $spreadsheet->getActiveSheet()->setCellValue($col1.'2', $lesson['lessonName']);
+            $spreadsheet->getActiveSheet()->getStyle($col1.'2:'.$col2.'2')->applyFromArray($styleTopHeaders);
             for ($k = 0; $k <= 15; $k++) { $averages[$k] = 0; };
             for ($j = 0; $j <= 15; $j++) {
                 $c = 0;
@@ -967,32 +985,49 @@ class VisitModel extends Model
                     }
                 }
                 if ($c != 0) { 
-                    $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), number_format($averages[$j]/$c, 1,',',''));
-                    $spreadsheet->getActiveSheet()->setCellValue(chr($i+1).($j+3), number_format($averages[$j]/($c*5)*100, 2,',','').'%');
+                    $spreadsheet->getActiveSheet()->setCellValue($col1.($j+3), number_format($averages[$j]/$c, 1,',',''));
+                    $spreadsheet->getActiveSheet()->setCellValue($col2.($j+3), number_format($averages[$j]/($c*5)*100, 2,',','').'%');
                     $common[$j] += (int)number_format($averages[$j]/$c, 1,',','');
                 } else {
-                    $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), number_format($c, 1,',',''));
-                    $spreadsheet->getActiveSheet()->setCellValue(chr($i+1).($j+3), $c.'%');
+                    $spreadsheet->getActiveSheet()->setCellValue($col1.($j+3), number_format($c, 1,',',''));
+                    $spreadsheet->getActiveSheet()->setCellValue($col2.($j+3), $c.'%');
                     $common[$j] += (int)number_format($c, 1,',','');
                 }
             }
             $i=$i+2;
         }
-        $spreadsheet->getActiveSheet()->mergeCells(chr($i).'2:'.chr($i+1).'2');
-        $spreadsheet->getActiveSheet()->setCellValue(chr($i).'2', 'Средний балл');
-        $spreadsheet->getActiveSheet()->getStyle(chr($i).'2:'.chr($i+1).'2')->applyFromArray($styleTopHeaders);
-        $spreadsheet->getActiveSheet()->getColumnDimension(chr($i))->setWidth(11);
-        $spreadsheet->getActiveSheet()->getColumnDimension(chr($i+1))->setWidth(11);
+        if ($i<90) {
+            $col1 = chr($i);
+            $col2 = chr($i+1);
+        } else if ($i==90) {
+            $col1 = chr($i);
+            $col2 = 'AA';
+        } else {
+            $col1 = 'A'.chr($i-26);
+            $col2 = 'A'.chr($i-25);
+        }
+        $spreadsheet->getActiveSheet()->mergeCells($col1.'2:'.$col2.'2');
+        $spreadsheet->getActiveSheet()->setCellValue($col1.'2', 'Средний балл');
+        $spreadsheet->getActiveSheet()->getStyle($col1.'2:'.$col2.'2')->applyFromArray($styleTopHeaders);
+        $spreadsheet->getActiveSheet()->getColumnDimension($col1)->setWidth(11);
+        $spreadsheet->getActiveSheet()->getColumnDimension($col2)->setWidth(11);
         for ($j = 0; $j <= 15; $j++) {
-            $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), number_format($common[$j]/$colCount, 2,',',''));
-            $spreadsheet->getActiveSheet()->setCellValue(chr($i+1).($j+3), number_format($common[$j]/($colCount*5)*100, 2,',','').'%');
+            $spreadsheet->getActiveSheet()->setCellValue($col1.($j+3), number_format($common[$j]/$colCount, 2,',',''));
+            $spreadsheet->getActiveSheet()->setCellValue($col2.($j+3), number_format($common[$j]/($colCount*5)*100, 2,',','').'%');
         }
 
-        $spreadsheet->getActiveSheet()->getStyle('A2:'.chr($colCount+71).'18')->getAlignment()->setWrapText(true);
+        $allCol = $colCount*2+67;
+        if ($allCol<=90) {
+            $lastCol = chr($allCol);
+        } else {
+            $lastCol = 'A'.chr(($allCol-90)+64);
+        }
+        
+        $spreadsheet->getActiveSheet()->getStyle('A2:'.$lastCol.'18')->getAlignment()->setWrapText(true);
 
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray(['font'=>['bold'=>true,'size'=>14]]);
         $spreadsheet->getActiveSheet()->getStyle('A3:A18')->applyFromArray($styleLeftHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('B3:'.chr($colCount+71).'18')->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->getStyle('B3:'.$lastCol.'18')->applyFromArray($styleData);
 
         // Rename worksheet
         $spreadsheet->getActiveSheet()->setTitle('Свод по критериям');

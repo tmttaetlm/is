@@ -256,7 +256,7 @@ class VisitController extends Controller
             }
             $columns = [
                 'num'=>'№',
-                'who'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
+                'who'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
                 'v_cnt'=>'Всего',
                 'p_cnt'=>'Запланировано',
                 'c_cnt'=>'Подтверждено',
@@ -274,7 +274,7 @@ class VisitController extends Controller
                 $columns = [
                     'num'=>'№',
                     'visitDate'=>'Дата посещения',
-                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
+                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
                     'lessonNum'=>'Урок',
                     'status'=>'Статус'
                 ];
@@ -289,7 +289,7 @@ class VisitController extends Controller
                 $columns = [
                     'num'=>'№',
                     'visitDate'=>'Дата посещения',
-                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
+                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
                     'lessonNum'=>'Урок',
                     'status'=>'Статус'
                 ];
@@ -307,7 +307,7 @@ class VisitController extends Controller
             'num'=>'№',
             'visitDate'=>'Дата посещения',
             'whoVisited'=>'Наблюдатель',
-            'whoWasVisited'=>'Посещаемый',
+            'whoWasVisited'=>'Учитель',
             'lessonNum'=>'Урок',
             'status'=>'Статус'
         ];
