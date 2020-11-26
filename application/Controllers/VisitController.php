@@ -21,7 +21,7 @@ class VisitController extends Controller
 
     public function actionIndex()
     {
-        $res = $this->model->checkUser($this->model->user->getFullName());
+        $res = $this->model->checkUser($this->model->user->getIin());
         $userPriveleges = $this->model->user->getPriveleges();
         if (!$res /*|| $this->model->user->getIin() == '920812350558'*/) {
             $data['error'] = "У вас нет доступа к этому разделу. Не установлена соответствующая преподавателю роль или Вы не являетесь преподавателем. Обратитесь к администратору системы.";
@@ -57,7 +57,7 @@ class VisitController extends Controller
 
     public function getStandardTab($userPriveleges)
     {
-        $data['radioName']='tab1';
+        $data['radioName']='tab';
         $data['tabItems']['myVisits']='План посещений';
         $data['tabItems']['myEvaluations']='Мои оценки';
         if (in_array("visitReportAccess", $userPriveleges)) {
@@ -143,7 +143,7 @@ class VisitController extends Controller
     {
         if ($_POST['whoWasVisited'] == $this->model->user->getFullName()) { echo 'me'; }
         else {
-            $res = $this->model->checkUser($_POST['whoWasVisited']);
+            $res = $this->model->checkUser($this->model->getTeacherIin($_POST['whoWasVisited']));
             if (!$res) { echo ''; }
             else {
                 $this->model->addVisit($_POST);
@@ -236,7 +236,8 @@ class VisitController extends Controller
     public function actionGetNumberOfVisits()
     {
         $data = $this->model->getNumberOfVisits($_POST);
-        $title = "Количество посещении за период с ".date('d.m.Y', strtotime($_POST['start']))." по ".date('d.m.Y', strtotime($_POST['end']));
+        //$title = "Количество посещении за период с ".date('d.m.Y', strtotime($_POST['start']))." по ".date('d.m.Y', strtotime($_POST['end']));
+        $title = "";
         $columns = [
             'status'=>'Статус',
             'number'=>'Количество'
@@ -246,21 +247,71 @@ class VisitController extends Controller
 
     public function actionGetPersonalVisits()
     {
-        $data = $this->model->getPersonalVisits($_POST);
-        if ($_POST['visitType'] == 'WhoVisited') {
-            $title = "Количество посещении преподавателя {$_POST['teacher']} как наблюдателя";
+        if ($_POST['details'] == '0') {
+            $data = $this->model->getPersonalVisits($_POST);
+            if ($_POST['visitType'] == 'WhoVisited') {
+                $title = "Количество посещении преподавателя {$_POST['teacher']} как наблюдателя";
+            } else {
+                $title = "Количество посещении уроков преподавателя {$_POST['teacher']}";
+            }
+            $columns = [
+                'num'=>'№',
+                'who'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
+                'v_cnt'=>'Всего',
+                'p_cnt'=>'Запланировано',
+                'c_cnt'=>'Подтверждено',
+                'o_cnt'=>'В процессе'
+            ];
+            echo $this->view->cTable($title,$columns,$data,'numberOfVisits');
         } else {
-            $title = "Количество посещении уроков преподавателя {$_POST['teacher']}";
+            if ($_POST['detailsDate'] == '0') {
+                $data = $this->model->getAllVisitsInPeriod($_POST);
+                if ($_POST['visitType'] == 'WhoVisited') {
+                    $title = "Посещения преподавателя {$_POST['teacher']} как наблюдателя";
+                } else {
+                    $title = "Посещения уроков преподавателя {$_POST['teacher']}";
+                }
+                $columns = [
+                    'num'=>'№',
+                    'visitDate'=>'Дата посещения',
+                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
+                    'lessonNum'=>'Урок',
+                    'status'=>'Статус'
+                ];
+                echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
+            } else {
+                $data = $this->model->getAllVisitsInDetails($_POST);
+                if ($_POST['visitType'] == 'WhoVisited') {
+                    $title = "Посещения преподавателя {$_POST['teacher']} как наблюдателя за {$_POST['date']}";
+                } else {
+                    $title = "Посещения уроков преподавателя {$_POST['teacher']} за {$_POST['date']}";
+                }
+                $columns = [
+                    'num'=>'№',
+                    'visitDate'=>'Дата посещения',
+                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
+                    'lessonNum'=>'Урок',
+                    'status'=>'Статус'
+                ];
+                echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
+            }
         }
+        
+    }
+
+    public function actionGetAllVisits()
+    {
+        $data = $this->model->getAllVisits($_POST);
+        $title = "Количество посещении за период с {$_POST['visitPeriodStart']} по {$_POST['visitPeriodEnd']}";
         $columns = [
             'num'=>'№',
-            'who'=>$_POST['visitType'] == 'WhoVisited' ? 'Посещаемый' : 'Наблюдатель',
-            'v_cnt'=>'Всего',
-            'p_cnt'=>'Запланировано',
-            'c_cnt'=>'Подтверждено',
-            'o_cnt'=>'В процессе'
+            'visitDate'=>'Дата посещения',
+            'whoVisited'=>'Наблюдатель',
+            'whoWasVisited'=>'Посещаемый',
+            'lessonNum'=>'Урок',
+            'status'=>'Статус'
         ];
-        echo $this->view->cTable($title,$columns,$data,'numberOfVisits');
+        echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
     }
 
     public function actionGetReportsDump()
@@ -290,6 +341,7 @@ class VisitController extends Controller
             'num' =>'№',
             'whoWasVisited' => 'Посещаемый',
             'visitDate' => 'Период',
+            'focus' => 'Фокус оценивания',
             'status'=> 'Статус',
             'result' => 'Результат'
         ];
@@ -304,6 +356,7 @@ class VisitController extends Controller
             'num' =>'№',
             'whoVisited' => 'Наблюдатель',
             'visitDate' => 'Период',
+            'focus' => 'Фокус оценивания',
             'status'=> 'Статус',
             'result' => 'Результат'
         ];
@@ -349,5 +402,10 @@ class VisitController extends Controller
     public function actionGetAttestationResultsDump()
     {
         $this->model->getAttestationResultsDump($_POST);
+    }
+
+    public function actionGetVisitCount()
+    {
+        echo $this->model->getVisitCount($_POST);
     }
 }

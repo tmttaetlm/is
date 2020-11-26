@@ -1,4 +1,4 @@
-<div class="autocomplete" data-position-left="350px">
+<div class="autocomplete" data-position-left="370px" data-position-top="45px" style="margin-bottom: 10px;">
     <label for="visitSelectDay">Дата:</label>
     <input type="date" id="visitSelectDay" />
     <label for="personForVisit">Преподаватель:</label>
@@ -17,4 +17,8 @@
         <option value="10">10</option>
     </select>
     <button name="addVisit">Добавить</button>
+    <br/>
+    <div id="visitInfo" style="text-align: center;" class="hide">
+        <span class="visitInfo hide">К выбранному учителю в выбранную дату есть посещения.</span>
+    </div>
 </div>

@@ -103,6 +103,10 @@ window.onload = function() {
         document.getElementById('visitSelectEndDay').value = end;
     }
 
+    if (document.getElementById('detailsDateField')) {
+        document.getElementById('detailsDateField').value = today; 
+    }
+
     if (document.getElementById('selectDivision')){
         ajax('/skd/getDivisionList', function(data){document.getElementById('selectDivision').innerHTML =  data;});
     }
@@ -600,7 +604,6 @@ function getInputDate(offset){
 //Обработчик кликов на странице
 function clickHandler(obj)
 {
-
     if (obj.id == "userControl") {
         clearInterval(timerID);
         param ='null'
@@ -1187,14 +1190,46 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
         }, params);
     }
 
+    if (obj.id == 'reportDetails' || obj.id == 'reportDetailsLabel') {
+        if (obj.checked) {
+            document.getElementById('detailsDateLabel').classList.remove('hide');
+            document.getElementById('detailsDate').classList.remove('hide');
+        } else {
+            document.getElementById('detailsDateLabel').classList.add('hide');
+            document.getElementById('detailsDate').classList.add('hide');
+        }
+    }
+    if (obj.id == 'detailsDate' || obj.id == 'detailsDateLabel') {
+        if (obj.checked) {
+            document.getElementById('detailsDateField').classList.remove('hide');
+        } else {
+            document.getElementById('detailsDateField').classList.add('hide');
+        }
+    }
+
     if (obj.name == "showVisitReport") {
-        if (document.getElementById('personForReport').value != '') {
-            let params = 'teacher='+document.getElementById('personForReport').value+'&visitType='+getSelectedRadio('visitType');
-            ajax('/visit/getPersonalVisits', function(data){
+        if (obj.id == 'report0') {
+            if (document.getElementById('personForReport').value != '') {
+                let now = new Date();
+                if (now.getMonth() < 9) { var start = (now.getFullYear()-1)+'-09-01'; }
+                else { var start = (now.getFullYear())+'-09-01'; }
+                let params = 'teacher='+document.getElementById('personForReport').value+'&visitType='+getSelectedRadio('visitType')+
+                             '&details='+(document.getElementById('reportDetails').checked ? '1' : '0')+
+                             '&detailsDate='+(document.getElementById('detailsDate').checked ? '1' : '0')+
+                             '&date='+document.getElementById('detailsDateField').value+
+                             '&dateStart='+start+'&dateEnd='+getInputDate();
+                ajax('/visit/getPersonalVisits', function(data){
+                    document.body.querySelector('.Reports').querySelector('.results').innerHTML = data;
+                }, params);
+            } else {
+                alert("Учитель не выбран!");
+            }
+        }
+        if (obj.id == 'report3') {
+            let params = '&visitPeriodStart='+document.getElementById('visitSelectStartDay').value+'&visitPeriodEnd='+document.getElementById('visitSelectEndDay').value;;
+            ajax('/visit/getAllVisits', function(data){
                 document.body.querySelector('.Reports').querySelector('.results').innerHTML = data;
             }, params);
-        } else {
-            alert("Учитель не выбран!");
         }
     }
 
@@ -1308,6 +1343,18 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
                 a_subject_review.innerHTML = data;
             }, param);
         }
+    }
+
+    if (obj.parentNode.id == 'personForVisitautocomplete-list') {
+        let param = 'person='+obj.innerText+'&date='+document.getElementById('visitSelectDay').value; 
+        ajax('/visit/getVisitCount', function(data){
+            let msg = document.getElementById('visitInfo');
+            if (data != '0') {
+                msg.classList.remove('hide');
+            } else {
+                msg.classList.add('hide');
+            }
+        }, param);
     }
 }
 

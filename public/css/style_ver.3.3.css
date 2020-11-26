@@ -410,6 +410,10 @@ input[type=submit]:hover {
     width: 185px;
 }
 .visitAResults tr td:nth-child(4) {
+    width: 125px;
+    text-align: center;
+}
+.visitAResults tr td:nth-child(5) {
     width: 220px;
 }
 
@@ -744,6 +748,7 @@ div .controls{
   font-size: 16px;
 }
 #params{
+    flex: 1.6;
     display: block;
     width: 95%;
     padding: 15px;
@@ -759,6 +764,7 @@ div .controls{
 
 .autocomplete #personForVisit {
     width: 30%;
+    margin-bottom: 5px;
 }
 
 input[type=date] {
@@ -827,9 +833,9 @@ div #msg p {
     align-content: center;
 }
 
-.commonInfo, #numberOfVisits {
+/*.commonInfo, #numberOfVisits {
     width: 95%;
-}
+}*/
 .commonInfo{
     display: block;
     margin: 0 auto;
@@ -1266,4 +1272,23 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
     background: #72c2dfe5;
     text-align: center;
     margin: 0 auto;
+}
+
+.visitInfo {
+    display: block;
+    color: red;
+}
+
+#visitSelectStartDay, #visitSelectEndDay {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin: 0;
+    margin-top: 3px;
+}
+
+.numberOfAllVisits td:nth-child(1),
+.numberOfAllVisits td:nth-child(2),
+.numberOfAllVisits td:nth-child(5),
+.numberOfAllVisits td:nth-child(6) {
+    text-align: center;
 }

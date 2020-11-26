@@ -19,12 +19,12 @@ class VisitModel extends Model
         $this->view = $view;
     }
 
-    public static function checkUser($user)
+    public static function checkUser($iin)
     {
         $ad = Ad::getStaffListFromAD("teacher");
-
-        foreach ($ad as $value) {
-            if (in_array($user,$value)) {
+        
+        foreach ($ad as $value) { 
+            if ($iin == $value['iin']) {
                 return true;
             }
         }
@@ -451,6 +451,102 @@ class VisitModel extends Model
         $db = Db::getDb();
         $data = $db->selectQuery($query,$localParam);
         $data = $this->addRowNumbers($data);
+        return $data;
+    }
+
+    public function getAllVisitsInPeriod($params) {
+        $localParam['iin'] = $this->getTeacherIin($params['teacher']);
+        if ($params['visitType'] == 'WhoVisited') {
+            $query = "SELECT visitDate, whoWasVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
+                      FROM isdb.evaluationTeachers WHERE iinWhoVisited=:iin";
+        } else {
+            $query = "SELECT visitDate, whoVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
+                      FROM isdb.evaluationTeachers WHERE iinWhoWasVisited=:iin";
+        }
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$localParam);
+        $data = $this->addRowNumbers($data);
+        for ($i=0; $i<count($data); $i++) {
+            if (strtotime($data[$i]['visitDate']) <= strtotime(date("d.m.Y"))) {
+                if ($data[$i]['evaluates'] != '' && $data[$i]['evaluates'] != '0000000000000000' && $data[$i]['theme'] != '' && $data[$i]['lessonName'] != '' && $data[$i]['grade'] != '' && $data[$i]['recommendation'] != '') {
+                    if ($data[$i]['confirmations'] == "00") {
+                        $data[$i]['status'] = 'Ожидает подтверждения';
+                    }
+                    else if ($data[$i]['confirmations'] == "11") {
+                        $data[$i]['status'] = 'Подтверждено';
+                    } else {
+                        $data[$i]['status'] = 'На подтверждении';
+                    }
+                } else {
+                    $data[$i]['status'] = 'На оценивании';
+                }
+            } else {
+                $data[$i]['status'] = 'Запланировано';
+            }
+        }
+        return $data;
+    }
+
+    public function getAllVisitsInDetails($params) {
+        $localParam['iin'] = $this->getTeacherIin($params['teacher']);
+        $localParam['visitDate'] = $params['date'];
+        if ($params['visitType'] == 'WhoVisited') {
+            $query = "SELECT visitDate, whoWasVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
+                      FROM isdb.evaluationTeachers WHERE iinWhoVisited=:iin AND visitDate=:visitDate";
+        } else {
+            $query = "SELECT visitDate, whoVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
+                      FROM isdb.evaluationTeachers WHERE iinWhoWasVisited=:iin AND visitDate=:visitDate";
+        }
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$localParam);
+        $data = $this->addRowNumbers($data);
+        for ($i=0; $i<count($data); $i++) {
+            if (strtotime($data[$i]['visitDate']) <= strtotime(date("d.m.Y"))) {
+                if ($data[$i]['evaluates'] != '' && $data[$i]['evaluates'] != '0000000000000000' && $data[$i]['theme'] != '' && $data[$i]['lessonName'] != '' && $data[$i]['grade'] != '' && $data[$i]['recommendation'] != '') {
+                    if ($data[$i]['confirmations'] == "00") {
+                        $data[$i]['status'] = 'Ожидает подтверждения';
+                    }
+                    else if ($data[$i]['confirmations'] == "11") {
+                        $data[$i]['status'] = 'Подтверждено';
+                    } else {
+                        $data[$i]['status'] = 'На подтверждении';
+                    }
+                } else {
+                    $data[$i]['status'] = 'На оценивании';
+                }
+            } else {
+                $data[$i]['status'] = 'Запланировано';
+            }
+        }
+        return $data;
+    }
+
+    public function getAllVisits($params)
+    {
+        $query = "SELECT * FROM isdb.evaluationTeachers
+                  WHERE visitDate >= :visitPeriodStart AND visitDate <= :visitPeriodEnd
+                    AND whoVisited <> '' AND whoWasVisited <> ''";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$params);
+        $data = $this->addRowNumbers($data);
+        for ($i=0; $i<count($data); $i++) {
+            if (strtotime($data[$i]['visitDate']) <= strtotime(date("d.m.Y"))) {
+                if ($data[$i]['evaluates'] != '' && $data[$i]['evaluates'] != '0000000000000000' && $data[$i]['theme'] != '' && $data[$i]['lessonName'] != '' && $data[$i]['grade'] != '' && $data[$i]['recommendation'] != '') {
+                    if ($data[$i]['confirmations'] == "00") {
+                        $data[$i]['status'] = 'Ожидает подтверждения';
+                    }
+                    else if ($data[$i]['confirmations'] == "11") {
+                        $data[$i]['status'] = 'Подтверждено';
+                    } else {
+                        $data[$i]['status'] = 'На подтверждении';
+                    }
+                } else {
+                    $data[$i]['status'] = 'На оценивании';
+                }
+            } else {
+                $data[$i]['status'] = 'Запланировано';
+            }
+        }
         return $data;
     }
 
@@ -892,11 +988,11 @@ class VisitModel extends Model
             $spreadsheet->getActiveSheet()->setCellValue(chr($i+1).($j+3), number_format($common[$j]/($colCount*5)*100, 2,',','').'%');
         }
 
-        $spreadsheet->getActiveSheet()->getStyle('A2:'.chr($colCount+75).'18')->getAlignment()->setWrapText(true);
+        $spreadsheet->getActiveSheet()->getStyle('A2:'.chr($colCount+71).'18')->getAlignment()->setWrapText(true);
 
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray(['font'=>['bold'=>true,'size'=>14]]);
         $spreadsheet->getActiveSheet()->getStyle('A3:A18')->applyFromArray($styleLeftHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('B3:'.chr($colCount+74).'18')->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->getStyle('B3:'.chr($colCount+71).'18')->applyFromArray($styleData);
 
         // Rename worksheet
         $spreadsheet->getActiveSheet()->setTitle('Свод по критериям');
@@ -976,7 +1072,7 @@ class VisitModel extends Model
         $data = $db->selectQuery($query,$params);
         $data = $this->addRowNumbers($data);
         for ($i=0; $i<count($data); $i++) {
-            if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y")) && strtotime($data[$i]['visitDateTo']) >= strtotime(date("d.m.Y"))) {
+            if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y"))) {
                 $data[$i]['class'] = 'allowed';
                 $data[$i]['result'] = '<button name="saveToPDF" class="visitBut">Выгрузить</button>';
                 if ($data[$i]['evaluates'] != '' && $data[$i]['lesson_review'] != '' && $data[$i]['purpose_review'] != '') {
@@ -991,6 +1087,10 @@ class VisitModel extends Model
                 } else {
                     $data[$i]['status'] = '<i class="status">На оценивании</i>';
                 }
+                if (strtotime($data[$i]['visitDateTo']) <= strtotime(date("d.m.Y")) && $data[$i]['confirmations'] == "00") {
+                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
+                    $data[$i]['status'] = '<i class="status">Срок посещения истёк</i>';
+                }
             } else {
                 $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
                 $data[$i]['class'] = 'planned';
@@ -1002,6 +1102,20 @@ class VisitModel extends Model
                 $data[$i]['result'] .= '<button name="deleteResults" class="visitBut">Удалить</button>';
             }
             $data[$i]['visitDate'] = date("d.m.Y", strtotime($data[$i]['visitDateFrom'])).' - '.date("d.m.Y", strtotime($data[$i]['visitDateTo']));
+            switch ($data[$i]['focus']) {
+                case 'planning':
+                    $data[$i]['focus'] = 'Планирование';
+                    break;
+                case 'teaching':
+                    $data[$i]['focus'] = 'Преподавание';
+                    break;
+                case 'evaluating':
+                    $data[$i]['focus'] = 'Оценивание учебных достижений';
+                    break;
+                case 'complex':
+                    $data[$i]['focus'] = 'Комплексный анализ урока';
+                    break;
+            }
         }
         return $data;
     }
@@ -1037,9 +1151,28 @@ class VisitModel extends Model
             } else {
                 $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
                 $data[$i]['class'] = 'planned';
-                $data[$i]['status'] = '<i class="status">Запланировано</i>';
+                if (strtotime($data[$i]['visitDateFrom']) >= strtotime(date("d.m.Y"))) {
+                    $data[$i]['status'] = '<i class="status">Запланировано</i>';
+                }
+                if (strtotime($data[$i]['visitDateTo']) <= strtotime(date("d.m.Y"))) {
+                    $data[$i]['status'] = '<i class="status">Срок посещения истёк</i>';
+                }
             }
             $data[$i]['visitDate'] = date("d.m.Y", strtotime($data[$i]['visitDateFrom'])).' - '.date("d.m.Y", strtotime($data[$i]['visitDateTo']));
+            switch ($data[$i]['focus']) {
+                case 'planning':
+                    $data[$i]['focus'] = 'Планирование';
+                    break;
+                case 'teaching':
+                    $data[$i]['focus'] = 'Преподавание';
+                    break;
+                case 'evaluating':
+                    $data[$i]['focus'] = 'Оценивание учебных достижений';
+                    break;
+                case 'complex':
+                    $data[$i]['focus'] = 'Комплексный анализ урока';
+                    break;
+            }
         }
         return $data;
     }
@@ -1128,7 +1261,6 @@ class VisitModel extends Model
 
     public function getAttestationCriteriasList($focus)
     {
-
         $query = "
         SELECT ".$focus." AS criteria, ".substr($focus,0,1)."_rs AS rs, ".substr($focus,0,1)."_markable AS markable
         FROM isdb.teachers_attestation_criterias
@@ -1376,5 +1508,20 @@ class VisitModel extends Model
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
         exit;
+    }
+
+    public function getVisitCount($param)
+    {
+        $params['iin'] =$this->getTeacherIin($param['person']);
+        $params['date'] = $param['date'];
+        $query = "
+        SELECT COUNT(*) AS count FROM isdb.evaluationTeachers
+        WHERE iinWhoWasVisited = :iin
+          AND visitDate = :date
+        ;";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$params);
+
+        echo $data[0]['count'];
     }
 }
