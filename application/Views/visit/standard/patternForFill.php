@@ -1,6 +1,6 @@
 <?php
     function getTexts($section,$property) {
-        $ini_params = parse_ini_file('/home/developer/Code/PHP/is/public/texts/'.$_COOKIE["lang"].'-lang.ini',true);
+        $ini_params = parse_ini_file(ROOT.'/public/texts/'.$_COOKIE["lang"].'-lang.ini',true);
         return $ini_params[$section][$property];
     }
 ?>
@@ -47,7 +47,7 @@
             </select>
         </td>
         <td>
-            <input type="text" class="visitInputs" id="visitTopic" name="visitTopic" value="<?php print($data['data'][0]['theme']) ?>" 
+            <input type="text" class="visitInputs" id="visitTopic" name="visitTopic" placeholder="максимум 120 символов..." value="<?php print($data['data'][0]['theme']) ?>" 
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
         </td>
     </tr>
