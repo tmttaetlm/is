@@ -1292,3 +1292,9 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
 .numberOfAllVisits td:nth-child(6) {
     text-align: center;
 }
+
+#showExistedVisits {
+    color: rgb(0, 55, 255);
+    text-decoration: underline;
+    cursor: pointer;
+}

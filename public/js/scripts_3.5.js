@@ -574,6 +574,19 @@ function changeHandler(obj)
         }, param);
     }
 
+    if (obj.id == 'visitSelectDay' || obj.id == 'personForVisit') {
+        let param = 'person='+document.getElementById('personForVisit').value+'&date='+document.getElementById('visitSelectDay').value; 
+        ajax('/visit/getVisitCount', function(data){
+            let msg = document.getElementById('visitInfo');
+            if (data != '0') {
+                msg.classList.remove('hide');
+            } else {
+                msg.classList.add('hide');
+                document.body.querySelector('.myVisits').querySelector('.results').innerHTML = '';
+            }
+        }, param);
+    }
+
 }
 
 function showPermissions() {
@@ -1233,6 +1246,17 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
         }
     }
 
+    if (obj.id == 'showExistedVisits') {
+        let now = new Date();
+        if (now.getMonth() < 9) { var start = (now.getFullYear()-1)+'-09-01'; }
+        else { var start = (now.getFullYear())+'-09-01'; }
+        let params = 'teacher='+document.getElementById('personForVisit').value+'&visitType=WhoWasVisited'+
+                     '&details=1'+'&detailsDate=1'+'&date='+document.getElementById('visitSelectDay').value;
+        ajax('/visit/getPersonalVisits', function(data){
+            document.body.querySelector('.myVisits').querySelector('.results').innerHTML = data;
+        }, params);
+    }
+
     if (obj.name == 'saveVisitReports') {
         let dumpForm = document.getElementById('dumpVisitReports');
         if (obj.id == 'report1') {
@@ -1353,6 +1377,7 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
                 msg.classList.remove('hide');
             } else {
                 msg.classList.add('hide');
+                document.body.querySelector('.myVisits').querySelector('.results').innerHTML = '';
             }
         }, param);
     }

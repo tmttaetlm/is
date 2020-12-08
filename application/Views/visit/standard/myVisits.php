@@ -19,6 +19,6 @@
     <button name="addVisit">Добавить</button>
     <br/>
     <div id="visitInfo" style="text-align: center;" class="hide">
-        <span class="visitInfo hide">К выбранному учителю в выбранную дату есть посещения.</span>
+        <span class="visitInfo">К выбранному учителю в выбранную дату есть посещения. <a id="showExistedVisits">Показать.</a></span>
     </div>
 </div>
