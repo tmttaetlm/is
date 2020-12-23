@@ -141,15 +141,15 @@ class VisitController extends Controller
 
     public function actionAddVisit()
     {
-        if ($_POST['whoWasVisited'] == $this->model->user->getFullName()) { echo 'me'; }
-        else {
+        //if ($_POST['whoWasVisited'] == $this->model->user->getFullName()) { echo 'me'; }
+        //else {
             $res = $this->model->checkUser($this->model->getTeacherIin($_POST['whoWasVisited']));
             if (!$res) { echo ''; }
             else {
-                $this->model->addVisit($_POST);
+                echo $this->model->addVisit($_POST);
                 echo $this->getVisitTable();
             }
-        }
+        //}
     }
 
     public function actionGetCriteriaDiscription()
@@ -291,8 +291,12 @@ class VisitController extends Controller
                     'visitDate'=>'Дата посещения',
                     'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
                     'lessonNum'=>'Урок',
-                    'status'=>'Статус'
+                    'status'=>'Статус',
+                    'load' =>'Результат'
                 ];
+                for ($i=0; $i<count($data); $i++) {
+                    $data[$i]['load'] = '<button name="saveToPDFforRSh" class="visitBut">Выгрузить</button>';
+                }
                 echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
             }
         }

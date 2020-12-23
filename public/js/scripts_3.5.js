@@ -1099,7 +1099,15 @@ function clickHandler(obj)
         dumpForm.mode.value = prevRow.offsetParent.className=='visitResults'?'standart':'attestation';
         dumpForm.submit();
     }
-
+    if (obj.name == 'saveToPDFforRSh') {
+        var prevRow = obj.parentNode.parentNode;
+        var dumpForm = document.getElementById('dumpVisitResults');
+        dumpForm.rowId.value = prevRow.dataset.rowId;
+        dumpForm.focus.value = prevRow.dataset.focus;
+        dumpForm.mode.value = 'standart';
+        dumpForm.submit();
+    }
+    
     if (obj.parentElement.localName == 'tr') {
         if (obj.localName != 'th' && obj.parentElement.className == 'allowed') {
             let row = obj.parentNode;

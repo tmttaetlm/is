@@ -78,6 +78,24 @@ class VisitModel extends Model
         ";
         $db = Db::getDb();
         $db->selectQuery($query,$params);
+        $this->sendEmailNotification($params['iinWhoWasVisited']);
+    }
+
+    public function sendEmailNotification($iin)
+    {
+        $query = "SELECT login FROM user WHERE iin=:iin;";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,['iin' => $iin]);
+        
+        //$recipient = "<".$data[0]['login'].">"; 
+        $subject = "Уведомление системы оценивания уроков"; 
+        $message = "На ваш урок запланировано посещение.";
+
+        if (mail($data[0]['login'], $subject, $message)) {
+            echo "messege acepted for delivery";
+        } else {
+            echo "some error happens";
+        }
     }
 
     public function deleteVisit($params)
@@ -499,10 +517,10 @@ class VisitModel extends Model
         $localParam['iin'] = $this->getTeacherIin($params['teacher']);
         $localParam['visitDate'] = $params['date'];
         if ($params['visitType'] == 'WhoVisited') {
-            $query = "SELECT visitDate, whoWasVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
+            $query = "SELECT id, visitDate, whoWasVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
                       FROM isdb.evaluationTeachers WHERE iinWhoVisited=:iin AND visitDate=:visitDate";
         } else {
-            $query = "SELECT visitDate, whoVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
+            $query = "SELECT id, visitDate, whoVisited AS person, lessonNum, evaluates, theme, lessonName, grade, recommendation, confirmations
                       FROM isdb.evaluationTeachers WHERE iinWhoWasVisited=:iin AND visitDate=:visitDate";
         }
         $db = Db::getDb();
