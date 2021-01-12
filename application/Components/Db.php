@@ -86,7 +86,6 @@ class Db {
                     $stmt->bindValue($bindKey, $params[$key]);
                 }
             }
-	
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (PDOException $e) {
