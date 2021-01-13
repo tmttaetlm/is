@@ -1055,11 +1055,11 @@ function clickHandler(obj)
         if (person.value != '') {
             let param = 'visitDate='+date.value+'&whoWasVisited='+person.value+'&lessonNum='+lesson.value;
             ajax('/visit/addVisit', function(data){
-                //console.log(data);
                 if (data == 'me') { alert("Невозможно добавить в график указанного учителя."); }
                 else if (data == '') { alert("Указанный преподаватель не найден в базе данных."); }
                 else { document.body.querySelector('.myVisits').querySelector('.visitResults').innerHTML = data; }
             }, param);
+            ajax('/visit/sendEmailNotification', function(data){}, param);
             person.value = '';
         } else {
             alert('Преподаватель не выбран!');
@@ -1324,10 +1324,8 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
                         '&t_date_from='+t_date_from.value+'&t_date_to='+t_date_to.value+'&t_person='+teaching.value+
                         '&e_date_from='+e_date_from.value+'&e_date_to='+e_date_to.value+'&e_person='+evaluating.value+
                         '&c_date_from='+c_date_from.value+'&c_date_to='+c_date_to.value+'&c_person='+complex.value;
-            ajax('/visit/saveSynod', function(data){
-                alert(data);
-                //console.log(data);
-            }, param);
+            ajax('/visit/saveSynod', function(data){}, param);
+            ajax('/visit/sendEmailNotificationA', function(data){console.log(data)}, param);
         } else {
             if (person.value == '') { alert('Не выбран преподаватель для посещения'); return; }
             if (planning.value == '') { alert('Не выбран наблюдатель в фокусе "Планирование"'); return; }

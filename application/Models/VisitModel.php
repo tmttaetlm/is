@@ -78,24 +78,39 @@ class VisitModel extends Model
         ";
         $db = Db::getDb();
         $db->selectQuery($query,$params);
-        $this->sendEmailNotification($params['iinWhoWasVisited']);
     }
 
     public function sendEmailNotification($iin)
     {
         $query = "SELECT login FROM user WHERE iin=:iin;";
         $db = Db::getDb();
-        $data = $db->selectQuery($query,['iin' => $iin]);
+        $mailto = $db->selectQuery($query,['iin' => $iin]);
         
-        //$recipient = "<".$data[0]['login'].">"; 
-        $subject = "Уведомление системы оценивания уроков"; 
-        $message = "На ваш урок запланировано посещение.";
+        $query = "SELECT * FROM evaluationTeachers WHERE iinWhoWasVisited=:iin;";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,['iin' => $iin]);
 
-        if (mail($data[0]['login'], $subject, $message)) {
-            echo "messege acepted for delivery";
-        } else {
-            echo "some error happens";
-        }
+        $recipient = $mailto[0]['login']; 
+        $subject = "Уведомление системы оценивания уроков"; 
+        $message = "<p style='font-size: 18px;'>На ваш урок запланировано посещение:</p>";
+        $message = $message."<table style='border-collapse: separate; border-spacing: 3px; font-size: 18px;'>
+                                <tr>
+                                    <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Наблюдатель</th>
+                                    <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Дата</th>
+                                    <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Урок</th>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$data[0]['whoVisited']."</th>
+                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".date("d.m.Y",strtotime($data[0]['visitDate']))."</th>
+                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$data[0]['lessonNum']."</th>
+                                </tr>
+                            </table>";
+        $message = $message."<br><br>Это письмо сформировано и отправлено автоматически. Отвечать на него не нужно.";
+        $headers = "From: Cистема оценивания уроков <is@kst.nis.edu.kz>"."\r\n".
+                   "Reply-To: is@kst.nis.edu.kz"."\r\n".
+                   "MIME-Version: 1.0"."\r\n".
+                   "Content-Type: text/html;";
+        mail($recipient, $subject, $message, $headers);
     }
 
     public function deleteVisit($params)
@@ -1149,11 +1164,6 @@ class VisitModel extends Model
                 $data[$i]['class'] = 'planned';
                 $data[$i]['status'] = '<i class="status">Запланировано</i>';
             }
-            if (substr($data[$i]['confirmations'],0,1) == "1") {
-                $data[$i]['result'] .= '<button name="deleteResults" class="visitBut" disabled>Удалить</button>';
-            } else {
-                $data[$i]['result'] .= '<button name="deleteResults" class="visitBut">Удалить</button>';
-            }
             $data[$i]['visitDate'] = date("d.m.Y", strtotime($data[$i]['visitDateFrom'])).' - '.date("d.m.Y", strtotime($data[$i]['visitDateTo']));
             switch ($data[$i]['focus']) {
                 case 'planning':
@@ -1288,6 +1298,84 @@ class VisitModel extends Model
         }
         
         return $data;
+    }
+
+    public function sendEmailNotificationA($params)
+    {
+        $query = "SELECT visitDateFrom, visitDateTo, iinWhoWasVisited, whoWasVisited, iinWhoVisited, whoVisited, focus, u1.login login1, u2.login login2
+                FROM isdb.teachers_attestation a
+                LEFT JOIN isdb.user u1 ON u1.iin=a.iinWhoVisited
+                LEFT JOIN isdb.user u2 ON u2.iin=a.iinWhoWasVisited
+                WHERE iinWhoWasVisited=:iin1 OR iinWhoVisited=:iin2 OR iinWhoVisited=:iin3 OR iinWhoVisited=:iin4 OR iinWhoVisited=:iin5;";
+        $db = Db::getDb();
+        $mailto = $db->selectQuery($query,['iin1' => $this->getTeacherIin($params['person']),
+                                           'iin2' => $this->getTeacherIin($params['p_person']),
+                                           'iin3' => $this->getTeacherIin($params['t_person']),
+                                           'iin4' => $this->getTeacherIin($params['e_person']),
+                                           'iin5' => $this->getTeacherIin($params['c_person'])]);
+        print_r($mailto);
+
+        $table = "<table style='border-collapse: separate; border-spacing: 3px; font-size: 18px;'>
+                    <tr>
+                        <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Наблюдатель</th>
+                        <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Период</th>
+                        <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Фокус оценивания</th>
+                    </tr>";
+
+        foreach ($mailto as $key => $value) {
+            switch ($value['focus']) {
+                case 'planning':
+                    $focus = "Планирование";
+                    break;
+                case 'teaching':
+                    $focus = "Преподавание";
+                    break;
+                case 'evaluating':
+                    $focus = "Оценивание учебных достижений";
+                    break;
+                case 'complex':
+                    $focus = "Комплексный анализ урока";
+                    break;
+            }
+            $recipient = $value['login1']; 
+            $subject = "Уведомление системы оценивания уроков"; 
+            $message = "<p style='font-size: 18px;'>Вам необходимо посетить урок:</p>";
+            $message = $message."<table style='border-collapse: separate; border-spacing: 3px; font-size: 18px;'>
+                                    <tr>
+                                        <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Учитель</th>
+                                        <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Период</th>
+                                        <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Фокус оценивания</th>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$value['whoWasVisited']."</th>
+                                        <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".date("d.m.Y",strtotime($value['visitDateFrom']))." - ".date("d.m.Y",strtotime($value['visitDateTo']))."</th>
+                                        <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$focus."</th>
+                                    </tr>
+                                </table>";
+            $message = $message."<br><br>Это письмо сформировано и отправлено автоматически. Отвечать на него не нужно.";
+            $headers = "From: Cистема оценивания уроков <is@kst.nis.edu.kz>"."\r\n".
+                    "Reply-To: is@kst.nis.edu.kz"."\r\n".
+                    "MIME-Version: 1.0"."\r\n".
+                    "Content-Type: text/html;";
+            mail($recipient, $subject, $message, $headers);
+
+            $table = $table."<tr>
+                                <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$value['whoVisited']."</th>
+                                <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".date("d.m.Y",strtotime($value['visitDateFrom']))." - ".date("d.m.Y",strtotime($value['visitDateTo']))."</th>
+                                <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$focus."</th>
+                            </tr>";
+        }
+
+        $table = $table."</table>";
+        $recipient = $mailto[0]['login2']; 
+        $subject = "Уведомление системы оценивания уроков"; 
+        $message = "<p style='font-size: 18px;'>На ваш урок назначено посещение:</p>".$table;
+        $message = $message."<br><br>Это письмо сформировано и отправлено автоматически. Отвечать на него не нужно.";
+        $headers = "From: Cистема оценивания уроков <is@kst.nis.edu.kz>"."\r\n".
+                    "Reply-To: is@kst.nis.edu.kz"."\r\n".
+                    "MIME-Version: 1.0"."\r\n".
+                    "Content-Type: text/html;";
+        mail($recipient, $subject, $message, $headers);
     }
 
     public function getMaxGroupId()

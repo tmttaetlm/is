@@ -141,15 +141,20 @@ class VisitController extends Controller
 
     public function actionAddVisit()
     {
-        //if ($_POST['whoWasVisited'] == $this->model->user->getFullName()) { echo 'me'; }
-        //else {
+        if ($_POST['whoWasVisited'] == $this->model->user->getFullName()) { echo 'me'; }
+        else {
             $res = $this->model->checkUser($this->model->getTeacherIin($_POST['whoWasVisited']));
             if (!$res) { echo ''; }
             else {
-                echo $this->model->addVisit($_POST);
+                $this->model->addVisit($_POST);
                 echo $this->getVisitTable();
             }
-        //}
+        }
+    }
+
+    public function actionSendEmailNotification()
+    {
+        $this->model->sendEmailNotification($this->model->getTeacherIin($_POST['whoWasVisited']));
     }
 
     public function actionGetCriteriaDiscription()
@@ -370,6 +375,11 @@ class VisitController extends Controller
     public function actionSaveSynod()
     {
         $this->model->saveSynod($_POST);
+    }
+
+    public function actionSendEmailNotificationA()
+    {
+        $this->model->sendEmailNotificationA($_POST);
     }
 
     public function actionGetSynod()
