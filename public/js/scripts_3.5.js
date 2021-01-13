@@ -1324,8 +1324,8 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
                         '&t_date_from='+t_date_from.value+'&t_date_to='+t_date_to.value+'&t_person='+teaching.value+
                         '&e_date_from='+e_date_from.value+'&e_date_to='+e_date_to.value+'&e_person='+evaluating.value+
                         '&c_date_from='+c_date_from.value+'&c_date_to='+c_date_to.value+'&c_person='+complex.value;
-            ajax('/visit/saveSynod', function(data){}, param);
-            ajax('/visit/sendEmailNotificationA', function(data){console.log(data)}, param);
+            ajax('/visit/saveSynod', function(data){showNotification('Сохранено. Уведомление отправлено на почту.');}, param);
+            ajax('/visit/sendEmailNotificationA', function(data){}, param);
         } else {
             if (person.value == '') { alert('Не выбран преподаватель для посещения'); return; }
             if (planning.value == '') { alert('Не выбран наблюдатель в фокусе "Планирование"'); return; }
@@ -1850,12 +1850,12 @@ function mask(event) {
 }
 
 function showNotification(text, timer = 1500) {
-    /*let notification = document.getElementById('custom-notification-text');
+    let notification = document.getElementById('custom-notification-text');
     notification.classList.remove("notification-hide");
     notification.classList.add("notification-show");
     notification.innerHTML = text;
     setTimeout(() => {
         notification.classList.remove("notification-show");
         notification.classList.add("notification-hide");
-    }, timer);*/
+    }, timer);
 }
