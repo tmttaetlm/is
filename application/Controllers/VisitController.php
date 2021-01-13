@@ -85,9 +85,9 @@ class VisitController extends Controller
         $data['radioName']='tab2';
         $data['tabItems']['myAVisits']='План посещений';
         $data['tabItems']['myAEvaluations']='Мои оценки';
-        /*if (in_array("visitReportAccess", $userPriveleges)) {
+        if (in_array("visitReportAccess", $userPriveleges)) {
             $data['tabItems']['AReports']='Мониторинг посещений';
-        }*/
+        }
         if (in_array("visitManagementAccess", $userPriveleges)) {
             $data['tabItems']['AManagements']='Управление';
         }
@@ -96,7 +96,7 @@ class VisitController extends Controller
         $data['tabData']['myAVisits'] = $data['tabData']['myAVisits'];
 
         $data['tabData']['myAEvaluations'] = $this->getAttestationEvaluatesTable();
-        //$data['tabData']['AReports'] = $this->view->generate('visit/attestation/reports',$data);
+        $data['tabData']['AReports'] = $this->view->generate('visit/attestation/reports',$data);
         $data['tabData']['AManagements'] = $this->view->generate('visit/attestation/managements',$data);
 
         $data['content'] = $this->view->generate('framework/tabs',$data);
