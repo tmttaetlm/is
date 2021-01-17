@@ -1378,6 +1378,245 @@ class VisitModel extends Model
         mail($recipient, $subject, $message, $headers);
     }
 
+    public static function getNumberOfAttestationVisits($params)
+    {
+        $localParams['start1'] = $params['start']; $localParams['end1'] = $params['end'];
+        $localParams['start2'] = $params['start']; $localParams['end2'] = $params['end'];
+        $localParams['start3'] = $params['start']; $localParams['end3'] = $params['end'];
+        $localParams['start4'] = $params['start']; $localParams['end4'] = $params['end'];
+        $query = "SELECT 'Всего' status, count(id) number
+        FROM isdb.teachers_attestation
+        WHERE visitDateFrom >= :start1 AND visitDateTo <= :end1
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL
+        UNION
+        SELECT 'Запланировано', count(id)
+        FROM isdb.teachers_attestation
+        WHERE visitDateFrom >= now()
+          AND visitDateFrom >= :start2 AND visitDateTo <= :end2
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL
+        UNION
+        SELECT 'Подтверждено', count(id)
+        FROM isdb.teachers_attestation
+        WHERE LEFT(confirmations,1) = '1'
+          AND visitDateFrom >= :start3 AND visitDateTo <= :end3
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL
+        UNION
+        SELECT 'В процессе', count(id)
+        FROM isdb.teachers_attestation
+        WHERE visitDateFrom <= now() AND LEFT(confirmations,1) = '0'
+          AND visitDateFrom >= :start4 AND visitDateTo <= :end4
+          AND whoVisited <> '' AND whoWasVisited <> ''
+          AND whoVisited IS NOT NULL AND whoWasVisited IS NOT NULL;
+        ";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$localParams);
+        return $data;
+    }
+
+    public function getAllAttestationVisits($params)
+    {
+        $query = "SELECT * FROM isdb.teachers_attestation
+                  WHERE visitDateFrom >= :visitPeriodStart AND visitDateTo <= :visitPeriodEnd
+                    AND whoVisited <> '' AND whoWasVisited <> ''";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$params);
+        $data = $this->addRowNumbers($data);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['visitDate'] = date("d.m.Y", strtotime($data[$i]['visitDateFrom'])).' - '. date("d.m.Y", strtotime($data[$i]['visitDateTo']));
+            switch ($data[$i]['focus']) {
+                case 'planning':
+                    $data[$i]['focus'] = 'Планирование';
+                    break;
+                case 'teaching':
+                    $data[$i]['focus'] = 'Преподавание';
+                    break;
+                case 'evaluating':
+                    $data[$i]['focus'] = 'Оценивание учебных достижений';
+                    break;
+                case 'complex':
+                    $data[$i]['focus'] = 'Комплексный анализ урока';
+                    break;
+            }
+            if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y"))) {
+                if ($data[$i]['evaluates'] != '' && $data[$i]['evaluates'] != '0000000000000000' && $data[$i]['theme'] != '' && $data[$i]['lessonName'] != '' && $data[$i]['grade'] != '' && $data[$i]['recommendation'] != '') {
+                    if ($data[$i]['confirmations'] == "00") {
+                        $data[$i]['status'] = 'Ожидает подтверждения';
+                    }
+                    else if ($data[$i]['confirmations'] == "11") {
+                        $data[$i]['status'] = 'Подтверждено';
+                    } else {
+                        $data[$i]['status'] = 'На подтверждении';
+                    }
+                } else {
+                    $data[$i]['status'] = 'На оценивании';
+                }
+            } else {
+                if (strtotime($data[$i]['visitDateFrom']) >= strtotime($params['visitPeriodEnd'])) {
+                    $data[$i]['status'] = 'Дата оценивания прошла';
+                } else {
+                    $data[$i]['status'] = 'Запланировано';
+                }
+            }
+        }
+        return $data;
+    }
+
+    public function getPersonalAttestationVisits($params)
+    {
+        $localParam['iin1'] = $this->getTeacherIin($params['teacher']);
+        $localParam['iin2'] = $this->getTeacherIin($params['teacher']);
+        $localParam['iin3'] = $this->getTeacherIin($params['teacher']);
+        $localParam['iin4'] = $this->getTeacherIin($params['teacher']);
+        
+        if ($params['visitType'] == 'WhoVisited') {
+            $query = "SELECT DISTINCT evaluates.who, evaluates.cnt v_cnt, confirmed.cnt c_cnt, planned.cnt p_cnt, in_process.cnt o_cnt
+                      FROM (SELECT whoWasVisited who, count(whoWasVisited) cnt
+                            FROM isdb.teachers_attestation
+                            WHERE iinWhoVisited = :iin1
+                            GROUP BY whoWasVisited) evaluates
+                      LEFT JOIN (SELECT whoWasVisited who, count(whoWasVisited) cnt
+                                 FROM isdb.teachers_attestation
+                                 WHERE iinWhoVisited = :iin2 AND LEFT(confirmations,1) = '1'
+                                 GROUP BY whoWasVisited) confirmed
+                      ON evaluates.who = confirmed.who
+                      LEFT JOIN (SELECT whoWasVisited who, count(whoWasVisited) cnt
+                                 FROM isdb.teachers_attestation
+                                 WHERE iinWhoVisited = :iin3 AND visitDateFrom >= NOW()
+                                 GROUP BY whoWasVisited) planned
+                      ON evaluates.who = planned.who
+                      LEFT JOIN (SELECT  whoWasVisited who, count(whoWasVisited) cnt
+                                 FROM isdb.teachers_attestation
+                                 WHERE iinWhoVisited = :iin4 AND visitDateFrom <= now() AND LEFT(confirmations,1) = '0'
+                                 GROUP BY whoWasVisited) in_process
+                      ON evaluates.who = in_process.who;";
+        } else {
+            $query = "SELECT DISTINCT evaluates.who, evaluates.cnt v_cnt, confirmed.cnt c_cnt, planned.cnt p_cnt, in_process.cnt o_cnt
+                      FROM (SELECT whoVisited who, count(whoVisited) cnt
+                            FROM isdb.teachers_attestation
+                            WHERE iinWhoWasVisited = :iin1
+                            GROUP BY whoVisited) evaluates
+                      LEFT JOIN (SELECT whoVisited who, count(whoVisited) cnt
+                                 FROM isdb.teachers_attestation
+                                 WHERE iinWhoWasVisited = :iin2 AND LEFT(confirmations,1) = '1'
+                                 GROUP BY whoVisited) confirmed
+                      ON evaluates.who = confirmed.who
+                      LEFT JOIN (SELECT whoVisited who, count(whoVisited) cnt
+                                 FROM isdb.teachers_attestation
+                                 WHERE iinWhoWasVisited = :iin3 AND visitDateFrom >= NOW()
+                                 GROUP BY whoVisited) planned
+                      ON evaluates.who = planned.who
+                      LEFT JOIN (SELECT  whoVisited who, count(whoVisited) cnt
+                                 FROM isdb.teachers_attestation
+                                 WHERE iinWhoWasVisited = :iin4 AND visitDateFrom <= now() AND LEFT(confirmations,1) = '0'
+                                 GROUP BY whoVisited) in_process
+                      ON evaluates.who = in_process.who;";
+        }
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$localParam);
+        $data = $this->addRowNumbers($data);
+        return $data;
+    }
+
+    public function getAllAttestationVisitsInPeriod($params) {
+        $localParam['iin'] = $this->getTeacherIin($params['teacher']);
+        if ($params['visitType'] == 'WhoVisited') {
+            $query = "SELECT visitDateFrom, visitDateTo, visitDate, whoWasVisited AS person, focus, evaluates, theme, lessonName, grade, confirmations
+                      FROM isdb.teachers_attestation WHERE iinWhoVisited=:iin";
+        } else {
+            $query = "SELECT visitDateFrom, visitDateTo, visitDate, whoVisited AS person, focus, evaluates, theme, lessonName, grade, confirmations
+                      FROM isdb.teachers_attestation WHERE iinWhoWasVisited=:iin";
+        }
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$localParam);
+        $data = $this->addRowNumbers($data);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['period'] = date("d.m.Y", strtotime($data[$i]['visitDateFrom'])).' - '. date("d.m.Y", strtotime($data[$i]['visitDateTo']));
+            switch ($data[$i]['focus']) {
+                case 'planning':
+                    $data[$i]['focus'] = 'Планирование';
+                    break;
+                case 'teaching':
+                    $data[$i]['focus'] = 'Преподавание';
+                    break;
+                case 'evaluating':
+                    $data[$i]['focus'] = 'Оценивание учебных достижений';
+                    break;
+                case 'complex':
+                    $data[$i]['focus'] = 'Комплексный анализ урока';
+                    break;
+            }
+            if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y"))) {
+                if ($data[$i]['evaluates'] != '' && $data[$i]['evaluates'] != '0000000000000000' && $data[$i]['theme'] != '' && $data[$i]['lessonName'] != '' && $data[$i]['grade'] != '' && $data[$i]['recommendation'] != '') {
+                    if ($data[$i]['confirmations'] == "00") {
+                        $data[$i]['status'] = 'Ожидает подтверждения';
+                    }
+                    else if ($data[$i]['confirmations'] == "11") {
+                        $data[$i]['status'] = 'Подтверждено';
+                    } else {
+                        $data[$i]['status'] = 'На подтверждении';
+                    }
+                } else {
+                    $data[$i]['status'] = 'На оценивании';
+                }
+            } else {
+                $data[$i]['status'] = 'Запланировано';
+            }
+        }
+        return $data;
+    }
+
+    public function getAllAttestationVisitsInDetails($params) {
+        $localParam['iin'] = $this->getTeacherIin($params['teacher']);
+        $localParam['visitDate'] = $params['date'];
+        if ($params['visitType'] == 'WhoVisited') {
+            $query = "SELECT visitDateFrom, visitDateTo, visitDate, whoWasVisited AS person, focus, evaluates, theme, lessonName, grade, confirmations
+                      FROM isdb.teachers_attestation WHERE iinWhoVisited=:iin AND visitDateFrom<=:visitDate";
+        } else {
+            $query = "SELECT visitDateFrom, visitDateTo, visitDate, whoWasVisited AS person, focus, evaluates, theme, lessonName, grade, confirmations
+                      FROM isdb.teachers_attestation WHERE iinWhoWasVisited=:iin AND visitDateTo>=:visitDate";
+        }
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,$localParam);
+        $data = $this->addRowNumbers($data);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['period'] = date("d.m.Y", strtotime($data[$i]['visitDateFrom'])).' - '. date("d.m.Y", strtotime($data[$i]['visitDateTo']));
+            switch ($data[$i]['focus']) {
+                case 'planning':
+                    $data[$i]['focus'] = 'Планирование';
+                    break;
+                case 'teaching':
+                    $data[$i]['focus'] = 'Преподавание';
+                    break;
+                case 'evaluating':
+                    $data[$i]['focus'] = 'Оценивание учебных достижений';
+                    break;
+                case 'complex':
+                    $data[$i]['focus'] = 'Комплексный анализ урока';
+                    break;
+            }
+            if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y"))) {
+                if ($data[$i]['evaluates'] != '' && $data[$i]['evaluates'] != '0000000000000000' && $data[$i]['theme'] != '' && $data[$i]['lessonName'] != '' && $data[$i]['grade'] != '' && $data[$i]['recommendation'] != '') {
+                    if ($data[$i]['confirmations'] == "00") {
+                        $data[$i]['status'] = 'Ожидает подтверждения';
+                    }
+                    else if ($data[$i]['confirmations'] == "11") {
+                        $data[$i]['status'] = 'Подтверждено';
+                    } else {
+                        $data[$i]['status'] = 'На подтверждении';
+                    }
+                } else {
+                    $data[$i]['status'] = 'На оценивании';
+                }
+            } else {
+                $data[$i]['status'] = 'Запланировано';
+            }
+        }
+        return $data;
+    }
+
     public function getMaxGroupId()
     {
         $query = "SELECT DISTINCT MAX(groupId) AS gId FROM isdb.teachers_attestation;";
