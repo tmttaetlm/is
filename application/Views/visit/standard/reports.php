@@ -3,7 +3,7 @@
         <label for="personForReport">Преподаватель:</label>
         <input type="text" id="personForReport" name="personForReport" placeholder="Поиск..." />
         <br>
-        <input type="radio" checked="checked" id="WhoVisited" name="visitType" value="WhoVisited"/>
+        <input type="radio" id="WhoVisited" name="visitType" value="WhoVisited" checked="checked" />
         <label for="WhoVisited">Наблюдатель</label>
         <input type="radio" id="WhoWasVisited" name="visitType" value="WhoWasVisited"/>
         <label for="WhoWasVisited">Учитель</label>
