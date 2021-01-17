@@ -101,10 +101,15 @@ window.onload = function() {
         }
         document.getElementById('visitSelectStartDay').value = start;
         document.getElementById('visitSelectEndDay').value = end;
+        document.getElementById('AvisitSelectStartDay').value = start;
+        document.getElementById('AvisitSelectEndDay').value = end;
     }
 
     if (document.getElementById('detailsDateField')) {
         document.getElementById('detailsDateField').value = today; 
+    }
+    if (document.getElementById('detailsDateFieldA')) {
+        document.getElementById('detailsDateFieldA').value = today; 
     }
 
     if (document.getElementById('selectDivision')){
@@ -132,6 +137,15 @@ window.onload = function() {
 
     if (document.getElementById('personForReport')){
         let seachField = document.getElementById("personForReport");
+        seachField.value = '';
+        
+        ajaxJson('/visit/getStaffList', function(data){
+            autocomplete(seachField, data);
+        });
+    }
+
+    if (document.getElementById('personForAReport')){
+        let seachField = document.getElementById("personForAReport");
         seachField.value = '';
         
         ajaxJson('/visit/getStaffList', function(data){
@@ -491,6 +505,12 @@ function changeHandler(obj)
         }
     }
 
+    if (obj.name == "tab2"){
+        if (obj.id == 'AReports'){
+            getNumberOfAVisits();
+        }
+    }
+
     //Inventory change location and comments
     if (obj.classList.contains('inv-select-location')){
         var param = 'locationCode='+obj.value + '&id='+obj.dataset.id;
@@ -537,6 +557,12 @@ function changeHandler(obj)
     if (obj.id == 'visitSelectStartDay' || obj.id == 'visitSelectEndDay') {
         if (obj.value != '') {
             getNumberOfVisits();
+        };
+    }
+
+    if (obj.id == 'AvisitSelectStartDay' || obj.id == 'AvisitSelectEndDay') {
+        if (obj.value != '') {
+            getNumberOfAVisits();
         };
     }
 
@@ -1095,7 +1121,7 @@ function clickHandler(obj)
         var prevRow = obj.parentNode.parentNode;
         var dumpForm = document.getElementById('dumpVisitResults');
         dumpForm.rowId.value = prevRow.dataset.rowId;
-        dumpForm.focus.value = prevRow.dataset.focus;
+        dumpForm.focus.value = obj.id != 'lso' ? prevRow.dataset.focus : 'lso';
         dumpForm.mode.value = prevRow.offsetParent.className=='visitResults'?'standart':'attestation';
         dumpForm.submit();
     }
@@ -1227,6 +1253,22 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
             document.getElementById('detailsDateField').classList.add('hide');
         }
     }
+    if (obj.id == 'reportDetailsA' || obj.id == 'reportDetailsLabelA') {
+        if (obj.checked) {
+            document.getElementById('detailsDateLabelA').classList.remove('hide');
+            document.getElementById('detailsDateA').classList.remove('hide');
+        } else {
+            document.getElementById('detailsDateLabelA').classList.add('hide');
+            document.getElementById('detailsDateA').classList.add('hide');
+        }
+    }
+    if (obj.id == 'detailsDateA' || obj.id == 'detailsDateLabelA') {
+        if (obj.checked) {
+            document.getElementById('detailsDateFieldA').classList.remove('hide');
+        } else {
+            document.getElementById('detailsDateFieldA').classList.add('hide');
+        }
+    }
 
     if (obj.name == "showVisitReport") {
         if (obj.id == 'report0') {
@@ -1247,10 +1289,34 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
             }
         }
         if (obj.id == 'report3') {
-            let params = '&visitPeriodStart='+document.getElementById('visitSelectStartDay').value+'&visitPeriodEnd='+document.getElementById('visitSelectEndDay').value;;
+            let params = 'visitPeriodStart='+document.getElementById('visitSelectStartDay').value+'&visitPeriodEnd='+document.getElementById('visitSelectEndDay').value;;
             ajax('/visit/getAllVisits', function(data){
                 document.body.querySelector('.Reports').querySelector('.results').innerHTML = data;
             }, params);
+        }
+        if (obj.id == 'report4') {
+            let params = 'visitPeriodStart='+document.getElementById('AvisitSelectStartDay').value+'&visitPeriodEnd='+document.getElementById('AvisitSelectEndDay').value;
+            ajax('/visit/getAllAttestationVisits', function(data){
+                document.body.querySelector('.AReports').querySelector('.results').innerHTML = data;
+            }, params);
+        }
+        if (obj.id == 'report5') {
+            if (document.getElementById('personForAReport').value != '') {
+                let now = new Date();
+                if (now.getMonth() < 9) { var start = (now.getFullYear()-1)+'-09-01'; }
+                else { var start = (now.getFullYear())+'-09-01'; }
+                let params = 'teacher='+document.getElementById('personForAReport').value+'&visitType='+getSelectedRadio('AvisitType')+
+                             '&details='+(document.getElementById('reportDetailsA').checked ? '1' : '0')+
+                             '&detailsDate='+(document.getElementById('detailsDateA').checked ? '1' : '0')+
+                             '&date='+document.getElementById('detailsDateFieldA').value+
+                             '&dateStart='+start+'&dateEnd='+getInputDate();
+                console.log(params);
+                ajax('/visit/getPersonalAttestationVisits', function(data){
+                    document.body.querySelector('.AReports').querySelector('.results').innerHTML = data;
+                }, params);
+            } else {
+                alert("Учитель не выбран!");
+            }
         }
     }
 
@@ -1816,6 +1882,17 @@ function getNumberOfVisits(){
         if (data.indexOf('content-login') >= 0) { location.reload(true) };
         document.body.querySelector('.Reports').querySelector('#numberOfVisits').innerHTML = '';
         document.body.querySelector('.Reports').querySelector('#numberOfVisits').innerHTML = data;
+        }, params);
+}
+
+function getNumberOfAVisits(){
+    let start = document.getElementById('AvisitSelectStartDay').value;
+    let end = document.getElementById('AvisitSelectEndDay').value;
+    let params = 'start='+start+'&end='+end;
+    ajax('/visit/getNumberOfAttestationVisits', function(data){
+        if (data.indexOf('content-login') >= 0) { location.reload(true) };
+        document.body.querySelector('.AReports').querySelector('#numberOfAVisits').innerHTML = '';
+        document.body.querySelector('.AReports').querySelector('#numberOfAVisits').innerHTML = data;
         }, params);
 }
 
