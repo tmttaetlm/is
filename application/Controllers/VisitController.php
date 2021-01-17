@@ -311,7 +311,7 @@ class VisitController extends Controller
     public function actionGetAllVisits()
     {
         $data = $this->model->getAllVisits($_POST);
-        $title = "Количество посещении за период с {$_POST['visitPeriodStart']} по {$_POST['visitPeriodEnd']}";
+        $title = "Количество посещении за период с ".date('d.m.Y',strtotime($_POST['visitPeriodStart']))." по ".date('d.m.Y',strtotime($_POST['visitPeriodEnd']));
         $columns = [
             'num'=>'№',
             'visitDate'=>'Дата посещения',
@@ -422,4 +422,92 @@ class VisitController extends Controller
     {
         echo $this->model->getVisitCount($_POST);
     }
+
+    public function actionGetNumberOfAttestationVisits()
+    {
+        $data = $this->model->getNumberOfAttestationVisits($_POST);
+        //$title = "Количество посещении за период с ".date('d.m.Y', strtotime($_POST['start']))." по ".date('d.m.Y', strtotime($_POST['end']));
+        $title = "";
+        $columns = [
+            'status'=>'Статус',
+            'number'=>'Количество'
+        ];
+        echo $this->view->cTable($title,$columns,$data,'commonNumberOfVisits');
+    }
+
+    public function actionGetAllAttestationVisits()
+    {
+        $data = $this->model->getAllAttestationVisits($_POST);
+        $title = "Количество посещении за период с ".date('d.m.Y',strtotime($_POST['visitPeriodStart']))." по ".date('d.m.Y',strtotime($_POST['visitPeriodEnd']));
+        $columns = [
+            'num'=>'№',
+            'visitDate'=>'Период',
+            'whoVisited'=>'Наблюдатель',
+            'whoWasVisited'=>'Учитель',
+            'focus'=>'Фокус оценивания',
+            'status'=>'Статус'
+        ];
+        echo $this->view->cTable($title,$columns,$data,'numberOfAllAttestationVisits');
+    }
+
+    public function actionGetPersonalAttestationVisits()
+    {
+        if ($_POST['details'] == '0') {
+            $data = $this->model->getPersonalAttestationVisits($_POST);
+            if ($_POST['visitType'] == 'WhoVisited') {
+                $title = "Количество посещении преподавателя {$_POST['teacher']} как наблюдателя";
+            } else {
+                $title = "Количество посещении уроков преподавателя {$_POST['teacher']}";
+            }
+            $columns = [
+                'num'=>'№',
+                'who'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
+                'v_cnt'=>'Всего',
+                'p_cnt'=>'Запланировано',
+                'c_cnt'=>'Подтверждено',
+                'o_cnt'=>'В процессе'
+            ];
+            echo $this->view->cTable($title,$columns,$data,'numberOfVisits');
+        } else {
+            if ($_POST['detailsDate'] == '0') {
+                $data = $this->model->getAllAttestationVisitsInPeriod($_POST);
+                if ($_POST['visitType'] == 'WhoVisited') {
+                    $title = "Посещения преподавателя {$_POST['teacher']} как наблюдателя";
+                } else {
+                    $title = "Посещения уроков преподавателя {$_POST['teacher']}";
+                }
+                $columns = [
+                    'num'=>'№',
+                    'period'=>'Период',
+                    'visitDate'=>'Дата посещения',
+                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
+                    'focus'=>'Фокус оценивания',
+                    'status'=>'Статус'
+                ];
+                echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
+            } else {
+                $data = $this->model->getAllAttestationVisitsInDetails($_POST);
+                if ($_POST['visitType'] == 'WhoVisited') {
+                    $title = "Посещения преподавателя {$_POST['teacher']} как наблюдателя за {$_POST['date']}";
+                } else {
+                    $title = "Посещения уроков преподавателя {$_POST['teacher']} за {$_POST['date']}";
+                }
+                $columns = [
+                    'num'=>'№',
+                    'period'=>'Период',
+                    'visitDate'=>'Дата посещения',
+                    'person'=>$_POST['visitType'] == 'WhoVisited' ? 'Учитель' : 'Наблюдатель',
+                    'focus'=>'Фокус оценивания',
+                    'status'=>'Статус',
+                    'load' =>'Результат'
+                ];
+                for ($i=0; $i<count($data); $i++) {
+                    $data[$i]['load'] = '<button name="saveToPDFforRSh" class="visitBut">Выгрузить</button>';
+                }
+                echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
+            }
+        }
+        
+    }
+    
 }
