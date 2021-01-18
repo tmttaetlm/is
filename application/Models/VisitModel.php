@@ -60,10 +60,14 @@ class VisitModel extends Model
 
     public function getResultsDump()
     {
-        if ($_POST['mode'] == 'standart') {
-            $this->getStandartResultsDump($_POST);
+        if ($_POST['focus'] == 'lso') {
+            //
         } else {
-            $this->getAttestationResultsDump($_POST);
+            if ($_POST['mode'] == 'standart') {
+                $this->getStandartResultsDump($_POST);
+            } else {
+                $this->getAttestationResultsDump($_POST);
+            }
         }
     }
 
@@ -1142,7 +1146,7 @@ class VisitModel extends Model
         for ($i=0; $i<count($data); $i++) {
             if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y"))) {
                 $data[$i]['class'] = 'allowed';
-                $data[$i]['result'] = '<button name="saveToPDF" class="visitBut">Выгрузить</button>';
+                $data[$i]['result'] = '<button name="saveToPDF" class="visitBut">ЛОУ</button><button id="lso" name="saveToPDF" class="visitBut">ЛШО</button>';
                 if ($data[$i]['evaluates'] != '' && $data[$i]['lesson_review'] != '' && $data[$i]['purpose_review'] != '') {
                     if ($data[$i]['confirmations'] == "00") {
                         $data[$i]['status'] = '<i class="status">Ожидает подтверждения</i>';
@@ -1156,11 +1160,11 @@ class VisitModel extends Model
                     $data[$i]['status'] = '<i class="status">На оценивании</i>';
                 }
                 if (strtotime($data[$i]['visitDateTo']) <= strtotime(date("d.m.Y")) && $data[$i]['confirmations'] == "00") {
-                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
+                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>ЛОУ</button><button id="lso" name="saveToPDF" class="visitBut" disabled>ЛШО</button>';
                     $data[$i]['status'] = '<i class="status">Срок посещения истёк</i>';
                 }
             } else {
-                $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
+                $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>ЛОУ</button><button id="lso" name="saveToPDF" class="visitBut" disabled>ЛШО</button>';
                 $data[$i]['class'] = 'planned';
                 $data[$i]['status'] = '<i class="status">Запланировано</i>';
             }
@@ -1196,7 +1200,7 @@ class VisitModel extends Model
         for ($i=0; $i<count($data); $i++) {
             if (strtotime($data[$i]['visitDateFrom']) <= strtotime(date("d.m.Y")) || strtotime($data[$i]['visitDateTo']) >= strtotime(date("d.m.Y"))) {
                 if ($data[$i]['evaluates'] != '' && $data[$i]['lesson_review'] != '' && $data[$i]['purpose_review'] != '') {
-                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut">Выгрузить</button>';
+                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut">ЛОУ</button><button name="saveToPDF" class="visitBut">ЛШО</button>';
                     $data[$i]['class'] = 'allowed';
                     if ($data[$i]['confirmations'] == "00") {
                         $data[$i]['status'] = '<i class="status">Ожидает подтверждения</i>';
@@ -1207,12 +1211,12 @@ class VisitModel extends Model
                         $data[$i]['status'] = '<i class="status">На подтверждении</i>';
                     }
                 } else {
-                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
+                    $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>ЛОУ</button><button name="saveToPDF" class="visitBut" disabled>ЛШО</button>';
                     $data[$i]['class'] = 'planned';
                     $data[$i]['status'] = '<i class="status">Нет оценок</i>';
                 }
             } else {
-                $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>Выгрузить</button>';
+                $data[$i]['result'] = '<button name="saveToPDF" class="visitBut" disabled>ЛОУ</button><button name="saveToPDF" class="visitBut" disabled>ЛШО</button>';
                 $data[$i]['class'] = 'planned';
                 if (strtotime($data[$i]['visitDateFrom']) >= strtotime(date("d.m.Y"))) {
                     $data[$i]['status'] = '<i class="status">Запланировано</i>';
