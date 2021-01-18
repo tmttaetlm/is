@@ -872,7 +872,7 @@ class VisitModel extends Model
             $spreadsheet->getActiveSheet()->setCellValue('A'.$i, $this->getTexts('CRITERIAS', $criteria['d2']));
             $spreadsheet->getActiveSheet()->getRowDimension($i)->setRowHeight(-1);
         }
-        for ($k = 0; $k <= 15; $k++) { $averages[$k] = 0; };
+        for ($k = 0; $k <= 15; $k++) { $averages[$k] = 0; $avCount[$k] = 0; };
         $i = 66; //"B" letter's number in ASCII table
         foreach ($arrayData as $data) {
             $spreadsheet->getActiveSheet()->getColumnDimension(chr($i))->setWidth(21);
@@ -881,17 +881,22 @@ class VisitModel extends Model
             for ($j = 0; $j <= 15; $j++) {
                 $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), substr($data['evaluates'],$j,1));
                 $averages[$j] += (int)substr($data['evaluates'],$j,1);
+                if (substr($data['evaluates'],$j,1) != '0') { $avCount[$j]++; }
             }
             $i++;
         }
         $spreadsheet->getActiveSheet()->setCellValue(chr($i).'2', 'Средний балл');
         $spreadsheet->getActiveSheet()->getStyle(chr($i).'2')->applyFromArray($styleTopHeaders);
         for ($j = 0; $j <= 15; $j++) {
-            $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), number_format($averages[$j]/$colCount,1,',',''));
+            if ($avCount[$j] != 0) {
+                $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), number_format($averages[$j]/$avCount[$j],1,',',''));
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue(chr($i).($j+3), "0");
+            }
             $spreadsheet->getActiveSheet()->getStyle(chr($i).($j+3))->applyFromArray($styleData);
             $spreadsheet->getActiveSheet()->getColumnDimension(chr($i))->setWidth(21);
         }
-
+        
         $spreadsheet->getActiveSheet()->getStyle('A2:'.chr($colCount+66).'18')->getAlignment()->setWrapText(true);
 
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray(['font'=>['bold'=>true,'size'=>14]]);
