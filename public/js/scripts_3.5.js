@@ -1085,7 +1085,7 @@ function clickHandler(obj)
                 else if (data == '') { alert("Указанный преподаватель не найден в базе данных."); }
                 else { document.body.querySelector('.myVisits').querySelector('.visitResults').innerHTML = data; }
             }, param);
-            ajax('/visit/sendEmailNotification', function(data){}, param);
+            ajax('/visit/sendEmailNotification', function(data){ console.log(data); }, param);
             person.value = '';
         } else {
             alert('Преподаватель не выбран!');

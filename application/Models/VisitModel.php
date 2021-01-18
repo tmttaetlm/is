@@ -60,15 +60,15 @@ class VisitModel extends Model
 
     public function getResultsDump()
     {
-        if ($_POST['focus'] == 'lso') {
+        //if ($_POST['focus'] == 'lso') {
             //
-        } else {
+        //} else {
             if ($_POST['mode'] == 'standart') {
                 $this->getStandartResultsDump($_POST);
             } else {
                 $this->getAttestationResultsDump($_POST);
             }
-        }
+        //}
     }
 
     public function addVisit($params)
@@ -84,15 +84,15 @@ class VisitModel extends Model
         $db->selectQuery($query,$params);
     }
 
-    public function sendEmailNotification($iin)
+    public function sendEmailNotification($params)
     {
-        $query = "SELECT login FROM user WHERE iin=:iin;";
+        $query = "SELECT login, concat(lastName, ' ', firstName) AS fio FROM user WHERE iin=:iin;";
         $db = Db::getDb();
-        $mailto = $db->selectQuery($query,['iin' => $iin]);
+        $mailto = $db->selectQuery($query,['iin' => $this->getTeacherIin($params['whoWasVisited'])]);
         
-        $query = "SELECT * FROM evaluationTeachers WHERE iinWhoWasVisited=:iin;";
+        /*$query = "SELECT * FROM evaluationTeachers WHERE iinWhoWasVisited=:iin;";
         $db = Db::getDb();
-        $data = $db->selectQuery($query,['iin' => $iin]);
+        $data = $db->selectQuery($query,['iin' => $iin]);*/
 
         $recipient = $mailto[0]['login']; 
         $subject = "Уведомление системы оценивания уроков"; 
@@ -104,9 +104,9 @@ class VisitModel extends Model
                                     <th style='padding: 5px; border: 1px solid black; background-color: #C5E1A5'>Урок</th>
                                 </tr>
                                 <tr>
-                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$data[0]['whoVisited']."</th>
-                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".date("d.m.Y",strtotime($data[0]['visitDate']))."</th>
-                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$data[0]['lessonNum']."</th>
+                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$mailto[0]['fio']."</th>
+                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".date("d.m.Y",strtotime($params['visitDate']))."</th>
+                                    <td style='padding: 5px; border: 1px solid black; background-color: #F1F8E9'>".$params['lessonNum']."</th>
                                 </tr>
                             </table>";
         $message = $message."<br><br>Это письмо сформировано и отправлено автоматически. Отвечать на него не нужно.";
@@ -114,7 +114,7 @@ class VisitModel extends Model
                    "Reply-To: is@kst.nis.edu.kz"."\r\n".
                    "MIME-Version: 1.0"."\r\n".
                    "Content-Type: text/html;";
-        mail($recipient, $subject, $message, $headers);
+        echo mail($recipient, $subject, $message, $headers);
     }
 
     public function deleteVisit($params)

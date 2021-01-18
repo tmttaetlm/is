@@ -154,7 +154,7 @@ class VisitController extends Controller
 
     public function actionSendEmailNotification()
     {
-        $this->model->sendEmailNotification($this->model->getTeacherIin($_POST['whoWasVisited']));
+        $this->model->sendEmailNotification($_POST);
     }
 
     public function actionGetCriteriaDiscription()
