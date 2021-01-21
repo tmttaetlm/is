@@ -36,14 +36,11 @@ class User
     public function signIn($login,$password)
     {
         $user = Ad::getDataFromAD($login,$password);
-        if ($user)
-        {
+        if ($user) {
             $this->saveUser($user);
             $_SESSION['userIin'] = $user['iin'];
             return true;
-        }
-        else 
-        {
+        } else {
             return false;
         }
     }
