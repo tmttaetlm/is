@@ -106,14 +106,14 @@
     <tr><th colspan="4"><?php echo getTexts('TABLE_HEADERS', 'recommendation')?></th></tr>
     <tr>
         <td colspan="4">
-            <textarea rows="5" maxlength="1000" id="visitRecommendation" name="visitRecommendation" class="big_textarea"
+            <textarea rows="5" maxlength="2000" id="visitRecommendation" name="visitRecommendation" class="big_textarea"
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>><?php print($data['data'][0]['recommendation']) ?></textarea>
         </td>
     </tr>
     <tr><th colspan="4"><?php echo getTexts('TABLE_HEADERS', 'purpose_feedback')?></th></tr>
     <tr>
         <td colspan="4">
-            <textarea rows="5" maxlength="500" id="visitPurposeRecommendation" name="visitPurposeRecommendation" class="big_textarea"
+            <textarea rows="5" maxlength="2000" id="visitPurposeRecommendation" name="visitPurposeRecommendation" class="big_textarea"
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>><?php print($data['data'][0]['purpose_review']) ?></textarea>
         </td>
     </tr>
