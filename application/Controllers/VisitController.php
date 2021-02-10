@@ -23,20 +23,20 @@ class VisitController extends Controller
     {
         $res = $this->model->checkUser($this->model->user->getIin());
         $userPriveleges = $this->model->user->getPriveleges();
-        if (!$res /*|| $this->model->user->getIin() == '920812350558'*/) {
+        if (!$res && !(in_array("visitPDOAccess", $userPriveleges)) /*|| $this->model->user->getIin() == '920812350558'*/) {
             $data['error'] = "У вас нет доступа к этому разделу. Не установлена соответствующая преподавателю роль или Вы не являетесь преподавателем. Обратитесь к администратору системы.";
             $data['content'] = $this->view->generate('visit/noAccess',$data);
         } else {
             $data['radioName']='tabR';
-            $data['tabItems']['standard']='Оценивание урока';
-            $data['tabItems']['attestation']='Оценивание урока в рамках аттестации';
+            $data['tabItems']['standard']='Наблюдение урока';
+            $data['tabItems']['attestation']='Наблюдение урока в рамках аттестации';
+            $data['tabItems']['management']='Управление';
 
-            /*$data['tabData']['standard'] = $this->view->generate('visit/languagePanel',$data);
-            $data['tabData']['standard'] = $data['tabData']['standard'].$this->getStandardTab($userPriveleges);*/
             $data['tabData']['standard'] = $this->getStandardTab($userPriveleges);
-            /*$data['tabData']['attestation'] = $this->view->generate('visit/languagePanel',$data);
-            $data['tabData']['attestation'] = $data['tabData']['attestation'].$this->getAttestationTab($userPriveleges);*/
             $data['tabData']['attestation'] = $this->getAttestationTab($userPriveleges);
+            if (in_array("visitManagementAccess", $userPriveleges)) {
+                $data['tabData']['management'] = $this->view->generate('visit/management',$data);
+            }
 
             $data['content'] = $this->view->generate('visit/languagePanel',$data);
             $data['content'] = $data['content'].$this->view->generate('framework/tabs',$data);
@@ -46,7 +46,7 @@ class VisitController extends Controller
                                                     <input type="hidden" name="focus">
                                                  </form>';
         }
-        $data['systemTitle'] = 'Система оценивания уроков';
+        $data['systemTitle'] = 'Система наблюдения уроков';
 
         $data['content'] = $this->view->generate('framework/system',$data);
         $data['user'] = $this->model->user->getFullName();
@@ -59,21 +59,19 @@ class VisitController extends Controller
     {
         $data['radioName']='tab';
         $data['tabItems']['myVisits']='План посещений';
-        $data['tabItems']['myEvaluations']='Мои оценки';
+        $data['tabItems']['myEvaluations']='Результаты наблюдения';
         if (in_array("visitReportAccess", $userPriveleges)) {
             $data['tabItems']['Reports']='Мониторинг посещений';
         }
-        if (in_array("visitManagementAccess", $userPriveleges)) {
+        /*if (in_array("visitManagementAccess", $userPriveleges)) {
             $data['tabItems']['Managements']='Управление';
-        }
+        }*/
 
         $data['tabData']['myVisits'] = $this->view->generate('visit/standard/myVisits',$data);
         $data['tabData']['myVisits'] = $data['tabData']['myVisits'].$this->getVisitTable();
-        $data['tabData']['myVisits'] = $data['tabData']['myVisits'];
-        
         $data['tabData']['myEvaluations'] = $this->getEvaluateTable();
         $data['tabData']['Reports'] = $this->view->generate('visit/standard/reports',$data);
-        $data['tabData']['Managements'] = $this->view->generate('visit/standard/managements',$data);
+        //$data['tabData']['Managements'] = $this->view->generate('visit/standard/managements',$data);
 
         $data['content'] = $this->view->generate('framework/tabs',$data);
 
@@ -84,18 +82,21 @@ class VisitController extends Controller
     {
         $data['radioName']='tab2';
         $data['tabItems']['myAVisits']='План посещений';
-        $data['tabItems']['myAEvaluations']='Мои оценки';
+        $data['tabItems']['myAEvaluations']='Результаты наблюдения';
+        if (in_array("visitLSOAccess", $userPriveleges)) {
+            $data['tabItems']['LSO']='ЛШО';
+        }
         if (in_array("visitReportAccess", $userPriveleges)) {
             $data['tabItems']['AReports']='Мониторинг посещений';
         }
         if (in_array("visitManagementAccess", $userPriveleges)) {
-            $data['tabItems']['AManagements']='Управление';
+            $data['tabItems']['AManagements']='Управление наблюдателями';
         }
 
         $data['tabData']['myAVisits'] = $this->getAttestationVisitTable();
-        $data['tabData']['myAVisits'] = $data['tabData']['myAVisits'];
-
         $data['tabData']['myAEvaluations'] = $this->getAttestationEvaluatesTable();
+        $data['tabData']['LSO'] = $this->view->generate('visit/attestation/lso',$data);
+        $data['tabData']['LSO'] = $data['tabData']['LSO'].$this->getLSOTable([]);
         $data['tabData']['AReports'] = $this->view->generate('visit/attestation/reports',$data);
         $data['tabData']['AManagements'] = $this->view->generate('visit/attestation/managements',$data);
 
@@ -134,6 +135,23 @@ class VisitController extends Controller
         return $this->view->cTable($title,$columns,$result,'visitResults');
     }
 
+    public function getLSOTable($param)
+    {
+        $title = '';
+        $result = $this->model->getLSOTable($param);
+        $columns = [
+            'num'=>'№',
+            'whoWasVisited'=>'Учитель',
+            'planning'=>'"Планирование"',
+            'teaching'=>'"Преподавание"',
+            'evaluating'=>'"Оценивание учебных достижений"',
+            'complex'=>'"Комплексный анализ урока"',
+            'half_year'=>'Период',
+            'result'=>'Результат'
+        ];
+        return $this->view->cTable($title,$columns,$result,'lsoTable');
+    }
+
     public function actionGetStaffList()
     {
         return $this->model->getStaffList();
@@ -144,7 +162,8 @@ class VisitController extends Controller
         if ($_POST['whoWasVisited'] == $this->model->user->getFullName()) { echo 'me'; }
         else {
             $res = $this->model->checkUser($this->model->getTeacherIin($_POST['whoWasVisited']));
-            if (!$res) { echo ''; }
+            $userPriveleges = $this->model->user->getPriveleges();
+            if (!$res && !(in_array("visitPDOAccess", $userPriveleges))) { echo ''; }
             else {
                 $this->model->addVisit($_POST);
                 echo $this->getVisitTable();
@@ -342,13 +361,18 @@ class VisitController extends Controller
         $this->model->savePersonPurpose($_POST);
     }
 
+    public function actionDeletePersonPurpose()
+    {
+        $this->model->deletePersonPurpose($_POST);
+    }
+
     public function getAttestationVisitTable()
     {
         $title = 'График моих посещений'; 
         $result = $this->model->getAttestationVisitsList();
         $columns = [
             'num' =>'№',
-            'whoWasVisited' => 'Посещаемый',
+            'whoWasVisited' => 'Учитель',
             'visitDate' => 'Период',
             'focus' => 'Фокус оценивания',
             'status'=> 'Статус',
@@ -507,7 +531,52 @@ class VisitController extends Controller
                 echo $this->view->cTable($title,$columns,$data,'numberOfAllVisits');
             }
         }
-        
     }
-    
+
+    public function actionGetLSOSearchResults()
+    {
+        echo $this->getLSOTable($_POST);
+    }
+
+    public function actionGetLSOResults()
+    {
+        $data = $this->model->getLSOResults($_POST);
+        //print_r($_POST);
+        if ($_POST['period'] == 1) {
+            echo $this->view->generate('visit/attestation/patternLSO1',$data);
+        } else if ($_POST['period'] == 2) {
+            echo $this->view->generate('visit/attestation/patternLSO2',$data);
+        }
+    }
+
+    public function actionSaveLSO()
+    {
+        $data = $this->model->saveLSO($_POST);
+        echo $this->getLSOTable($_POST);
+    }
+
+    public function actionGetAllSavedTeachers()
+    {
+        $data = [
+            'id' => 'selectTeacher',
+            'size' => '9',
+            'items' => $this->model->getAllSavedTeachers()
+        ];
+
+        if (!empty($_POST)) {
+            $data['selected'] = $_POST['person'];
+        }
+        //print_r($data['selected']);
+        echo $this->view->generate('framework/select', $data).'<button id="deleteTeacher">Удалить</button>';
+    }
+
+    public function actionSetHalfYearPeriods()
+    {
+        echo $this->model->setHalfYearPeriods($_POST);
+    }
+
+    public function actionGetHalfYearPeriods()
+    {
+        echo $this->model->getHalfYearPeriods();
+    }
 }
