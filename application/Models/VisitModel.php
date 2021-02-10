@@ -1972,6 +1972,8 @@ class VisitModel extends Model
                 $data[$i]['half_year'] = 'I полугодие';
             } else if ($data[$i]['period'] == 2) {
                 $data[$i]['half_year'] = 'II полугодие';
+            } else {
+                $data[$i]['half_year'] = 'Не указаны периоды полугодии.';
             }
         }
         return $data;
