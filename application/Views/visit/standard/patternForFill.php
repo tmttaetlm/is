@@ -40,14 +40,14 @@
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
                 <option selected></option>
                 <?php for ($i = 0; $i <= count($data['subj'])-1; $i++):?>
-                    <option <?php $data['data'][0]['lessonName'] == $data['subj'][$i]['subjects'] ? print('selected') : print('') ?>>
-                        <?php echo $data['subj'][$i]['subjects'] ?>
+                    <option <?php $data['data'][0]['lessonName'] == getTexts('SUBJECTS', $data['subj'][$i]['subjects']) ? print('selected') : print('') ?>>
+                        <?php echo getTexts('SUBJECTS', $data['subj'][$i]['subjects']) ?>
                     </option>
                 <?php endfor;?>
             </select>
         </td>
         <td>
-            <input type="text" class="visitInputs" id="visitTopic" name="visitTopic" placeholder="максимум 120 символов..." value="<?php print($data['data'][0]['theme']) ?>" 
+            <input type="text" maxlength="120" class="visitInputs" id="visitTopic" name="visitTopic" value="<?php print($data['data'][0]['theme']) ?>" 
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
         </td>
     </tr>

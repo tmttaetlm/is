@@ -58,14 +58,14 @@
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
                 <option selected></option>
                 <?php for ($i = 0; $i <= count($data['subj'])-1; $i++):?>
-                    <option <?php $data['data'][0]['lessonName'] == $data['subj'][$i]['subjects'] ? print('selected') : print('') ?>>
-                        <?php echo $data['subj'][$i]['subjects'] ?>
+                    <option <?php $data['data'][0]['lessonName'] == getTexts('SUBJECTS', $data['subj'][$i]['subjects']) ? print('selected') : print('') ?>>
+                        <?php echo getTexts('SUBJECTS', $data['subj'][$i]['subjects']) ?>
                     </option>
                 <?php endfor;?>
             </select>
         </td>
         <td colspan="2">
-            <input type="text" class="visitInputs" id="visitTopic" name="visitTopic" value="<?php print($data['data'][0]['theme']) ?>" 
+            <input type="text" maxlength="120" class="visitInputs" id="visitTopic" name="visitTopic" value="<?php print($data['data'][0]['theme']) ?>" 
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
         </td>
     </tr>
@@ -113,7 +113,7 @@
             <?php if ($data['def'][$i]['markable']) { ?>
                 <td colspan="6" id="attestation_criterias"><?php echo getTexts('ATTESTATION_CRITERIAS', $data['def'][$i]['criteria']); ?></td>
                 <td id="criteria_check" style="width: 10%;">
-                    <input type="checkbox" class="custom-checkbox-input" id="<?php echo "chk".$data['def'][$i]['num'] ?>"
+                    <input type="<?php $data['def'][$i]['rs'] == 1 ? print("checkbox") : print("radio") ?>" class="custom-checkbox-input" name="<?php echo "mark".$data['def'][$i]['markable'] ?>" id="<?php echo "chk".$data['def'][$i]['num'] ?>"
                     <?php if (substr($data['data'][0]['evaluates'],$j,1) == '1') { echo 'checked'; } ?>
                     <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
                     <label for="<?php echo "chk".$data['def'][$i]['num'] ?>" class="custom-checkbox-label"></label>
@@ -126,14 +126,14 @@
     <tr><th colspan="8"><?php echo getTexts('ATTESTATION_TABLE_HEADERS', 'lesson_feedback')?></th></tr>
     <tr>
         <td colspan="8">
-            <textarea rows="5" maxlength="1000" id="visitLessonReview" name="visitLessonReview" class="big_textarea"
+            <textarea rows="5" maxlength="2000" id="visitLessonReview" name="visitLessonReview" class="big_textarea"
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>><?php print($data['data'][0]['lesson_review']) ?></textarea>
         </td>
     </tr>
     <tr><th colspan="8"><?php echo getTexts('TABLE_HEADERS', 'purpose_feedback')?></th></tr>
     <tr>
         <td colspan="8">
-            <textarea rows="5" maxlength="500" id="visitPurposeReview" name="visitPurposeReview" class="big_textarea"
+            <textarea rows="5" maxlength="2000" id="visitPurposeReview" name="visitPurposeReview" class="big_textarea"
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>><?php print($data['data'][0]['purpose_review']) ?></textarea>
         </td>
     </tr>
