@@ -299,10 +299,9 @@ Class SkdController extends Controller
                 foreach ($dataFromDb as $key=>$value){
                     $data = [
                         'name' => 'comment',
-                        'id' => $dataFromDb[$key]['ID'],
+                        'data-id' => $dataFromDb[$key]['ID'],
                         'selected' => $dataFromDb[$key]['Address'],
                         'items' => [
-                            $dataFromDb[$key]['Address'],
                             '',
                             'Б/С',
                             'Б/Л',

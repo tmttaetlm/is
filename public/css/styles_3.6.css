@@ -340,48 +340,49 @@ input[type=submit]:hover {
 }
 
 
-.visitResults, .visitAResults {
+.visitResults, .visitAResults, .lsoTable {
     background-color: white;
     border-radius: 5px;
     width: 100%;
 }
 
-.visitResults h3, .visitAResults h3 {
+.visitResults h3, .visitAResults h3, .lsoTable h3 {
     text-align: center;
     line-height: 1.8;
 }
 
-.visitResults table .visitAResults table {
+.visitResults table .visitAResults table, .lsoTable table {
     margin: 10px auto;
     border: 1px solid black;
     width: 100%;
 }
-.visitResults .planned, .visitAResults .planned {
+.visitResults .planned, .visitAResults .planned, .lsoTable .planned {
     cursor: not-allowed !important;
 }
-.visitResults .allowed, .visitAResults .allowed {
+.visitResults .allowed, .visitAResults .allowed, .lsoTable .allowed {
     cursor: pointer;
     transition: 0.25s;
 }
-.visitResults .allowed:hover, .visitAResults .allowed:hover {
+.visitResults .allowed:hover, .visitAResults .allowed:hover, .lsoTable .allowed:hover {
     background-color: rgb(226, 234, 255);
     transition: 0.25s;
 }
-.visitResults td, .visitResults th, .visitAResults td, .visitAResults th {
+.visitResults td, .visitResults th, .visitAResults td, .visitAResults th, .lsoTable td, .lsoTable th {
     border: 1px solid black;
     padding: 3px;
 }
-.visitResults td, .visitAResults td {
+.visitResults td, .visitAResults td, .lsoTable td {
     text-align: left;
     height: 35px;
 }
-.visitResults .results td, .visitResults .results th, .visitAResults .results td, .visitAResults .results th {
+.visitResults .results td, .visitResults .results th, .visitAResults .results td, .visitAResults .results th,
+.lsoTable .results td, .lsoTable .results th {
     border: 1px solid #0191c5;
     height: 35px;
     width: 50px;
     text-align: center;
 }
-.visitResults caption, .visitAResults caption {
+.visitResults caption, .visitAResults caption, .lsoTable caption {
     text-align: center;
     font-size: 20px;
     margin: 0px auto 5px;
@@ -415,6 +416,17 @@ input[type=submit]:hover {
 }
 .visitAResults tr td:nth-child(5) {
     width: 220px;
+}
+
+/*.lsoTable {
+    font-size: 14px;
+}*/
+.lsoTable tr td:nth-child(7) {
+    /*width: 100px;*/
+    text-align: center;
+}
+.lsoTable td .visitBut {
+    text-align: center;
 }
 
 #tempRow {
@@ -473,15 +485,33 @@ input[type=submit]:hover {
     display: block;
     pointer-events: none;
 }
+.on_evaluating  {
+    background-color: #FFECB3 !important;
+}
+.on_waiting  {
+    background-color: #FFECB3 !important;
+}
+.confirmed  {
+    background-color: #C5E1A5 !important;
+}
+.on_confirmation  {
+    background-color: #FFECB3 !important;
+}
+.scheduled  {
+    background-color: #B2EBF2 !important;
+}
+.no_evaluates  {
+    background-color: #CFD8DC !important;
+}
+.deadline_is_out  {
+    background-color: #ffcdd2 !important;
+}
 
 .skd-menu li{
     list-style: none;
     display: inline;
     margin-right: 5px;
 }
-
-
-
 
 /* Tabs style */
 .ui-tabs {
@@ -501,7 +531,7 @@ input[type=submit]:hover {
   transition: 0.15s;
 }
 .ui-tabs > label[for='standard'], .ui-tabs > label[for='attestation'] {
-  width: calc(50% - 26px);
+  width: calc(40% - 26px);
   text-align: center;
 }
 .ui-tabs > label:hover {
@@ -532,12 +562,14 @@ input[type=submit]:hover {
 .ui-tabs input[id="bypassControl"]:checked ~ .content .bypassControl,
 .ui-tabs input[id="standard"]:checked ~ .content .standard,
 .ui-tabs input[id="attestation"]:checked ~ .content .attestation,
+.ui-tabs input[id="management"]:checked ~ .content .management,
 .ui-tabs input[id="myVisits"]:checked ~ .content .myVisits,
 .ui-tabs input[id="myEvaluations"]:checked ~ .content .myEvaluations,
 .ui-tabs input[id="Reports"]:checked ~ .content .Reports,
 .ui-tabs input[id="Managements"]:checked ~ .content .Managements,
 .ui-tabs input[id="myAVisits"]:checked ~ .content .myAVisits,
 .ui-tabs input[id="myAEvaluations"]:checked ~ .content .myAEvaluations,
+.ui-tabs input[id="LSO"]:checked ~ .content .LSO,
 .ui-tabs input[id="AReports"]:checked ~ .content .AReports,
 .ui-tabs input[id="AManagements"]:checked ~ .content .AManagements
 {
@@ -765,6 +797,29 @@ div .controls{
 .autocomplete #personForVisit {
     width: 30%;
     margin-bottom: 5px;
+}
+
+.LSO input[type=date] {
+    padding: 3px;
+    height: 25px;
+}
+.autocomplete #lsoFocus {
+    width: 245px;
+    height: 35px;
+}
+/*.autocomplete #personForLso {
+    width: 30%;
+}*/
+.lsoHeader {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.lso_textarea {
+    resize: none;
+    width: 98.7%;
+    height: 100px;
+    padding: 5px;
 }
 
 input[type=date] {
@@ -1114,14 +1169,14 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
 
 #teachersPurpose {
     resize: none;
-    width: 99%;
+    width: 98%;
     height: 120px;
     margin-top: 5px;
     padding: 5px;
 }
 
 .vmButtons {
-    width: 277px;
+    /*width: 277px;*/
     margin: 10px auto 0;
 }
 #showPersonManagements, #savePurpose {
@@ -1298,4 +1353,53 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
     color: rgb(0, 55, 255);
     text-decoration: underline;
     cursor: pointer;
+}
+
+.management #selectTeacher {
+    height: 298px;
+    width: 96%;
+    margin-bottom: 10px;
+}
+.management .selectLevel {
+    width: 50%;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+.management .addNewTeacher {
+    margin-bottom: 10px;
+}
+#teachersList {
+    margin-left: 0;
+}
+
+#lsoFilters > input[id="firstHY"], #lsoFilters > input[id="secondHY"], #lsoFilters > input[id="allHY"] {
+    display: none;
+}
+#lsoFilters > label[for="firstHY"], #lsoFilters > label[for="secondHY"], #lsoFilters > label[for="allHY"] {
+    background-color: #ecf0f1;
+    padding: 5px;
+    cursor: pointer;
+}
+#lsoFilters > input:checked + label[for="firstHY"], #lsoFilters > input:checked + label[for="secondHY"], #lsoFilters > input:checked + label[for="allHY"] {
+    background-color: #5e852c;
+    color: #fefefe;
+}
+#lsoFilters > label[for="firstHY"] {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    margin-right: -2px;
+    padding: 5px 10px;
+}
+#lsoFilters > label[for="secondHY"] {
+    margin-left: -2px;
+    padding: 5px 10px;
+}
+#lsoFilters > label[for="allHY"] {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    margin-left: -5px;
+}
+
+button[name="searchLSO"] {
+    margin-left: 10px;
 }

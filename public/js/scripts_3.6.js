@@ -162,6 +162,15 @@ window.onload = function() {
         });
     }
 
+    if (document.getElementById('personForLso')){
+        let seachField = document.getElementById("personForLso");
+        seachField.value = '';
+        
+        ajaxJson('/visit/getStaffList', function(data){
+            autocomplete(seachField, data);
+        });
+    }
+
     //Инициализация слайдера
     var slides = document.querySelectorAll('#slides .slide');
     if (slides.length>0) {
@@ -262,6 +271,48 @@ window.onload = function() {
             autocomplete(seachField, data);
         });
     }
+
+    if (document.getElementById('firstPeriodStart') && document.getElementById('firstPeriodEnd') && document.getElementById('secondPeriodStart') && document.getElementById('secondPeriodEnd')){
+        ajax('/visit/getHalfYearPeriods', function(data){
+            let fp = data.substr(0, data.indexOf('|'));
+            let sp = data.substr(data.indexOf('|')+1, data.length);
+            document.getElementById("firstPeriodStart").value = fp.substr(0,fp.indexOf(';'));
+            document.getElementById("firstPeriodEnd").value = fp.substr(fp.indexOf(';')+1, fp.length);
+            document.getElementById("secondPeriodStart").value = sp.substr(0,sp.indexOf(';'));
+            document.getElementById("secondPeriodEnd").value = sp.substr(sp.indexOf(';')+1, sp.length);
+
+            if (today >= fp.substr(0,fp.indexOf(';')) && today <= fp.substr(fp.indexOf(';')+1, fp.length)) {
+                document.getElementById("pAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+                document.getElementById("pAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+                document.getElementById("tAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+                document.getElementById("tAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+                document.getElementById("eAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+                document.getElementById("eAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+                document.getElementById("cAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+                document.getElementById("cAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+            } else if (today >= sp.substr(0,sp.indexOf(';')) && today <= sp.substr(sp.indexOf(';')+1, sp.length)) {
+                document.getElementById("pAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+                document.getElementById("pAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length);
+                document.getElementById("tAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+                document.getElementById("tAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length);
+                document.getElementById("eAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+                document.getElementById("eAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length);
+                document.getElementById("cAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+                document.getElementById("cAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length); 
+            }
+        }, '');
+    }
+    
+    if (document.getElementById('teachersList')){
+        ajax('/visit/getAllSavedTeachers', function(data){
+            let selList = document.getElementById("teachersList");
+            selList.innerHTML = data;
+        }, '');
+    }
+
+    if (document.getElementById('allHY')){ document.getElementById('allHY').checked = true; }
+
+
 }
 
 //Keyboard focusInHandler
@@ -431,7 +482,10 @@ function changeHandler(obj)
     }
     
     //admin roleSettings
-    if (obj.id == "skdCanBrowseStudentsLogs"|| obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="skdCanAddParentContact" || obj.id =="fasInvControl" || obj.id =="fasInvStart" || obj.id =="visitReportAccess" || obj.id =="visitManagementAccess"){
+    if (obj.id == "skdCanBrowseStudentsLogs" || obj.id == "skdCanBrowseStaffLogs"|| obj.id == "skdCanBrowseGeneralControl" || 
+    obj.id == "fasCanSeach" || obj.id == "adminPanel" || obj.id =="skdGeneralControlCanEditComments" || obj.id =="skdCanAddParentContact" || 
+    obj.id =="fasInvControl" || obj.id =="fasInvStart" || obj.id =="visitReportAccess" || obj.id =="visitManagementAccess"
+    || obj.id =="visitLSOAccess" || obj.id =="visitPDOAccess"){
         var roleList = document.getElementById('roleList');
         if (roleList.selectedIndex ==-1) {
             alert('Выберите роль, для которой настраиваете права!');
@@ -613,6 +667,22 @@ function changeHandler(obj)
         }, param);
     }
 
+    if (obj.id == 'firstPeriodStart' || obj.id == 'firstPeriodEnd') {
+        let firstPeriodStart = document.getElementById('firstPeriodStart').value;
+        let firstPeriodEnd = document.getElementById('firstPeriodEnd').value;
+        if (firstPeriodStart != '' && firstPeriodEnd != '') {
+            param = 'firstPeriodStart='+firstPeriodStart+'&firstPeriodEnd='+firstPeriodEnd+'&period=1';
+            ajax('/visit/setHalfYearPeriods', function(data){ console.log(data) }, param);
+        }
+    }
+    if (obj.id == 'secondPeriodStart' || obj.id == 'secondPeriodEnd') {
+        let secondPeriodStart = document.getElementById('secondPeriodStart').value;
+        let secondPeriodEnd = document.getElementById('secondPeriodEnd').value;
+        if (secondPeriodStart != '' && secondPeriodEnd != '') {
+            param = 'secondPeriodStart='+secondPeriodStart+'&secondPeriodEnd='+secondPeriodEnd+'&period=2';
+            ajax('/visit/setHalfYearPeriods', function(data){ console.log(data) }, param);
+        }
+    }
 }
 
 function showPermissions() {
@@ -1097,6 +1167,11 @@ function clickHandler(obj)
         closePattern();
     }
 
+    if (obj.name == "saveLSO") {
+        saveLSO();
+        closePattern();
+    }
+
     if (obj.name == "closePattern") {
         closePattern();
     }
@@ -1121,8 +1196,12 @@ function clickHandler(obj)
         var prevRow = obj.parentNode.parentNode;
         var dumpForm = document.getElementById('dumpVisitResults');
         dumpForm.rowId.value = prevRow.dataset.rowId;
-        dumpForm.focus.value = obj.id != 'lso' ? prevRow.dataset.focus : 'lso';
-        dumpForm.mode.value = prevRow.offsetParent.className=='visitResults'?'standart':'attestation';
+        dumpForm.focus.value = prevRow.dataset.focus;
+        if (prevRow.offsetParent.className=='lsoTable') {
+            dumpForm.mode.value = prevRow.dataset.period;
+        } else {
+            dumpForm.mode.value = prevRow.offsetParent.className=='visitResults'?'standart':'attestation';
+        }
         dumpForm.submit();
     }
     if (obj.name == 'saveToPDFforRSh') {
@@ -1138,8 +1217,8 @@ function clickHandler(obj)
         if (obj.localName != 'th' && obj.parentElement.className == 'allowed') {
             let row = obj.parentNode;
             let className = row.offsetParent.parentElement.className;
-            let param = 'rowId='+row.dataset.rowId+'&className='+className;
             if (obj.offsetParent.className == 'visitResults') {
+                let param = 'rowId='+row.dataset.rowId+'&className='+className;
                 ajax('/visit/getVisitResults', function(data){
                     if (data.indexOf('content-login') >= 0) { location.reload(true) };
                     if (document.getElementById('tempRow')) {
@@ -1166,6 +1245,7 @@ function clickHandler(obj)
                 }, param);
             }
             if (obj.offsetParent.className == 'visitAResults') {
+                let param = 'rowId='+row.dataset.rowId+'&className='+className;
                 ajax('/visit/getAttestationVisitResults', function(data){
                     if (data.indexOf('content-login') >= 0) { location.reload(true) };
                     if (document.getElementById('tempRow')) {
@@ -1191,40 +1271,63 @@ function clickHandler(obj)
                     cell.innerHTML = data;
                 }, param);
             }
+            if (className == 'LSO') {
+                let param = 'rowId='+row.dataset.rowId+'&period='+row.dataset.period;
+                ajax('/visit/getLSOResults', function(data){
+                    if (data.indexOf('content-login') >= 0) { location.reload(true) };
+                    if (document.getElementById('tempRow')) {
+                        let tempRow = document.getElementById('tempRow');
+                        let tempRowId = tempRow.parentNode.children[tempRow.rowIndex-1].dataset.rowId;
+                        saveLSO();
+                        closePattern();
+                        if (tempRowId == row.dataset.rowId) { return; }
+                    }
+                    let table = document.body.querySelector('.'+className).querySelector('.lsoTable');
+                    let new_tr = table.insertRow(row.rowIndex+1);
+                    new_tr.id = "tempRow";
+                    let cell = new_tr.insertCell(0);
+                    cell.colSpan = 8;
+                    cell.id = 'lso_review'
+                    cell.innerHTML = data;
+                }, param)
+            }
         }
     }
 
-if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
+    if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
         let tempRow = document.getElementById('tempRow');
         let prevRow = tempRow.parentNode.children[tempRow.rowIndex-1];
         let params = 'rowId='+prevRow.dataset.rowId + (obj.name == 'confirmResults' ? '&mode=standart' : '&mode=attestation');
         ajax('/visit/checkEvaluates', function(data){
-            //console.log(data);
             if (data != 'none') {
                 let q = confirm('Убедитесь в корректности заполненных данных. После подтверждения редактирование данных невозможно!');
                 if (q) {
                     obj.style = "";
                     obj.disabled = true;
-                    let mode = obj.name == 'confirmResults' ? 5 : 4;
-                    if (obj.id == 'watcherSide') { prevRow.children[mode].children[1].disabled = true; }
+                    //let mode = obj.name == 'confirmResults' ? 5 : 4;
+                    if (obj.id == 'watcherSide' && obj.name == 'confirmResults') { prevRow.children[5].children[1].disabled = true; }
                     
                     let params = 'rowId='+prevRow.dataset.rowId+(obj.id=='watcherSide'?'&side=watcher':'&side=presenter')+(obj.name=='confirmResults'?'&mode=standart':'&mode=attestation');
                     ajax('/visit/setConfirmation', function(){}, params);
 
                     ajax('/visit/checkEvaluates', function(data){
-                        let mode = obj.name == 'confirmResults' ? 4 : 3;
+                        //let mode = obj.name == 'confirmResults' ? 4 : 3;
                         switch (data) {
                             case 'confirmed':
-                                prevRow.children[mode].lastChild.innerText = 'Подтверждено';
+                                prevRow.children[4].lastChild.innerText = 'Подтверждено';
+                                prevRow.children[4].lastChild.className = 'status confirmed'
                                 break;
                             case 'half-confirmed':
-                                prevRow.children[mode].lastChild.innerText = 'На подтверждении';
+                                prevRow.children[4].lastChild.innerText = 'На подтверждении';
+                                prevRow.children[4].lastChild.className = 'status on_confirmation';
                                 break;
                             case 'non-confirmed':
-                                prevRow.children[mode].lastChild.innerText = 'Ожидает подтверждения';
+                                prevRow.children[4].lastChild.innerText = 'Ожидает подтверждения';
+                                prevRow.children[4].lastChild.className = 'status on_waiting';
                                 break;
                             default:
-                                prevRow.children[mode].lastChild.innerText = 'На оценивании';
+                                prevRow.children[4].lastChild.innerText = 'На оценивании';
+                                prevRow.children[4].lastChild.className = 'status on_evaluating';
                                 break;
                         }
                     }, params);
@@ -1347,7 +1450,7 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
         dumpForm.submit();
     }
 
-    if (obj.id == 'showPersonManagements') {
+    /*if (obj.id == 'showPersonManagements') {
         let person = document.getElementById('personForManagement');
         let param = 'person='+person.value;
         ajax('/visit/managePersonPurpose', function(data){
@@ -1357,16 +1460,7 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
                 alert('Нет заданных целей профессионального развития для выбранного учителя.');
             }
         }, param);
-    }
-
-    if (obj.id == 'savePurpose') {
-        let person = document.getElementById('personForManagement');
-        let purpose = document.getElementById('teachersPurpose');
-        let param = 'person='+person.value+'&purpose='+purpose.value;
-        ajax('/visit/savePersonPurpose', function(data){
-            showNotification('Сохранено');
-        }, param);
-    }
+    }*/
 
     if (obj.id == 'saveSynods') {
         let person = document.getElementById('personForAManagement');
@@ -1453,6 +1547,65 @@ if (obj.name == 'confirmResults' || obj.name == 'confirmAResults') {
             }
         }, param);
     }
+
+    if (obj.name == 'searchLSO') {
+        var param = 'person='+document.getElementById('personForLso').value+'&period='+getSelectedRadio('period');
+        ajax('/visit/getLSOSearchResults', function(data){
+            //console.log(param);
+            document.body.querySelector('.LSO').querySelector('.lsoTable').innerHTML = data;
+        }, param);
+    }
+
+    if (obj.id == 'savePurpose') {
+        let id = document.getElementById('selectTeacher');
+        let purpose = document.getElementById('teachersPurpose');
+        let cur_level = document.getElementById('selectCurLevel');
+        let up_level = document.getElementById('selectUpLevel');
+        let param = 'id='+id.selectedOptions[0].dataset.oid+'&person='+id.selectedOptions[0].text+'&purpose='+purpose.value+'&cur_level='+cur_level.value+'&up_level='+up_level.value+'&mode=old';
+        ajax('/visit/savePersonPurpose', function(data){
+            showNotification('Цель и уровни сохранены');
+        }, param);
+    }
+    
+    if (obj.parentElement.id == "selectTeacher")
+    {
+        var param = 'id='+obj.dataset.oid;
+        ajax('/visit/managePersonPurpose', function(data){
+            if (data != 'empty') {
+                var purposes = data.split(';');
+                document.getElementById('teachersPurpose').value = purposes[0];
+                document.getElementById('selectCurLevel').value = purposes[1];
+                document.getElementById('selectUpLevel').value = purposes[2];
+            } else {
+                alert('Нет заданных целей профессионального развития для выбранного учителя.');
+            }
+        }, param);
+    }
+
+    if (obj.id == 'addNewTeacher') {
+        var person = document.getElementById('personForManagement');
+        var param = 'person='+person.value+'&mode=new';
+        ajax('/visit/savePersonPurpose', function(data){
+            ajax('/visit/getAllSavedTeachers', function(data){
+                let selList = document.getElementById("teachersList");
+                selList.innerHTML = data;
+                person.value = '';
+            }, 'person='+person.value);
+            showNotification('Преподаватель добавлен в список');
+        }, param);
+    }
+
+    if (obj.id == 'deleteTeacher') {
+        let person = document.getElementById('selectTeacher');
+        let param = 'id='+person.selectedOptions[0].dataset.oid;
+        ajax('/visit/deletePersonPurpose', function(data){
+            ajax('/visit/getAllSavedTeachers', function(data){
+                let selList = document.getElementById("teachersList");
+                selList.innerHTML = data;
+            }, '');
+            showNotification('Преподаватель удалён из списка');
+        }, param);
+    }
 }
 
 function saveVisitResults(){
@@ -1473,21 +1626,25 @@ function saveVisitResults(){
                     '&subject='+subject+'&topic='+topic+'&grade='+grade+
                     '&recommendation='+recommendation+'&marks='+marks+
                     '&purpose_review='+purpose_review;
-        ajax('/visit/setVisitResults', function(){}, param);
+        ajax('/visit/setVisitResults', function(data){ console.log(data) }, param);
         param = 'rowId='+prevRow.dataset.rowId+'&mode=standart';
         ajax('/visit/checkEvaluates', function(data){
             switch (data) {
                 case 'confirmed':
                     prevRow.children[4].lastChild.innerText = 'Подтверждено';
+                    prevRow.children[4].lastChild.className = 'status confirmed'
                     break;
                 case 'half-confirmed':
                     prevRow.children[4].lastChild.innerText = 'На подтверждении';
+                    prevRow.children[4].lastChild.className = 'status on_confirmation';
                     break;
                 case 'non-confirmed':
                     prevRow.children[4].lastChild.innerText = 'Ожидает подтверждения';
+                    prevRow.children[4].lastChild.className = 'status on_waiting';
                     break;
                 default:
                     prevRow.children[4].lastChild.innerText = 'На оценивании';
+                    prevRow.children[4].lastChild.className = 'status on_evaluating';
                     break;
             }
         }, param);
@@ -1512,20 +1669,42 @@ function saveVisitResults(){
         ajax('/visit/checkEvaluates', function(data){
             switch (data) {
                 case 'confirmed':
-                    prevRow.children[3].lastChild.innerText = 'Подтверждено';
+                    prevRow.children[4].lastChild.innerText = 'Подтверждено';
+                    prevRow.children[4].lastChild.className = 'status confirmed'
                     break;
                 case 'half-confirmed':
-                    prevRow.children[3].lastChild.innerText = 'На подтверждении';
+                    prevRow.children[4].lastChild.innerText = 'На подтверждении';
+                    prevRow.children[4].lastChild.className = 'status on_confirmation';
                     break;
                 case 'non-confirmed':
-                    prevRow.children[3].lastChild.innerText = 'Ожидает подтверждения';
+                    prevRow.children[4].lastChild.innerText = 'Ожидает подтверждения';
+                    prevRow.children[4].lastChild.className = 'status on_waiting';
                     break;
                 default:
-                    prevRow.children[3].lastChild.innerText = 'На оценивании';
+                    prevRow.children[4].lastChild.innerText = 'На оценивании';
+                    prevRow.children[4].lastChild.className = 'status on_evaluating';
                     break;
             }
         }, param);
     }
+}
+
+function saveLSO(){
+    let tempRow = document.getElementById('tempRow');
+    let prevRow = tempRow.parentNode.children[tempRow.rowIndex-1];
+    let job = document.getElementById('LSO_job').value;
+    let param = 'rowId='+prevRow.dataset.rowId+'&period='+prevRow.dataset.period;
+    if (prevRow.dataset.period == 1) {
+        var summary = document.getElementById('lso1summary').value;
+        var correction = document.getElementById('lso1correction').value;
+        param = param+'&job='+job+'&summary='+summary+'&correction='+correction;
+    } else if (prevRow.dataset.period == 2) {
+        var summary = document.getElementById('lso2summary').value;
+        var correction = document.getElementById('lso2correction').value;
+        var recommendation = document.getElementById('lso2recommendation').value;
+        param = param+'&job='+job+'&summary='+summary+'&correction='+correction+'&recommendation='+recommendation;
+    }
+    ajax('/visit/saveLSO', function(data){ /*console.log(data);*/ }, param);
 }
 
 function closePattern() {
