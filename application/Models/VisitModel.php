@@ -1954,6 +1954,7 @@ class VisitModel extends Model
                 LEFT JOIN (SELECT a.groupId,
                                   (CASE WHEN MIN(a.visitDateFrom)>=(SELECT dateTimeValue AS dateTimeValue FROM isdb.info WHERE id = 4) AND MAX(a.visitDateTo)<=(SELECT dateTimeValue AS dateTimeValue FROM isdb.info WHERE id = 5) THEN 1
                                         WHEN MIN(a.visitDateFrom)>=(SELECT dateTimeValue AS dateTimeValue FROM isdb.info WHERE id = 6) AND MAX(a.visitDateTo)<=(SELECT dateTimeValue AS dateTimeValue FROM isdb.info WHERE id = 7) THEN 2
+                                        ELSE 0
                                    END) AS period
                             FROM isdb.teachers_attestation a
                             GROUP BY a.whoWasVisited, a.groupId
@@ -1972,7 +1973,7 @@ class VisitModel extends Model
                 $data[$i]['half_year'] = 'I полугодие';
             } else if ($data[$i]['period'] == 2) {
                 $data[$i]['half_year'] = 'II полугодие';
-            } else {
+            } else if ($data[$i]['period'] == 0) {
                 $data[$i]['half_year'] = 'Не указаны периоды полугодии.';
             }
         }

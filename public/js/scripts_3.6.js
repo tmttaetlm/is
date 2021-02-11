@@ -1198,11 +1198,12 @@ function clickHandler(obj)
         dumpForm.rowId.value = prevRow.dataset.rowId;
         dumpForm.focus.value = prevRow.dataset.focus;
         if (prevRow.offsetParent.className=='lsoTable') {
-            dumpForm.mode.value = prevRow.dataset.period;
+            if (prevRow.dataset.period != 0) { dumpForm.mode.value = prevRow.dataset.period; }
+            else { alert('Невозможно выгрузить ЛШО. Не указаны периоды для полугодии.'); }
         } else {
             dumpForm.mode.value = prevRow.offsetParent.className=='visitResults'?'standart':'attestation';
         }
-        dumpForm.submit();
+        if (dumpForm.mode.value != '') { dumpForm.submit(); }
     }
     if (obj.name == 'saveToPDFforRSh') {
         var prevRow = obj.parentNode.parentNode;
@@ -1272,24 +1273,26 @@ function clickHandler(obj)
                 }, param);
             }
             if (className == 'LSO') {
-                let param = 'rowId='+row.dataset.rowId+'&period='+row.dataset.period;
-                ajax('/visit/getLSOResults', function(data){
-                    if (data.indexOf('content-login') >= 0) { location.reload(true) };
-                    if (document.getElementById('tempRow')) {
-                        let tempRow = document.getElementById('tempRow');
-                        let tempRowId = tempRow.parentNode.children[tempRow.rowIndex-1].dataset.rowId;
-                        saveLSO();
-                        closePattern();
-                        if (tempRowId == row.dataset.rowId) { return; }
-                    }
-                    let table = document.body.querySelector('.'+className).querySelector('.lsoTable');
-                    let new_tr = table.insertRow(row.rowIndex+1);
-                    new_tr.id = "tempRow";
-                    let cell = new_tr.insertCell(0);
-                    cell.colSpan = 8;
-                    cell.id = 'lso_review'
-                    cell.innerHTML = data;
-                }, param)
+                if (row.dataset.period != 0) {
+                    let param = 'rowId='+row.dataset.rowId+'&period='+row.dataset.period;
+                    ajax('/visit/getLSOResults', function(data){
+                        if (data.indexOf('content-login') >= 0) { location.reload(true) };
+                        if (document.getElementById('tempRow')) {
+                            let tempRow = document.getElementById('tempRow');
+                            let tempRowId = tempRow.parentNode.children[tempRow.rowIndex-1].dataset.rowId;
+                            saveLSO();
+                            closePattern();
+                            if (tempRowId == row.dataset.rowId) { return; }
+                        }
+                        let table = document.body.querySelector('.'+className).querySelector('.lsoTable');
+                        let new_tr = table.insertRow(row.rowIndex+1);
+                        new_tr.id = "tempRow";
+                        let cell = new_tr.insertCell(0);
+                        cell.colSpan = 8;
+                        cell.id = 'lso_review'
+                        cell.innerHTML = data;
+                    }, param);
+                } else { alert('Невозможно сформировать ЛШО. Не указаны периоды для полугодии.'); }
             }
         }
     }

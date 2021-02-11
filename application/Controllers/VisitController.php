@@ -541,7 +541,6 @@ class VisitController extends Controller
     public function actionGetLSOResults()
     {
         $data = $this->model->getLSOResults($_POST);
-        //print_r($_POST);
         if ($_POST['period'] == 1) {
             echo $this->view->generate('visit/attestation/patternLSO1',$data);
         } else if ($_POST['period'] == 2) {
