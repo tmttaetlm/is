@@ -1,9 +1,10 @@
 <?php
 
-/*
- * This file for syncronize data with 1C
- */
+/*This file for syncronize data with 1C*/
+
+//define('ROOT', '/home/developer/Code/PHP/is');
 define('ROOT', '/var/www/is');
+
 //Turns on the Composer Autoload
 require ROOT.'/application/vendor/autoload.php';
 
@@ -68,19 +69,21 @@ class FasSync {
         {
             $acc = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
             if ($acc != '2419') {
-                $data[] = $worksheet->getCellByColumnAndRow(1, $row)->getFormattedValue(); //invNumber
-                $data[] = $worksheet->getCellByColumnAndRow(2, $row)->getFormattedValue(); //barcode
-                $data[] = $worksheet->getCellByColumnAndRow(3, $row)->getValue(); //description
-                $data[] = $worksheet->getCellByColumnAndRow(4, $row)->getValue(); //dateFixed
-                $data[] = $worksheet->getCellByColumnAndRow(5, $row)->getFormattedValue(); //iin
-                $data[] = $worksheet->getCellByColumnAndRow(6, $row)->getValue(); //person
-                $data[] = $worksheet->getCellByColumnAndRow(7, $row)->getValue(); //location
-                $data[] = $worksheet->getCellByColumnAndRow(8, $row)->getValue(); //sn
-                $data[] = $worksheet->getCellByColumnAndRow(9, $row)->getValue(); //comment
-                $data[] = $worksheet->getCellByColumnAndRow(10, $row)->getValue(); //registrationDate
-                $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue(); //accountablePersonIin
-                $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue(); //locationCode
-                $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue(); //accounts
+                /*1*/ $data[] = $worksheet->getCellByColumnAndRow(1, $row)->getFormattedValue(); //invNumber
+                /*2*/ $data[] = $worksheet->getCellByColumnAndRow(2, $row)->getFormattedValue(); //barcode
+                /*3*/ $data[] = $worksheet->getCellByColumnAndRow(3, $row)->getValue(); //description
+                /*4*/ $data[] = $worksheet->getCellByColumnAndRow(4, $row)->getValue(); //dateFixed
+                /*5*/ $data[] = $worksheet->getCellByColumnAndRow(5, $row)->getFormattedValue(); //iin
+                /*6*/ $data[] = $worksheet->getCellByColumnAndRow(6, $row)->getValue(); //person
+                /*7*/ $data[] = $worksheet->getCellByColumnAndRow(7, $row)->getValue(); //location
+                /*8*/ $data[] = $worksheet->getCellByColumnAndRow(8, $row)->getValue(); //sn
+                /*9*/ $data[] = $worksheet->getCellByColumnAndRow(9, $row)->getValue(); //comment
+                /*10*/ $data[] = $worksheet->getCellByColumnAndRow(10, $row)->getValue(); //registrationDate
+                /*11*/ $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue(); //accountablePersonIin
+                /*12*/ $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue(); //locationCode
+                /*13*/ $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue(); //accounts
+                /*14*/ $data[] = $worksheet->getCellByColumnAndRow(15, $row)->getValue(); //properties
+                /*15*/ $data[] = $worksheet->getCellByColumnAndRow(16, $row)->getValue(); //upgradeInfo
             }
         }
         //Deletes all '#NULL!' values
@@ -100,19 +103,21 @@ class FasSync {
         {
             $acc = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
             if ($acc == '2419') {
-                $data[] = $worksheet->getCellByColumnAndRow(1, $row)->getFormattedValue(); //invNumber
-                $data[] = $worksheet->getCellByColumnAndRow(2, $row)->getFormattedValue(); //barcode
-                $data[] = $worksheet->getCellByColumnAndRow(3, $row)->getValue(); //description
-                $data[] = $worksheet->getCellByColumnAndRow(4, $row)->getValue(); //dateFixed
-                $data[] = $worksheet->getCellByColumnAndRow(5, $row)->getFormattedValue(); //iin
-                $data[] = $worksheet->getCellByColumnAndRow(6, $row)->getValue(); //person
-                $data[] = $worksheet->getCellByColumnAndRow(7, $row)->getValue(); //location
-                $data[] = $worksheet->getCellByColumnAndRow(8, $row)->getValue(); //sn
-                $data[] = $worksheet->getCellByColumnAndRow(9, $row)->getValue(); //comment
-                $data[] = $worksheet->getCellByColumnAndRow(10, $row)->getValue(); //registrationDate
-                $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue(); //accountablePersonIin
-                $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue(); //locationCode
-                $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue(); //accounts
+                /*1*/ $data[] = $worksheet->getCellByColumnAndRow(1, $row)->getFormattedValue(); //invNumber
+                /*2*/ $data[] = $worksheet->getCellByColumnAndRow(2, $row)->getFormattedValue(); //barcode
+                /*3*/ $data[] = $worksheet->getCellByColumnAndRow(3, $row)->getValue(); //description
+                /*4*/ $data[] = $worksheet->getCellByColumnAndRow(4, $row)->getValue(); //dateFixed
+                /*5*/ $data[] = $worksheet->getCellByColumnAndRow(5, $row)->getFormattedValue(); //iin
+                /*6*/ $data[] = $worksheet->getCellByColumnAndRow(6, $row)->getValue(); //person
+                /*7*/ $data[] = $worksheet->getCellByColumnAndRow(7, $row)->getValue(); //location
+                /*8*/ $data[] = $worksheet->getCellByColumnAndRow(8, $row)->getValue(); //sn
+                /*9*/ $data[] = $worksheet->getCellByColumnAndRow(9, $row)->getValue(); //comment
+                /*10*/ $data[] = $worksheet->getCellByColumnAndRow(10, $row)->getValue(); //registrationDate
+                /*11*/ $data[] = $worksheet->getCellByColumnAndRow(12, $row)->getValue(); //accountablePersonIin
+                /*12*/ $data[] = $worksheet->getCellByColumnAndRow(13, $row)->getFormattedValue(); //locationCode
+                /*13*/ $data[] = $worksheet->getCellByColumnAndRow(14, $row)->getValue(); //accounts
+                /*14*/ $data[] = $worksheet->getCellByColumnAndRow(15, $row)->getValue(); //properties
+                /*15*/ $data[] = $worksheet->getCellByColumnAndRow(16, $row)->getValue(); //upgradeInfo
             }
         }
         //Deletes all '#NULL!' values
@@ -125,12 +130,12 @@ class FasSync {
 
     private function multiInsert($data,$mode)
     {
-        $numRows = count($data)/13;
-        while ($numRows > 5000)
+        $numRows = count($data)/15;
+        while ($numRows > 4000)
         {
-            $d = array_splice($data,0,5000*13);
-            $this->writeData(5000,$d,$mode);
-            $numRows -=5000;
+            $d = array_splice($data,0,4000*15);
+            $this->writeData(4000,$d,$mode);
+            $numRows -= 4000;
         }
         if ($numRows > 0)
         {
@@ -143,11 +148,11 @@ class FasSync {
     	$placeHolders='';
     	for ($i=1; $i <= $numRows; $i++)
 	    {
-            $placeHolders.= '(?,?,?,?,?,?,?,?,?,?,?,?,?),';
+            $placeHolders .= '(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?),';
     	}
     	$placeHolders = mb_substr($placeHolders, 0, -1);
         //make query
-        $query = "INSERT INTO ".$mode."(invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode,account) VALUES ".$placeHolders;
+        $query = "INSERT INTO ".$mode." (invNumber,barcode,description,dateFix,iin,person,location,sn,comment,registrationDate,accountablePersonIin,locationCode,account,properties,upgradeInfo) VALUES ".$placeHolders;
         $this->db->InsertDataByQ($query, $data);
     }
 }
