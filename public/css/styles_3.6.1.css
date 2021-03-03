@@ -732,31 +732,67 @@ div .controls{
     background-color: white;
     border-radius: 5px;
     margin: 0 auto;
+    /*table-layout: fixed;
+    width: 100%;*/
 }
-
 .fasResultTable h3{
     text-align: center;
     line-height: 1.8;
 }
-
 .fasResultTable table{
     margin: 0 auto;
     border: 1px solid black;
     
 }
-.fasResultTable td, .fasResultTable th {
-    border: 1px solid black;
-    padding: 3px;
-}
-
 .fasResultTable caption{
     text-align: center;
     font-size: 20px;
 }
+.fasResultTable td, .fasResultTable th {
+    border: 1px solid black;
+    padding: 3px;
+}
+.fasResultTable td {
+    text-align: center;
+    transition: 0.5s;
+}
+/*.fasResultTable th:nth-child(1) {
+    width: 20px;
+}
+.fasResultTable th:nth-child(3) {
+    width: 165px;
+}
+.fasResultTable th:nth-child(4) {
+    width: 155px;
+}
+.fasResultTable th:nth-child(5) {
+    width: 110px;
+}
+.fasResultTable th:nth-child(8) {
+    width: 200px;
+}
+.fasResultTable td:nth-child(8) {
+    word-wrap: break-word;
+}*/
+.fasResultTable tr:hover td {
+    background: rgb(226, 234, 255);
+    transition: 0.5s;
+}
+.fixRowHeight {
+    --my-height: 40px;
+    height: 40px;
+    vertical-align: middle;
+    overflow-y: hidden;
+    transition: 0.5s;
+}
+.fixRowHeight:hover {
+    height: var(--my-height);
+    vertical-align: middle;
+    overflow-y: hidden;
+    transition: 0.5s;
+}
 
-/*
-    Autocomplete styles
-*/
+/*Autocomplete styles*/
 
 .autocomplete {
   /*the container must be positioned relative:*/
@@ -877,10 +913,15 @@ table.users td{
     /*padding: 3px 10px;*/
     max-width: 250px;
     width: 1px;
+    text-align: center;
+    transition: 0.5s;
 }
-
 table.users tr:hover td{
     background: rgb(226, 234, 255);/* фон строки при наведении */
+    transition: 0.5s;
+}
+table.users tr:nth-child(1) {
+    width: 16px;
 }
 
 div #msg p {
@@ -1222,9 +1263,12 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
     margin: 5px 0 15px 0;
     width: 98%;
 }
+#personForAComplex {
+    margin-bottom: 12px;
+}
 #saveSynods {
     display: block;
-    margin: 20px auto 0;
+    margin: 5px auto 0;
     width: 135px;
     clear: both;
 }
@@ -1355,10 +1399,14 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
     cursor: pointer;
 }
 
-.management #selectTeacher {
+.management #selectTeacher, .AManagements #selectTeacherA {
     height: 298px;
     width: 96%;
     margin-bottom: 10px;
+}
+.AManagements #selectTeacherA {
+    height: 378px;
+    margin-top: 10px;
 }
 .management .selectLevel {
     width: 50%;
@@ -1367,6 +1415,14 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
 }
 .management .addNewTeacher {
     margin-bottom: 10px;
+}
+.content .management .box-2, .content .AManagements .box-2 {
+    flex: 0.75;
+    margin-left: 10px;
+}
+.content .management .box-1, .content .AManagements .box-1 {
+    flex: 2;
+    margin-left: 10px;
 }
 #teachersList {
     margin-left: 0;

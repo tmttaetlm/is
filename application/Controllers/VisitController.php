@@ -408,7 +408,7 @@ class VisitController extends Controller
 
     public function actionGetSynod()
     { 
-        return $this->model->getSynod($_POST);;
+        return $this->model->getSynod($_POST);
     }
 
     public function actionGetAttestationVisitResults()
@@ -565,8 +565,21 @@ class VisitController extends Controller
         if (!empty($_POST)) {
             $data['selected'] = $_POST['person'];
         }
-        //print_r($data['selected']);
         echo $this->view->generate('framework/select', $data).'<button id="deleteTeacher">Удалить</button>';
+    }
+
+    public function actionGetAllTeachersWithSynod()
+    {
+        $data = [
+            'id' => 'selectTeacherA',
+            'size' => '9',
+            'items' => $this->model->getAllTeachersWithSynod()
+        ];
+
+        if (!empty($_POST)) {
+            $data['selected'] = $_POST['person'];
+        }
+        echo $this->view->generate('framework/select', $data)/*.'<button id="deleteTeacher">Удалить</button>'*/;
     }
 
     public function actionSetHalfYearPeriods()

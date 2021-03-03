@@ -5,7 +5,8 @@
 
 //Create a storage object
 var isStorage = {},
-    timerID = 0;
+    timerID = 0,
+    today = getInputDate();
 
 window.onload = function() {
     
@@ -29,12 +30,14 @@ window.onload = function() {
         mask(event);
     });
 
-/*    
-    //Catches keyboard input and send to handler
+    document.addEventListener('mouseover', function (event) {
+        mouseoverHandler(event.target);
+    });
+
+    /*//Catches keyboard input and send to handler
     document.addEventListener("onkeypress", function (event) {
         keyHandler(event.target);
-    });
-*/    
+    });*/    
 
     //Отлавливает ввод с клавиатуры и передает в обработчик
     document.body.onkeyup = function(event) {
@@ -58,7 +61,6 @@ window.onload = function() {
     
     
     //Настройка календарей
-    var today = getInputDate();
     var minDateStudent = getInputDate(-31);
     var minDatePerson = getInputDate(-150);
 
@@ -310,8 +312,16 @@ window.onload = function() {
         }, '');
     }
 
+    if (document.getElementById('teachersListA')){
+        ajax('/visit/getAllTeachersWithSynod', function(data){
+            let selList = document.getElementById("teachersListA");
+            selList.innerHTML = data;
+        }, '');
+    }
+
     if (document.getElementById('allHY')){ document.getElementById('allHY').checked = true; }
 
+    if (document.getElementById('monitoring').checked) { resizeWrapper('1366px'); }
 
 }
 
@@ -539,20 +549,20 @@ function changeHandler(obj)
             getPeopleCount();
         }
         if (obj.id == 'inventory'){
-            resizeWrapper('1300px');
+            resizeWrapper('1366px');
             getInventoryRooms();
             getInventoryComments();
             resetTimer(timerID);
         }
         if (obj.id == 'inventoryControl'){
             getInventoryPeople();
-            resizeWrapper('1300px');
+            resizeWrapper('1366px');
             resetTimer(timerID);
         }
         if (obj.id == 'monitoring' || obj.id == 'seach'){
-            resizeWrapper('960px');
+            resizeWrapper('1366px');
             let article = document.getElementsByClassName('seach');
-            if (article[0].children[2].children[0] && obj.id == 'seach') { resizeWrapper('1300px') };
+            if (article[0].children[2].children[0] && obj.id == 'seach') { resizeWrapper('1366px') };
         }
         if (obj.id == 'Reports'){
             getNumberOfVisits();
@@ -621,37 +631,33 @@ function changeHandler(obj)
     }
 
     if (obj.id == 'personForAManagement') {
-        let param = 'person='+obj.dataset.val;
-        ajax('/visit/getSynod', function(data){
-            var arr = data.split('|');
-            for (let i = 0; i < 13; i=i+4) {
-                //console.log(arr[i]);
-                switch (arr[i]) {
-                    case 'planning':
-                        document.getElementById('pAttestationDateFrom').value = arr[i+1];
-                        document.getElementById('pAttestationDateTo').value = arr[i+2];
-                        document.getElementById('personForAPlannig').value = arr[i+3];
-                        break;
-                    case 'teaching':
-                        document.getElementById('tAttestationDateFrom').value = arr[i+1];
-                        document.getElementById('tAttestationDateTo').value = arr[i+2];
-                        document.getElementById('personForATeaching').value = arr[i+3];
-                        break;
-                    case 'evaluating':
-                        document.getElementById('eAttestationDateFrom').value = arr[i+1];
-                        document.getElementById('eAttestationDateTo').value = arr[i+2];
-                        document.getElementById('personForAEvaluating').value = arr[i+3];
-                        break;
-                    case 'complex':
-                        document.getElementById('cAttestationDateFrom').value = arr[i+1];
-                        document.getElementById('cAttestationDateTo').value = arr[i+2]; 
-                        document.getElementById('personForAComplex').value = arr[i+3];
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }, param);
+        let fp = document.getElementById("firstPeriodStart").value+';'+document.getElementById("firstPeriodEnd").value;
+        let sp = document.getElementById("secondPeriodStart").value+';'+document.getElementById("secondPeriodEnd").value;
+        if (today >= fp.substr(0,fp.indexOf(';')) && today <= fp.substr(fp.indexOf(';')+1, fp.length)) {
+            document.getElementById("pAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+            document.getElementById("pAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+            document.getElementById("tAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+            document.getElementById("tAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+            document.getElementById("eAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+            document.getElementById("eAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+            document.getElementById("cAttestationDateFrom").value = fp.substr(0,fp.indexOf(';'));
+            document.getElementById("cAttestationDateTo").value = fp.substr(fp.indexOf(';')+1, fp.length);
+        } else if (today >= sp.substr(0,sp.indexOf(';')) && today <= sp.substr(sp.indexOf(';')+1, sp.length)) {
+            document.getElementById("pAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+            document.getElementById("pAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length);
+            document.getElementById("tAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+            document.getElementById("tAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length);
+            document.getElementById("eAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+            document.getElementById("eAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length);
+            document.getElementById("cAttestationDateFrom").value = sp.substr(0,sp.indexOf(';'));
+            document.getElementById("cAttestationDateTo").value = sp.substr(sp.indexOf(';')+1, sp.length); 
+        }
+        document.getElementById('personForAPlannig').value = '';
+        document.getElementById('personForATeaching').value = '';
+        document.getElementById('personForAEvaluating').value = ''; 
+        document.getElementById('personForAComplex').value = '';
+        document.getElementById('selectTeacherA').selectedIndex = -1;
+        document.getElementById('saveSynods').innerText = 'Назначить';
     }
 
     if (obj.id == 'visitSelectDay' || obj.id == 'personForVisit') {
@@ -685,34 +691,25 @@ function changeHandler(obj)
     }
 }
 
-function showPermissions() {
-    alert();
-}
+//MouseEnter handler
+function mouseoverHandler(obj) {
+    if (obj.className == 'fixRowHeight') {
+        var text = obj.textContent,
+            span = document.createElement('span');
 
-function staffHideReportElements() {
-    document.getElementById('staffSelectDay').classList.add('hide');
-    document.getElementById('personSet').classList.add('hide');
-    document.body.querySelector('.staffControl').querySelector('.results').innerHTML ="";
-}
+        span.textContent = text;
+        obj.innerHTML = '';
+        obj.appendChild(span);
 
-function hideReportElements() {
-    document.getElementById('selectDay').classList.add('hide');
-    document.getElementById('studentSet').classList.add('hide');
-    //document.getElementById('selectStudent').classList.add('hide');
-    //document.getElementById('studentByPeriodcal').classList.add('hide');
-    document.body.querySelector('.studentControl').querySelector('.results').innerHTML ="";
-}
-
-function getInputDate(offset){
-    offset = offset || 0;
-    var date = new Date();
-    date.setDate(date.getDate() + offset);
-    return date.toISOString().substring(0, 10);
+        //console.log(span.getClientRects().length);
+        obj.style.setProperty('--my-height', (20*(span.getClientRects().length))+'px');
+    }
 }
 
 //Обработчик кликов на странице
 function clickHandler(obj)
 {
+    getSelectedRadio('tab')
     if (obj.id == "userControl") {
         clearInterval(timerID);
         param ='null'
@@ -964,13 +961,13 @@ function clickHandler(obj)
             ajax('/fas/seach', function(data){document.getElementById('results').innerHTML = data}, param);
         }
 
-        resizeWrapper('1300px');
+        resizeWrapper('1366px');
     }
 
     //Inventory clicks
     if (obj.name == "invSeach"){
         loadInvData();
-        resizeWrapper('1300px');                
+        resizeWrapper('1366px');                
     }
 
     if (obj.name == "inventoryUpdate"){
@@ -1479,6 +1476,8 @@ function clickHandler(obj)
         let c_date_from = document.getElementById('cAttestationDateFrom');
         let c_date_to = document.getElementById('cAttestationDateTo');
         let complex = document.getElementById('personForAComplex');
+        let id = document.getElementById('selectTeacherA');
+
         if (person.value != '' && planning.value != '' && teaching.value != '' && evaluating.value != '' && complex.value != '' &&
             p_date_from.value != '' && p_date_to.value != '' && t_date_to.value != '' && t_date_to.value != '' &&
             e_date_to.value != '' && e_date_to.value != '' && c_date_to.value != '' && c_date_to.value != '') {
@@ -1487,8 +1486,13 @@ function clickHandler(obj)
                         '&t_date_from='+t_date_from.value+'&t_date_to='+t_date_to.value+'&t_person='+teaching.value+
                         '&e_date_from='+e_date_from.value+'&e_date_to='+e_date_to.value+'&e_person='+evaluating.value+
                         '&c_date_from='+c_date_from.value+'&c_date_to='+c_date_to.value+'&c_person='+complex.value;
-            ajax('/visit/saveSynod', function(data){showNotification('Сохранено. Уведомление отправлено на почту.');}, param);
-            ajax('/visit/sendEmailNotificationA', function(data){}, param);
+            let notif = 'Сохранено. Уведомление отправлено на почту.';
+            if (id.selectedOptions.length != 0) {
+                param = param+'&id='+id.selectedOptions[0].dataset.oid;
+                notif = 'Сохранено.';
+            }
+            ajax('/visit/saveSynod', function(data){ /*console.log(data);*/ showNotification(notif); }, param);
+            if (id.selectedOptions.length == 0) { ajax('/visit/sendEmailNotificationA', function(data){}, param) };
         } else {
             if (person.value == '') { alert('Не выбран преподаватель для посещения'); return; }
             if (planning.value == '') { alert('Не выбран наблюдатель в фокусе "Планирование"'); return; }
@@ -1585,13 +1589,56 @@ function clickHandler(obj)
         }, param);
     }
 
+    if (obj.parentElement.id == "selectTeacherA")
+    {
+        var param = 'person='+obj.value;
+        ajax('/visit/getSynod', function(data){
+            document.getElementById('saveSynods').innerText = 'Сохранить';
+            document.getElementById('personForAManagement').value = obj.value;
+            var arr = data.split('|');
+            //console.log(arr);
+            for (let i = 0; i < 19; i=i+5) {
+                switch (arr[i]) {
+                    case 'planning':
+                        document.getElementById('pAttestationDateFrom').value = arr[i+1];
+                        document.getElementById('pAttestationDateTo').value = arr[i+2];
+                        document.getElementById('personForAPlannig').value = arr[i+3];
+                        //document.getElementById('personForAPlannig').dataset.iin = arr[i+4];
+                        break;
+                    case 'teaching':
+                        document.getElementById('tAttestationDateFrom').value = arr[i+1];
+                        document.getElementById('tAttestationDateTo').value = arr[i+2];
+                        document.getElementById('personForATeaching').value = arr[i+3];
+                        //document.getElementById('personForATeaching').dataset.iin = arr[i+4];
+                        break;
+                    case 'evaluating':
+                        document.getElementById('eAttestationDateFrom').value = arr[i+1];
+                        document.getElementById('eAttestationDateTo').value = arr[i+2];
+                        document.getElementById('personForAEvaluating').value = arr[i+3];
+                        //document.getElementById('personForAEvaluating').dataset.iin = arr[i+4];
+                        break;
+                    case 'complex':
+                        document.getElementById('cAttestationDateFrom').value = arr[i+1];
+                        document.getElementById('cAttestationDateTo').value = arr[i+2]; 
+                        document.getElementById('personForAComplex').value = arr[i+3];
+                        //document.getElementById('personForAComplex').dataset.iin = arr[i+4];
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }, param);
+    }
+
     if (obj.id == 'addNewTeacher') {
         var person = document.getElementById('personForManagement');
         var param = 'person='+person.value+'&mode=new';
         ajax('/visit/savePersonPurpose', function(data){
             ajax('/visit/getAllSavedTeachers', function(data){
-                let selList = document.getElementById("teachersList");
-                selList.innerHTML = data;
+                let selList = document.getElementsByName("teachersList");
+                selList.forEach(element => {
+                    element.innerHTML = data; 
+                });
                 person.value = '';
             }, 'person='+person.value);
             showNotification('Преподаватель добавлен в список');
@@ -1603,12 +1650,39 @@ function clickHandler(obj)
         let param = 'id='+person.selectedOptions[0].dataset.oid;
         ajax('/visit/deletePersonPurpose', function(data){
             ajax('/visit/getAllSavedTeachers', function(data){
-                let selList = document.getElementById("teachersList");
-                selList.innerHTML = data;
+                let selList = document.getElementsByName("teachersList");
+                selList.forEach(element => {
+                    element.innerHTML = data; 
+                });
             }, '');
             showNotification('Преподаватель удалён из списка');
         }, param);
     }
+}
+
+function showPermissions() {
+    alert();
+}
+
+function staffHideReportElements() {
+    document.getElementById('staffSelectDay').classList.add('hide');
+    document.getElementById('personSet').classList.add('hide');
+    document.body.querySelector('.staffControl').querySelector('.results').innerHTML ="";
+}
+
+function hideReportElements() {
+    document.getElementById('selectDay').classList.add('hide');
+    document.getElementById('studentSet').classList.add('hide');
+    //document.getElementById('selectStudent').classList.add('hide');
+    //document.getElementById('studentByPeriodcal').classList.add('hide');
+    document.body.querySelector('.studentControl').querySelector('.results').innerHTML ="";
+}
+
+function getInputDate(offset){
+    offset = offset || 0;
+    var date = new Date();
+    date.setDate(date.getDate() + offset);
+    return date.toISOString().substring(0, 10);
 }
 
 function saveVisitResults(){
@@ -1731,7 +1805,7 @@ function getSelectedRadio(radioElem)
         {
             if (m[i].checked)
             {
-               return m[i].value;
+                return m[i].value;
             }
         } 
 }

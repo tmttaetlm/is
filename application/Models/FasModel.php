@@ -20,7 +20,19 @@ class FasModel extends Model
     
     public function getFixedAssets($iin) {
         $db = Db::getDb();
-	return $db->selectQuery("SELECT * FROM fixedAsset WHERE iin = :iin ORDER BY description",['iin'=>$iin]);
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE iin = :iin ORDER BY description",['iin'=>$iin]);
+        for ($i=0; $i<count($data); $i++) {
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        //print_r($data);
+        return $data;
     }
 
     public function getFixedAssetsInventory($iin) {
@@ -59,32 +71,116 @@ class FasModel extends Model
     
     public function seachByInvNumber($invNumber) {
         $db = Db::getDb();
-	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE invNumber = :invNumber",['invNumber'=>$invNumber]);
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE invNumber = :invNumber",['invNumber'=>$invNumber]);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['person'] = preg_replace('#(.*)\s+(.).*\s+(.).*#usi', '$1 $2.$3.', $data[$i]['person']);
+            $html = '<div class="fixRowHeight">'.$data[$i]['description'].'</div>';
+            $data[$i]['description'] = $html;
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        return $data;
     }
 
     public function seachBySerialNumber($serialNumber) {
         $db = Db::getDb();
-	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE sn = :serialNumber",['serialNumber'=>$serialNumber]);
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE sn = :serialNumber",['serialNumber'=>$serialNumber]);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['person'] = preg_replace('#(.*)\s+(.).*\s+(.).*#usi', '$1 $2.$3.', $data[$i]['person']);
+            $html = '<div class="fixRowHeight">'.$data[$i]['description'].'</div>';
+            $data[$i]['description'] = $html;
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        return $data;
     }
     
     public function seachByBarcode($barcode) {
         $db = Db::getDb();
-	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE barcode = :barcode",['barcode'=>$barcode]);
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE barcode = :barcode",['barcode'=>$barcode]);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['person'] = preg_replace('#(.*)\s+(.).*\s+(.).*#usi', '$1 $2.$3.', $data[$i]['person']);
+            $html = '<div class="fixRowHeight">'.$data[$i]['description'].'</div>';
+            $data[$i]['description'] = $html;
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        return $data;
     }
     
     public function seachByPerson($person) {
         $db = Db::getDb();
-	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE person = :person ORDER BY description",['person'=>$person]);  
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE person = :person ORDER BY description",['person'=>$person]);  
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['person'] = preg_replace('#(.*)\s+(.).*\s+(.).*#usi', '$1 $2.$3.', $data[$i]['person']);
+            $html = '<div class="fixRowHeight">'.$data[$i]['description'].'</div>';
+            $data[$i]['description'] = $html;
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        return $data;
     }
     
     public function seachByLocation($location) {
         $db = Db::getDb();
-	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE location = :location ORDER BY person,description",['location'=>$location]);
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE location = :location ORDER BY person,description",['location'=>$location]);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['person'] = preg_replace('#(.*)\s+(.).*\s+(.).*#usi', '$1 $2.$3.', $data[$i]['person']);
+            $html = '<div class="fixRowHeight">'.$data[$i]['description'].'</div>';
+            $data[$i]['description'] = $html;
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        return $data;
     }
 
     public function seachByFixedAsset($fixedAsset) {
         $db = Db::getDb();
-	    return $db->selectQuery("SELECT * FROM fixedAsset WHERE description = :fixedAsset",['fixedAsset'=>$fixedAsset]);
+	    $data = $db->selectQuery("SELECT * FROM fixedAsset WHERE description = :fixedAsset",['fixedAsset'=>$fixedAsset]);
+        for ($i=0; $i<count($data); $i++) {
+            $data[$i]['person'] = preg_replace('#(.*)\s+(.).*\s+(.).*#usi', '$1 $2.$3.', $data[$i]['person']);
+            $html = '<div class="fixRowHeight">'.$data[$i]['description'].'</div>';
+            $data[$i]['description'] = $html;
+            if ($data[$i]['properties'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['properties'].'</div>';
+                $data[$i]['properties'] = $html;
+            }
+            if ($data[$i]['upgradeInfo'] != '') {
+                $html = '<div class="fixRowHeight">'.$data[$i]['upgradeInfo'].'</div>';
+                $data[$i]['upgradeInfo'] = $html;
+            }
+        }
+        return $data;
     }     
     
     public function getPeople() {

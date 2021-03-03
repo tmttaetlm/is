@@ -56,12 +56,13 @@ class FasController extends Controller
         $result = $this->model->addRowNumbers($result);
         $columns = [
             'num'=>'№',
-            'invNumber'=>'Инвентарный номер',
+            'invNumber'=>'Инв. номер',
             'description'=>'Описание',
             'location'=>'Местонахождение',
             'dateFix'=>'Дата закрепления',
             'sn'=>'Серийный номер',
             'comment'=>'Комментарий',
+            'upgradeInfo'=>'Модернизация',
             ];
         
         $data['tabData']['monitoring'] = $updateInfo.$this->view->cTable($title,$columns, $result,'fasResultTable');
@@ -80,13 +81,14 @@ class FasController extends Controller
     {
         $columns = [
                 'num' =>'№',
-                'invNumber' => 'Инвентарный номер',
+                'invNumber' => 'Инв. номер',
                 'description' => 'Наименование ОС',
                 'person'=>'Ответственный',
                 'location'=>'Местонахождение',
                 'barcode'=>'Штрих-код',
                 'dateFix'=>'Дата закрепления',
                 'sn'=>'Серийный номер',
+                'upgradeInfo'=>'Модернизация',
                 'comment'=>'Комментарий',
             ];
     

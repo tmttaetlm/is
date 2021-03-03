@@ -61,11 +61,7 @@ class VisitModel extends Model
     public function getResultsDump()
     {
         if ($_POST['focus'] == 'lso') {
-            if ($_POST['mode'] == 1) {
-                $this->getLSO1Dump($_POST);
-            } else if ($_POST['mode'] == 2) {
-                $this->getLSO2Dump($_POST);
-            }
+                $this->getLSODumps($_POST, 'lso'.$_POST['mode']);
         } else {
             if ($_POST['mode'] == 'standart') {
                 $this->getStandartResultsDump($_POST);
@@ -1260,13 +1256,14 @@ class VisitModel extends Model
 
     public function getSynod($params)
     {
-        $query = "SELECT focus, visitDateFrom, visitDateTo, whoVisited
+        $query = "SELECT focus, visitDateFrom, visitDateTo, whoVisited, iinWhoVisited
                   FROM isdb.teachers_attestation
                   WHERE iinWhoWasVisited = :iin
-                    AND groupId = (SELECT DISTINCT MAX(groupId) FROM isdb.teachers_attestation);";
+                  ORDER BY groupId DESC;";
         $db = Db::getDb();
         $data = $db->selectQuery($query,['iin' => $this->getTeacherIin($params['person'])]);
         $str = '';
+        //print_r($data);
         foreach ($data as $key => $value) {
             $str .= implode('|', $value).'|';
         }
@@ -1275,55 +1272,90 @@ class VisitModel extends Model
 
     public function saveSynod($post_params)
     {
-        $maxGroupId = $this->getMaxGroupId();
-        $all_params = [['visitDateFrom' =>  $post_params['p_date_from'],
-                        'visitDateTo' =>  $post_params['p_date_to'],
-                        'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
-                        'WhoWasVisited' => $post_params['person'],
-                        'iinWhoVisited' => $this->getTeacherIin($post_params['p_person']),
-                        'WhoVisited' => $post_params['p_person'],
-                        'focus' => 'planning',
-                        'groupId' => $maxGroupId],
-                       ['visitDateFrom' =>  $post_params['t_date_from'],
-                        'visitDateTo' =>  $post_params['t_date_to'],
-                        'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
-                        'WhoWasVisited' => $post_params['person'],
-                        'iinWhoVisited' => $this->getTeacherIin($post_params['t_person']),
-                        'WhoVisited' => $post_params['t_person'],
-                        'focus' => 'teaching',
-                        'groupId' => $maxGroupId],
-                       ['visitDateFrom' =>  $post_params['e_date_from'],
-                        'visitDateTo' =>  $post_params['e_date_to'],
-                        'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
-                        'WhoWasVisited' => $post_params['person'],
-                        'iinWhoVisited' => $this->getTeacherIin($post_params['e_person']),
-                        'WhoVisited' => $post_params['e_person'],
-                        'focus' => 'evaluating',
-                        'groupId' => $maxGroupId],
-                       ['visitDateFrom' =>  $post_params['c_date_from'],
-                        'visitDateTo' =>  $post_params['c_date_to'],
-                        'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
-                        'WhoWasVisited' => $post_params['person'],
-                        'iinWhoVisited' => $this->getTeacherIin($post_params['c_person']),
-                        'WhoVisited' => $post_params['c_person'],
-                        'focus' => 'complex',
-                        'groupId' => $maxGroupId]];
-        foreach ($all_params as $key => $value) {
-            $query = "INSERT INTO isdb.teachers_attestation (visitDateFrom, visitDateTo, iinWhoWasVisited, WhoWasVisited, iinWhoVisited, WhoVisited, focus, groupId, confirmations)
-                      VALUES (:visitDateFrom, :visitDateTo, :iinWhoWasVisited, :WhoWasVisited, :iinWhoVisited, :WhoVisited, :focus, :groupId, '00');";
-            $db = Db::getDb();
-            $data = $db->selectQuery($query,$all_params[$key]);            
-        }
+        if (array_key_exists('id', $post_params)) {
+            $maxGroupId = $post_params['id'];
+            $all_params = [['visitDateFrom' =>  $post_params['p_date_from'],
+                            'visitDateTo' =>  $post_params['p_date_to'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['p_person']),
+                            'WhoVisited' => $post_params['p_person'],
+                            'focus' => 'planning',
+                            'groupId' => $maxGroupId],
+                           ['visitDateFrom' =>  $post_params['t_date_from'],
+                            'visitDateTo' =>  $post_params['t_date_to'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['t_person']),
+                            'WhoVisited' => $post_params['t_person'],
+                            'focus' => 'teaching',
+                            'groupId' => $maxGroupId],
+                           ['visitDateFrom' =>  $post_params['e_date_from'],
+                            'visitDateTo' =>  $post_params['e_date_to'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['e_person']),
+                            'WhoVisited' => $post_params['e_person'],
+                            'focus' => 'evaluating',
+                            'groupId' => $maxGroupId],
+                           ['visitDateFrom' =>  $post_params['c_date_from'],
+                            'visitDateTo' =>  $post_params['c_date_to'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['c_person']),
+                            'WhoVisited' => $post_params['c_person'],
+                            'focus' => 'complex',
+                            'groupId' => $maxGroupId]];
+            foreach ($all_params as $key => $value) {
+                $query = "UPDATE isdb.teachers_attestation
+                            SET visitDateFrom = :visitDateFrom,
+                                visitDateTo = :visitDateTo,
+                                iinWhoVisited = :iinWhoVisited,
+                                WhoVisited = :WhoVisited
+                            WHERE groupId = :groupId AND focus = :focus;";
+                $db = Db::getDb();
+                $data = $db->selectQuery($query,$all_params[$key]);            
+            }
+        } else {
+            $maxGroupId = $this->getMaxGroupId();
+            $all_params = [['visitDateFrom' =>  $post_params['p_date_from'],
+                            'visitDateTo' =>  $post_params['p_date_to'],
+                            'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
+                            'WhoWasVisited' => $post_params['person'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['p_person']),
+                            'WhoVisited' => $post_params['p_person'],
+                            'focus' => 'planning',
+                            'groupId' => $maxGroupId],
+                        ['visitDateFrom' =>  $post_params['t_date_from'],
+                            'visitDateTo' =>  $post_params['t_date_to'],
+                            'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
+                            'WhoWasVisited' => $post_params['person'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['t_person']),
+                            'WhoVisited' => $post_params['t_person'],
+                            'focus' => 'teaching',
+                            'groupId' => $maxGroupId],
+                        ['visitDateFrom' =>  $post_params['e_date_from'],
+                            'visitDateTo' =>  $post_params['e_date_to'],
+                            'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
+                            'WhoWasVisited' => $post_params['person'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['e_person']),
+                            'WhoVisited' => $post_params['e_person'],
+                            'focus' => 'evaluating',
+                            'groupId' => $maxGroupId],
+                        ['visitDateFrom' =>  $post_params['c_date_from'],
+                            'visitDateTo' =>  $post_params['c_date_to'],
+                            'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
+                            'WhoWasVisited' => $post_params['person'],
+                            'iinWhoVisited' => $this->getTeacherIin($post_params['c_person']),
+                            'WhoVisited' => $post_params['c_person'],
+                            'focus' => 'complex',
+                            'groupId' => $maxGroupId]];
+            foreach ($all_params as $key => $value) {
+                $query = "INSERT INTO isdb.teachers_attestation (visitDateFrom, visitDateTo, iinWhoWasVisited, WhoWasVisited, iinWhoVisited, WhoVisited, focus, groupId, confirmations)
+                        VALUES (:visitDateFrom, :visitDateTo, :iinWhoWasVisited, :WhoWasVisited, :iinWhoVisited, :WhoVisited, :focus, :groupId, '00');";
+                $db = Db::getDb();
+                $data = $db->selectQuery($query,$all_params[$key]);            
+            }
 
-        $lso_params = ['groupId' => $maxGroupId,
-                       'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']),
-                       'whoWasVisited' => $post_params['person']];
-        $query = "INSERT INTO isdb.teachers_lso (id, iinWhoWasVisited, WhoWasVisited)
-                  VALUES (:groupId, :iinWhoWasVisited, :WhoWasVisited);";
-        $db = Db::getDb();
-        $data = $db->selectQuery($query,$all_params[$key]);
+            $lso_params = ['groupId' => $maxGroupId, 'iinWhoWasVisited' => $this->getTeacherIin($post_params['person']), 'whoWasVisited' => $post_params['person']];
+            $query = "INSERT INTO isdb.teachers_lso (id, iinWhoWasVisited, WhoWasVisited) VALUES (:groupId, :iinWhoWasVisited, :WhoWasVisited);";
+            $db = Db::getDb();
+            $data = $db->selectQuery($query,$all_params[$key]);
+        }    
         
-        return $data;
+        //return $data;
     }
 
     public function sendEmailNotificationA($params)
@@ -2033,7 +2065,7 @@ class VisitModel extends Model
         $data = $db->selectQuery($query,$localParam);
     }
 
-    public function getLSO1Dump($params) {
+    public function getLSODumps($params, $mode) {
         require_once ROOT.'/application/vendor/phpoffice/phpspreadsheet/src/Bootstrap.php';
         $spreadsheet = new Spreadsheet();
 
@@ -2066,22 +2098,36 @@ class VisitModel extends Model
         $spreadsheet->getActiveSheet()->getRowDimension(15)->setRowHeight(10);
         $spreadsheet->getActiveSheet()->getRowDimension(16)->setRowHeight(70);
         $spreadsheet->getActiveSheet()->getRowDimension(17)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(18)->setRowHeight(70);
         $spreadsheet->getActiveSheet()->getRowDimension(19)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(20)->setRowHeight(70);
-        $spreadsheet->getActiveSheet()->getRowDimension(21)->setRowHeight(10);
+        if ($mode == 'lso1') {
+            $spreadsheet->getActiveSheet()->getRowDimension(18)->setRowHeight(70);
+            $spreadsheet->getActiveSheet()->getRowDimension(20)->setRowHeight(70);
+            $spreadsheet->getActiveSheet()->getRowDimension(21)->setRowHeight(10);
+        } else {
+            $spreadsheet->getActiveSheet()->getRowDimension(18)->setRowHeight(100);
+            $spreadsheet->getActiveSheet()->getRowDimension(20)->setRowHeight(15);
+            $spreadsheet->getActiveSheet()->getRowDimension(21)->setRowHeight(120);
+            $spreadsheet->getActiveSheet()->getRowDimension(22)->setRowHeight(10);
+            $spreadsheet->getActiveSheet()->getRowDimension(23)->setRowHeight(70);
+            $spreadsheet->getActiveSheet()->getRowDimension(24)->setRowHeight(10);
+        }
 
         // Merge cells
         $spreadsheet->getActiveSheet()->mergeCells('A1:D1');
         $spreadsheet->getActiveSheet()->mergeCells('A7:D7');
-        $spreadsheet->getActiveSheet()->mergeCells('B8:C8');
         $spreadsheet->getActiveSheet()->mergeCells('A9:D9');
+        $spreadsheet->getActiveSheet()->mergeCells('B8:C8');
         $spreadsheet->getActiveSheet()->mergeCells('B10:C10');
         $spreadsheet->getActiveSheet()->mergeCells('B12:C12');
         $spreadsheet->getActiveSheet()->mergeCells('B14:C14');
         $spreadsheet->getActiveSheet()->mergeCells('B16:C16');
         $spreadsheet->getActiveSheet()->mergeCells('B18:C18');
-        $spreadsheet->getActiveSheet()->mergeCells('B20:C20');
+        if ($mode == 'lso1') {
+            $spreadsheet->getActiveSheet()->mergeCells('B20:C20');
+        } else {
+            $spreadsheet->getActiveSheet()->mergeCells('B21:C21');
+            $spreadsheet->getActiveSheet()->mergeCells('B23:C23');
+        }
 
         // Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A1', $this->getTexts('LSO_TABLE_HEADER', 'lso'));
@@ -2104,144 +2150,21 @@ class VisitModel extends Model
         // Put data into cells
         $spreadsheet->getActiveSheet()->setCellValue('C2', $arrayData[0]['whoWasVisited']);
         $spreadsheet->getActiveSheet()->setCellValue('C3', $arrayData[0]['position']);
-        $spreadsheet->getActiveSheet()->setCellValue('C4', $arrayData[0]['cur_level']);
-        $spreadsheet->getActiveSheet()->setCellValue('C5', $arrayData[0]['up_level']);
-        $spreadsheet->getActiveSheet()->setCellValue('B10', $arrayData[0]['planning_lesson_review']);
-        $spreadsheet->getActiveSheet()->setCellValue('B12', $arrayData[0]['teaching_lesson_review']);
-        $spreadsheet->getActiveSheet()->setCellValue('B14', $arrayData[0]['evaluating_lesson_review']);
-        $spreadsheet->getActiveSheet()->setCellValue('B16', $arrayData[0]['complex_lesson_review']);
-        $spreadsheet->getActiveSheet()->setCellValue('B18', $arrayData[0]['first_recommendation']);
-        $spreadsheet->getActiveSheet()->setCellValue('B20', $arrayData[0]['first_correction']);
-
-        $styleHeaders = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                                         'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-                         'font' => ['bold' => true, 'size' => 14],];
-        $styleAllBorders = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],];
-        $styleOutBordersColorfulBackground = ['borders' => ['outline' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
-                                              'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                                                         'startColor' => ['rgb' => 'CCEEFF']]];
-        $styleOutBordersWhiteBackground = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
-                                                           'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP,],
-                                           'borders' => ['outline' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
-                                           'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,'startColor' => ['rgb' => 'FFFFFF']]];
-
-        $spreadsheet->getActiveSheet()->getStyle('A1:D23')->getAlignment()->setWrapText(true);
-
-        $spreadsheet->getActiveSheet()->getStyle('A1:D1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A7:D21')->applyFromArray($styleOutBordersColorfulBackground);
-        $spreadsheet->getActiveSheet()->getStyle('A7:D7')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A9:D9')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('B2:C5')->applyFromArray($styleAllBorders);
-        $spreadsheet->getActiveSheet()->getStyle('B8:C8')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B10:C10')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B12:C12')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B14:C14')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B16:C16')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B18:C18')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B20:C20')->applyFromArray($styleOutBordersWhiteBackground);
-        
-        // Rename worksheet
-        $spreadsheet->getActiveSheet()->setTitle('Результат оценки урока');
-        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $spreadsheet->setActiveSheetIndex(0);
-
-        // Redirect output to a client’s web browser (Xlsx)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="Результат оценки урока.xlsx"');
-        header('Cache-Control: max-age=0');
-        // If you're serving to IE 9, then the following may be needed
-        header('Cache-Control: max-age=1');
-
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save('php://output');
-        exit;
-    }
-
-    public function getLSO2Dump($params) {
-        require_once ROOT.'/application/vendor/phpoffice/phpspreadsheet/src/Bootstrap.php';
-        $spreadsheet = new Spreadsheet();
-
-        // Set document properties
-        $spreadsheet->getProperties()->setCreator('Система наблюдения уроков')
-        ->setLastModifiedBy('Система наблюдения уроков')
-        ->setTitle('Результаты оценивания урока')
-        ->setSubject('Результаты оценивания урока')
-        ->setDescription('Результаты оценивания урока')
-        ->setKeywords('office 2007 openxml php')
-        ->setCategory('Отчет');
-
-        // Add data from model
-        $arrayData = self::getLSOResults(['rowId'=>$params['rowId'], 'period'=>$params['mode']]);
-        
-        // Width for cells
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(2);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(52);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(52);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(2);
-
-        // Height for cells
-        $spreadsheet->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
-        $spreadsheet->getActiveSheet()->getRowDimension(8)->setRowHeight(30);
-        $spreadsheet->getActiveSheet()->getRowDimension(10)->setRowHeight(70);
-        $spreadsheet->getActiveSheet()->getRowDimension(11)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(12)->setRowHeight(70);
-        $spreadsheet->getActiveSheet()->getRowDimension(13)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(14)->setRowHeight(70);
-        $spreadsheet->getActiveSheet()->getRowDimension(15)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(16)->setRowHeight(70);
-        $spreadsheet->getActiveSheet()->getRowDimension(17)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(18)->setRowHeight(100);
-        $spreadsheet->getActiveSheet()->getRowDimension(19)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(20)->setRowHeight(15);
-        $spreadsheet->getActiveSheet()->getRowDimension(21)->setRowHeight(120);
-        $spreadsheet->getActiveSheet()->getRowDimension(22)->setRowHeight(10);
-        $spreadsheet->getActiveSheet()->getRowDimension(23)->setRowHeight(70);
-        $spreadsheet->getActiveSheet()->getRowDimension(24)->setRowHeight(10);
-
-        // Merge cells
-        $spreadsheet->getActiveSheet()->mergeCells('A1:D1');
-        $spreadsheet->getActiveSheet()->mergeCells('A7:D7');
-        $spreadsheet->getActiveSheet()->mergeCells('A9:D9');
-        $spreadsheet->getActiveSheet()->mergeCells('B8:C8');
-        $spreadsheet->getActiveSheet()->mergeCells('B10:C10');
-        $spreadsheet->getActiveSheet()->mergeCells('B12:C12');
-        $spreadsheet->getActiveSheet()->mergeCells('B14:C14');
-        $spreadsheet->getActiveSheet()->mergeCells('B16:C16');
-        $spreadsheet->getActiveSheet()->mergeCells('B18:C18');
-        $spreadsheet->getActiveSheet()->mergeCells('B21:C21');
-        $spreadsheet->getActiveSheet()->mergeCells('B23:C23');
-
-        // Put headers
-        $spreadsheet->getActiveSheet()->setCellValue('A1', $this->getTexts('LSO_TABLE_HEADER', 'lso'));
-        $spreadsheet->getActiveSheet()->setCellValue('B2', $this->getTexts('LSO_TABLE_HEADER', 'fio'));
-        $spreadsheet->getActiveSheet()->setCellValue('B3', $this->getTexts('LSO_TABLE_HEADER', 'job_info'));
-        $spreadsheet->getActiveSheet()->setCellValue('B4', $this->getTexts('LSO_TABLE_HEADER', 'cur_level'));
-        $spreadsheet->getActiveSheet()->setCellValue('B5', $this->getTexts('LSO_TABLE_HEADER', 'up_level'));
-
-        $today = getdate();
-        $years = $today['mon'] > 5 ? ($today['year'].' - '.($today['year']+1)) : (($today['year']-1).' - '.$today['year']);
-        $text = str_replace('*year*', $years, $this->getTexts('LSO_TABLE_HEADER', 'purpose'));
-        $spreadsheet->getActiveSheet()->setCellValue('A7', $text);
-
-        if ($params['mode'] == 1) {
-            $spreadsheet->getActiveSheet()->setCellValue('A9', $this->getTexts('LSO_TABLE_HEADER', 'first_half_year'));
-        } else if ($params['mode'] == 2) {
-            $spreadsheet->getActiveSheet()->setCellValue('A9', $this->getTexts('LSO_TABLE_HEADER', 'second_half_year'));
-        }
-        
-        // Put data into cells
-        $spreadsheet->getActiveSheet()->setCellValue('C2', $arrayData[0]['whoWasVisited']);
-        $spreadsheet->getActiveSheet()->setCellValue('C3', $arrayData[0]['position']);
-        $spreadsheet->getActiveSheet()->setCellValue('C4', $arrayData[0]['cur_level']);
-        $spreadsheet->getActiveSheet()->setCellValue('C5', $arrayData[0]['up_level']);
+        $spreadsheet->getActiveSheet()->setCellValue('C4', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['cur_level']));
+        $spreadsheet->getActiveSheet()->setCellValue('C5', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['up_level']));
         $spreadsheet->getActiveSheet()->setCellValue('B8', $arrayData[0]['purpose']);
         $spreadsheet->getActiveSheet()->setCellValue('B10', $arrayData[0]['planning_lesson_review']);
         $spreadsheet->getActiveSheet()->setCellValue('B12', $arrayData[0]['teaching_lesson_review']);
         $spreadsheet->getActiveSheet()->setCellValue('B14', $arrayData[0]['evaluating_lesson_review']);
         $spreadsheet->getActiveSheet()->setCellValue('B16', $arrayData[0]['complex_lesson_review']);
-        $spreadsheet->getActiveSheet()->setCellValue('B18', $arrayData[0]['second_recommendation']);
-        $spreadsheet->getActiveSheet()->setCellValue('B21', $arrayData[0]['second_correction']);
-        $spreadsheet->getActiveSheet()->setCellValue('B23', $arrayData[0]['all_recommendation']);
+        if ($mode == 'lso1') {
+            $spreadsheet->getActiveSheet()->setCellValue('B18', $arrayData[0]['first_recommendation']);
+            $spreadsheet->getActiveSheet()->setCellValue('B20', $arrayData[0]['first_correction']);
+        } else {
+            $spreadsheet->getActiveSheet()->setCellValue('B18', $arrayData[0]['second_recommendation']);
+            $spreadsheet->getActiveSheet()->setCellValue('B21', $arrayData[0]['second_correction']);
+            $spreadsheet->getActiveSheet()->setCellValue('B23', $arrayData[0]['all_recommendation']);
+        }
 
         $styleHeaders = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                                          'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
@@ -2258,19 +2181,24 @@ class VisitModel extends Model
         $spreadsheet->getActiveSheet()->getStyle('A1:D23')->getAlignment()->setWrapText(true);
 
         $spreadsheet->getActiveSheet()->getStyle('A1:D1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A7:D19')->applyFromArray($styleOutBordersColorfulBackground);
         $spreadsheet->getActiveSheet()->getStyle('A7:D7')->applyFromArray($styleHeaders);
         $spreadsheet->getActiveSheet()->getStyle('A9:D9')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A20:D24')->applyFromArray($styleOutBordersColorfulBackground);
         $spreadsheet->getActiveSheet()->getStyle('B2:C5')->applyFromArray($styleAllBorders);
+        if ($mode == 'lso1') {
+            $spreadsheet->getActiveSheet()->getStyle('A7:D21')->applyFromArray($styleOutBordersColorfulBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B20:C20')->applyFromArray($styleOutBordersWhiteBackground);
+        } else {
+            $spreadsheet->getActiveSheet()->getStyle('A7:D19')->applyFromArray($styleOutBordersColorfulBackground);
+            $spreadsheet->getActiveSheet()->getStyle('A20:D24')->applyFromArray($styleOutBordersColorfulBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B21:C21')->applyFromArray($styleOutBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B23:C23')->applyFromArray($styleOutBordersWhiteBackground);
+        }
         $spreadsheet->getActiveSheet()->getStyle('B8:C8')->applyFromArray($styleOutBordersWhiteBackground);
         $spreadsheet->getActiveSheet()->getStyle('B10:C10')->applyFromArray($styleOutBordersWhiteBackground);
         $spreadsheet->getActiveSheet()->getStyle('B12:C12')->applyFromArray($styleOutBordersWhiteBackground);
         $spreadsheet->getActiveSheet()->getStyle('B14:C14')->applyFromArray($styleOutBordersWhiteBackground);
         $spreadsheet->getActiveSheet()->getStyle('B16:C16')->applyFromArray($styleOutBordersWhiteBackground);
         $spreadsheet->getActiveSheet()->getStyle('B18:C18')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B21:C21')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B23:C23')->applyFromArray($styleOutBordersWhiteBackground);
 
         // Rename worksheet
         $spreadsheet->getActiveSheet()->setTitle('Результат оценки урока');
@@ -2292,6 +2220,14 @@ class VisitModel extends Model
     public function getAllSavedTeachers()
     {
         $query = "SELECT id AS oid, teacher_fio AS item FROM isdb.teachers_purposes ORDER BY teacher_fio;";
+        $db = Db::getDb();
+        $data = $db->selectQuery($query,[]);
+        return $data;
+    }
+
+    public function getAllTeachersWithSynod()
+    {
+        $query = "SELECT max(groupId) AS oid, whoWasVisited AS item FROM isdb.teachers_attestation GROUP BY whoWasVisited ORDER BY whoWasVisited;";
         $db = Db::getDb();
         $data = $db->selectQuery($query,[]);
         return $data;
