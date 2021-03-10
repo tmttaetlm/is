@@ -1201,7 +1201,10 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
     margin-bottom: 10px;
 }
 
-#report1, #report2 {
+#report1 {
+    margin-top: 15px;
+}
+#report2 {
     margin-top: 5px;
 }
 #report4 {
@@ -1379,7 +1382,8 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
     color: red;
 }
 
-#visitSelectStartDay, #visitSelectEndDay, #AvisitSelectStartDay, #AvisitSelectEndDay {
+#visitSelectStartDay, #visitSelectEndDay, #AvisitSelectStartDay, #AvisitSelectEndDay, #reportSelectStartDay, #reportSelectEndDay, #reportSelectDay {
+    height: 25px;
     padding-top: 2px;
     padding-bottom: 2px;
     margin: 0;
@@ -1458,4 +1462,14 @@ table.mtCaption tbody tr :nth-last-child(5) :not(input){
 
 button[name="searchLSO"] {
     margin-left: 10px;
+}
+
+#reportForDay, #reportForMonth, #reportForPeriod {
+    display: none;
+}
+input[name="periodForReports"] {
+    margin-bottom: 10px;
+}
+#reportSelectMonth {
+    width: 120px;
 }

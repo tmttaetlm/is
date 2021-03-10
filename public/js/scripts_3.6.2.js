@@ -321,7 +321,7 @@ window.onload = function() {
 
     if (document.getElementById('allHY')){ document.getElementById('allHY').checked = true; }
 
-    if (document.getElementById('monitoring').checked) { resizeWrapper('1366px'); }
+    //if (document.getElementById('monitoring').checked) { resizeWrapper('1366px'); }
 
 }
 
@@ -1446,6 +1446,21 @@ function clickHandler(obj)
         }
         if (obj.id == 'report2') {
             dumpForm.whoWasVisited.value = '';
+            switch (getSelectedRadio('periodForReports')) {
+                case 'forDay':
+                    dumpForm.params.value = document.getElementById('reportSelectDay').value;
+                    break;
+                case 'forMonth':
+                    dumpForm.params.value = document.getElementById('reportSelectMonth').value;
+                    break;
+                case 'forPeriod':
+                    dumpForm.params.value = document.getElementById('reportSelectStartDay').value+'|'+document.getElementById('reportSelectEndDay').value;
+                    break;
+                case 'forAllTime':
+                    dumpForm.params.value = '';
+                    break;
+            }
+            dumpForm.mode.value = getSelectedRadio('periodForReports');
         }
         dumpForm.submit();
     }
@@ -1657,6 +1672,31 @@ function clickHandler(obj)
             }, '');
             showNotification('Преподаватель удалён из списка');
         }, param);
+    }
+
+    if (obj.name == 'periodForReports') {
+        switch (getSelectedRadio('periodForReports')) {
+            case 'forDay':
+                document.getElementById('reportForDay').style = "display: block;"
+                document.getElementById('reportForMonth').style = "display: none;"
+                document.getElementById('reportForPeriod').style = "display: none;"
+                break;
+            case 'forMonth':
+                document.getElementById('reportForDay').style = "display: none;"
+                document.getElementById('reportForMonth').style = "display: block;"
+                document.getElementById('reportForPeriod').style = "display: none;"
+                break;
+            case 'forPeriod':
+                document.getElementById('reportForDay').style = "display: none;"
+                document.getElementById('reportForMonth').style = "display: none;"
+                document.getElementById('reportForPeriod').style = "display: block;"
+                break;
+            case 'forAllTime':
+                document.getElementById('reportForDay').style = "display: none;"
+                document.getElementById('reportForMonth').style = "display: none;"
+                document.getElementById('reportForPeriod').style = "display: none;"
+                break;
+        }
     }
 }
 

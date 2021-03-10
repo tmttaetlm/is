@@ -3,7 +3,7 @@
     <head>
         <title>Информационные системы NIS Kostanay</title>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="/public/css/styles_3.6.1.css">
+        <link rel="stylesheet" type="text/css" href="/public/css/styles_3.6.2.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
         <link rel="apple-touch-icon" sizes="180x180" href="/public/images/icons/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/public/images/icons/favicon-32x32.png">
@@ -12,6 +12,10 @@
         <link rel="mask-icon" href="/public/images/icons/safari-pinned-tab.svg" color="#5e852c">
         <meta name="msapplication-TileColor" content="#365908">
         <meta name="theme-color" content="#678f33">
+        
+        <!-- counter -->
+        <?php include ROOT.'/application/Components/Counter/count.php'; ?>
+        <!-- /counter -->
     </head>
     <body>
         <header>
@@ -32,11 +36,13 @@
                 </div>
             </div>
         </header>
-<?php echo $data['content']; ?>
-       
+        <?php echo $data['content']; ?>
+        <!-- informer -->
+        <?php include ROOT.'/application/Components/Counter/informer.php'; ?>
+        <!-- /informer -->
         <footer>
-        <p class="copyright">Copyright © <?php echo date('Y') ?> NIS Kostanay</p>
+            <p class="copyright">Copyright © <?php echo date('Y') ?> NIS Kostanay</p>
         </footer>
-        <script type="module" src="/public/js/scripts_3.6.1.js"></script>
+        <script type="module" src="/public/js/scripts_3.6.2.js"></script>
     </body>
 </html>

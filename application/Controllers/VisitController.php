@@ -347,7 +347,7 @@ class VisitController extends Controller
         if (!empty($_POST['whoWasVisited'])) {
             $this->model->getDumpForReport1($_POST);
         } else {
-            $this->model->getDumpForReport2();
+            $this->model->getDumpForReport2($_POST);
         }
     } 
 

@@ -931,33 +931,71 @@ class VisitModel extends Model
         exit;
     }
 
-    public static function getDataForReport2()
+    public static function getDataForReport2($post)
     {
+        switch ($post['mode']) {
+            case 'forDay':
+                $where = "AND visitDate = :day";
+                $param['day'] = $post['params'];
+                break;
+            case 'forMonth':
+                $where = "AND month(visitDate) = :month";
+                $param['month'] = $post['params'];
+                break;
+            case 'forPeriod':
+                $where = "AND visitDate >= :start AND visitDate <= :end";
+                $param['start'] = substr($post['params'], 0, strpos($post['params'], '|'));
+                $param['end'] = substr($post['params'], strpos($post['params'], '|')+1, strlen($post['params']));
+                break;
+            case 'forAllTime':
+                $where = '';
+                $param = [];
+                break;
+        }
         $query = "SELECT evaluates, lessonName FROM isdb.evaluationTeachers
                   WHERE evaluates IS NOT null
                     AND evaluates <> '0000000000000000'
-                    AND lessonName <> ''
+                    AND lessonName <> '' ".$where."
                   ORDER BY lessonName;
                  ";
         $db = Db::getDb();
-        $data = $db->selectQuery($query);
+        $data = $db->selectQuery($query,$param);
         return $data;
     }
 
-    public static function getActualLessons()
+    public static function getActualLessons($post)
     {
+        switch ($post['mode']) {
+            case 'forDay':
+                $where = "AND visitDate = :day";
+                $param['day'] = $post['params'];
+                break;
+            case 'forMonth':
+                $where = "AND month(visitDate) = :month";
+                $param['month'] = $post['params'];
+                break;
+            case 'forPeriod':
+                $where = "AND visitDate >= :start AND visitDate <= :end";
+                $param['start'] = substr($post['params'], 0, strpos($post['params'], '|'));
+                $param['end'] = substr($post['params'], strpos($post['params'], '|')+1, strlen($post['params']));
+                break;
+            case 'forAllTime':
+                $where = '';
+                $param = [];
+                break;
+        }
         $query = "SELECT DISTINCT lessonName FROM isdb.evaluationTeachers
                   WHERE evaluates IS NOT null
                     AND evaluates <> '0000000000000000'
-                    AND lessonName <> ''
+                    AND lessonName <> '' ".$where."
                   ORDER BY lessonName;
                  ";
         $db = Db::getDb();
-        $data = $db->selectQuery($query);
+        $data = $db->selectQuery($query,$param);
         return $data;       
     }
 
-    public function getDumpForReport2()
+    public function getDumpForReport2($param)
     {
         require_once ROOT.'/application/vendor/phpoffice/phpspreadsheet/src/Bootstrap.php';
         $spreadsheet = new Spreadsheet();
@@ -994,9 +1032,9 @@ class VisitModel extends Model
         ->setCategory('Отчет');
 
         // Add data from model
-        $arrayData = self::getDataForReport2();
+        $arrayData = self::getDataForReport2($param);
         $arrayDefCriterias = self::getDefaultCriteriasList();
-        $actualLessons = self::getActualLessons();
+        $actualLessons = self::getActualLessons($param);
         $colCount = count($actualLessons);
 
         // Put headers
