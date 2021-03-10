@@ -20,13 +20,13 @@
     <tr>
         <td colspan="2" style="width: 15%;"><?php echo getTexts('LSO_TABLE_HEADER', 'cur_level')?></td>
         <td colspan="2" style="width: 15%;">
-            <input type="text" class="visitInputs" id="LSO_curLevel" name="LSO_curLevel" value="<?php $data[0]['cur_level'] = '' ? print(getTexts('TEACHERS_LEVELS', $data[0]['cur_level'])) : print(''); ?>">
+            <input type="text" class="visitInputs" id="LSO_curLevel" name="LSO_curLevel" value="<?php echo getTexts('TEACHERS_LEVELS', $data[0]['cur_level']) ?>">
         </td>
     </tr>
     <tr>
         <td colspan="2" style="width: 15%;"><?php echo getTexts('LSO_TABLE_HEADER', 'up_level')?></td>
         <td colspan="2" style="width: 15%;">
-            <input type="text" class="visitInputs" id="LSO_upLevel" name="LSO_upLevel" value="<?php $data[0]['up_level'] = '' ? print(getTexts('TEACHERS_LEVELS', $data[0]['up_level'])) : print(''); ?>">
+            <input type="text" class="visitInputs" id="LSO_upLevel" name="LSO_upLevel" value="<?php echo getTexts('TEACHERS_LEVELS', $data[0]['up_level']) ?>">
         </td>
     </tr>
 </table>
