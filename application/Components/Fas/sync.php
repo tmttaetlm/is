@@ -2,8 +2,8 @@
 
 /*This file for syncronize data with 1C*/
 
-//define('ROOT', '/home/developer/Code/PHP/is');
-define('ROOT', '/var/www/is');
+define('ROOT', '/home/developer/Code/PHP/is');
+//define('ROOT', '/var/www/is');
 
 //Turns on the Composer Autoload
 require ROOT.'/application/vendor/autoload.php';
