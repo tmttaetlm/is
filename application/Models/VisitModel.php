@@ -2010,7 +2010,12 @@ class VisitModel extends Model
             if ($param['person'] == '' && $param['period'] == '') { $where = ''; } else {
                 $where = "WHERE ";
                 if ($param['person'] != '') { $where =  $where."a.whoWasVisited = :person"; } else { unset($param['person']); }
-                if ($param['period'] != '') { if ($param['person'] != '') { $where =  $where." AND "; }; $where =  $where."b.period = :period"; } else { unset($param['period']); }
+                if ($param['period'] != '') {
+                    if (array_key_exists('person', $param)) { if ($param['person'] != '') { $where =  $where." AND "; }; };
+                    $where =  $where."b.period = :period"; 
+                } else {
+                    unset($param['period']);
+                }
             }
         } else {
             $where = '';
