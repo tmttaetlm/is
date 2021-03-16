@@ -1,0 +1,1 @@
+<button name="getDataFromSKD">Загрузить данные из СКД</button>
