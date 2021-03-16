@@ -286,7 +286,7 @@ class VisitModel extends Model
             $db = Db::getDb();
             $data = $db->selectQuery($query,['rowId' => $params['rowId']]);
 
-            if (!is_null($data[0]['evaluates']) && $data[0]['evaluates'] != '0000000000000000' && $data[0]['evaluates'] != '' && $data[0]['lessonName'] != '' && $data[0]['theme'] != '' && $data[0]['grade'] != '' && $data[0]['recommendation'] != '' && $data[0]['purpose_review'] != '') {
+            if (!is_null($data[0]['evaluates']) && $data[0]['evaluates'] != '0000000000000000' && $data[0]['evaluates'] != '' && $data[0]['lessonName'] != '' && $data[0]['theme'] != '' && ($data[0]['grade'] != '' && strlen($data[0]['grade']) == 2) && $data[0]['recommendation'] != '' && $data[0]['purpose_review'] != '') {
                 if ($data[0]['confirmations'] == '11') {
                     return 'confirmed';
                 } else if ($data[0]['confirmations'] == '10' || $data[0]['confirmations'] == '01') {
@@ -307,7 +307,7 @@ class VisitModel extends Model
             if ($data[0]['focus'] == 'evaluating') { if ($data[0]['evaluates'] == '00000') { $evaluates = 'null'; } }
             if ($data[0]['focus'] == 'complex') { if ($data[0]['evaluates'] == '000000000000000000000000') { $evaluates = 'null'; } }
 
-            if (!is_null($data[0]['evaluates']) && $evaluates != 'null' && ($data[0]['lessonName'] != '' && $data[0]['theme'] != '' && $data[0]['grade'] != '' && $data[0]['lesson_review'] != '' && $data[0]['purpose_review'] != '')) {
+            if (!is_null($data[0]['evaluates']) && $evaluates != 'null' && ($data[0]['lessonName'] != '' && $data[0]['theme'] != '' && ($data[0]['grade'] != '' && strlen($data[0]['grade']) == 2) && $data[0]['lesson_review'] != '' && $data[0]['purpose_review'] != '')) {
                 if ($data[0]['confirmations'] == '11') {
                     return 'confirmed';
                 } else if ($data[0]['confirmations'] == '10' || $data[0]['confirmations'] == '01') {
