@@ -37,10 +37,10 @@
             </div>
         </header>
         <?php echo $data['content']; ?>
-        <!-- informer -->
-        <?php include ROOT.'/application/Components/Counter/informer.php'; ?>
-        <!-- /informer -->
         <footer>
+            <!-- informer -->
+            <?php include ROOT.'/application/Components/Counter/informer.php'; ?>
+            <!-- /informer -->
             <p class="copyright">Copyright © <?php echo date('Y') ?> NIS Kostanay</p>
         </footer>
         <script type="module" src="/public/js/scripts_3.6.2.js"></script>
