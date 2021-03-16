@@ -4,8 +4,13 @@
             <h2><?php echo $data['systemTitle']; ?></h2>
         </div>
         <div class="wrapper">    
-           
-                <?php echo $data['content']; ?>
+            
+            <div id="custom-notification" class="custom-notification-block">
+                <div id="custom-notification-text" class="custom-notification notification-hide">
+                </div> 
+            </div>
+                
+            <?php echo $data['content']; ?>
    
         </div>
         
