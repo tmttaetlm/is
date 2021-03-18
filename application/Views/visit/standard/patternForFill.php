@@ -20,7 +20,7 @@
             <?php substr($data['data'][0]['confirmations'],0,1) == "1" ? print("disabled") : print("") ?>>
                 <option selected></option>
                 <?php for ($i = 7; $i <= 12; $i++):?>
-                    <option <?php substr($data['data'][0]['grade'],0, 1) == $i ? print('selected') : print('') ?>>
+                    <option <?php substr($data['data'][0]['grade'],0, strlen($data['data'][0]['grade'])-1) == $i ? print('selected') : print('') ?>>
                         <?php echo $i ?>
                     </option>    
                 <?php endfor;?>
