@@ -59,7 +59,38 @@
         <textarea rows="5" maxlength="2000" id="lso2summary" name="lso2summary" class="lso_textarea" placeholder="<?php echo getTexts('PLACEHOLDERS', 'lso2summary')?>"><?php print($data[0]['second_recommendation']) ?></textarea>
     </td></tr>
     <tr><td>
-        <textarea rows="5" maxlength="2000" id="lso2correction" name="lso2correction" class="lso_textarea" placeholder="<?php echo getTexts('PLACEHOLDERS', 'lso2correction')?>"><?php print($data[0]['second_correction']) ?></textarea>
+        <textarea rows="2" maxlength="2000" id="lso2comment" name="lso2comment" class="lso_textarea" placeholder="<?php echo getTexts('PLACEHOLDERS', 'lso2comment')?>"><?php print($data[0]['second_comment']) ?></textarea>
+            <?php for ($i=0; $i < 3; $i++) { ?>
+                <table>
+                    <caption><?php echo getTexts('LSO_QUESTIONS', 'caption'.($i+1))?></caption>
+                    <tr>
+                        <th></th>
+                        <?php for ($j=1; $j <= 5; $j++) { ?>
+                            <th><?php echo getTexts('LSO_QUESTIONS', 'q'.($j*($i+1)))?></th>
+                        <?php } ?>
+                    </tr>
+                    <?php for ($k=1; $k <= 4; $k++) { ?>
+                        <tr>
+                            <td><?php echo getTexts('LSO_QUESTIONS', 'ans'.$k)?></td>
+                            <?php $cents = $data[0]['q'.($i*4+$k)] != '' ? explode('|', $data[0]['q'.($i*4+$k)]) : [];
+                            for ($j=1; $j <= 5; $j++) { ?>
+                                <td>
+                                    <input type="text" class="visitInputs" id="<?php echo 'visitAnswer'.($j*$k)?>" name="visitAnswers" maxlength="5"
+                                    value="<?php if (!empty($cents)) { echo $cents[$j-1]; } ?>">
+                                </td>
+                            <?php } ?>
+                        </tr>
+                    <?php } ?>
+                    <tr>
+                        <td><?php echo getTexts('LSO_QUESTIONS', 'cnt')?></td>
+                        <td colspan = '5'>
+                            <input type="text" class="visitInputs" id="<?php echo 'visitAnswerCount'.($i)?>" name="visitAnswerCount" maxlength="5"
+                            value="<?php if (!empty($cents)) { echo $cents[5]; } ?>">
+                        </td>
+                    </tr>
+                </table>
+            <?php } ?>
+        <textarea rows="2" maxlength="2000" id="lso2correction" name="lso2correction" class="lso_textarea" placeholder="<?php echo getTexts('PLACEHOLDERS', 'lso2correction')?>"><?php print($data[0]['second_correction']) ?></textarea>
     </td></tr>
     <tr><td>
         <textarea rows="5" maxlength="2000" id="lso2recommendation" name="lso2recommendation" class="lso_textarea" placeholder="<?php echo getTexts('PLACEHOLDERS', 'lso2recommendation')?>"><?php print($data[0]['all_recommendation']) ?></textarea>

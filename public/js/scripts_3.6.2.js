@@ -1818,8 +1818,28 @@ function saveLSO(){
     } else if (prevRow.dataset.period == 2) {
         var summary = document.getElementById('lso2summary').value;
         var correction = document.getElementById('lso2correction').value;
+        var comment = document.getElementById('lso2comment').value;
         var recommendation = document.getElementById('lso2recommendation').value;
-        param = param+'&job='+job+'&summary='+summary+'&correction='+correction+'&recommendation='+recommendation;
+        var q = document.getElementsByName('visitAnswers');
+        var a = document.getElementsByName('visitAnswerCount');
+        var cnt = 0;
+        q.forEach(e => { if (e.value == '') { cnt++ } });
+        param = param+'&job='+job+'&summary='+summary+'&correction='+correction+'&comment='+comment+'&recommendation='+recommendation;
+        if (cnt != 60) {
+            param = param+'&q1='+q[0].value+'|'+q[1].value+'|'+q[2].value+'|'+q[3].value+'|'+q[4].value;
+            param = param+'&q2='+q[5].value+'|'+q[6].value+'|'+q[7].value+'|'+q[8].value+'|'+q[9].value;
+            param = param+'&q3='+q[10].value+'|'+q[11].value+'|'+q[12].value+'|'+q[13].value+'|'+q[14].value;
+            param = param+'&q4='+q[15].value+'|'+q[16].value+'|'+q[17].value+'|'+q[18].value+'|'+q[19].value+'|'+a[0].value;
+            param = param+'&q5='+q[20].value+'|'+q[21].value+'|'+q[22].value+'|'+q[23].value+'|'+q[24].value;
+            param = param+'&q6='+q[25].value+'|'+q[26].value+'|'+q[27].value+'|'+q[28].value+'|'+q[29].value;
+            param = param+'&q7='+q[30].value+'|'+q[31].value+'|'+q[32].value+'|'+q[33].value+'|'+q[34].value;
+            param = param+'&q8='+q[35].value+'|'+q[36].value+'|'+q[37].value+'|'+q[38].value+'|'+q[39].value+'|'+a[1].value;
+            param = param+'&q9='+q[40].value+'|'+q[41].value+'|'+q[42].value+'|'+q[43].value+'|'+q[44].value;
+            param = param+'&q10='+q[45].value+'|'+q[46].value+'|'+q[47].value+'|'+q[48].value+'|'+q[49].value;
+            param = param+'&q11='+q[50].value+'|'+q[51].value+'|'+q[52].value+'|'+q[53].value+'|'+q[54].value;
+            param = param+'&q12='+q[55].value+'|'+q[56].value+'|'+q[57].value+'|'+q[58].value+'|'+q[59].value+'|'+a[2].value;
+        }
+        //console.log(param);
     }
     ajax('/visit/saveLSO', function(data){ /*console.log(data);*/ }, param);
 }

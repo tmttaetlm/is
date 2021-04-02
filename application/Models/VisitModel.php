@@ -2069,7 +2069,12 @@ class VisitModel extends Model
                     (SELECT first_correction FROM isdb.teachers_lso WHERE id = a.groupId) AS first_correction,
                     (SELECT second_recommendation FROM isdb.teachers_lso WHERE id = a.groupId) AS second_recommendation,
                     (SELECT second_correction FROM isdb.teachers_lso WHERE id = a.groupId) AS second_correction,
-                    (SELECT all_recommendation FROM isdb.teachers_lso WHERE id = a.groupId) AS all_recommendation
+                    (SELECT second_comment FROM isdb.teachers_lso WHERE id = a.groupId) AS second_comment,
+                    (SELECT all_recommendation FROM isdb.teachers_lso WHERE id = a.groupId) AS all_recommendation,
+                    (SELECT q1 FROM isdb.teachers_lso WHERE id = a.groupId) AS q1, (SELECT q2 FROM isdb.teachers_lso WHERE id = a.groupId) AS q2, (SELECT q3 FROM isdb.teachers_lso WHERE id = a.groupId) AS q3,
+                    (SELECT q4 FROM isdb.teachers_lso WHERE id = a.groupId) AS q4, (SELECT q5 FROM isdb.teachers_lso WHERE id = a.groupId) AS q5, (SELECT q6 FROM isdb.teachers_lso WHERE id = a.groupId) AS q6,
+                    (SELECT q7 FROM isdb.teachers_lso WHERE id = a.groupId) AS q7, (SELECT q8 FROM isdb.teachers_lso WHERE id = a.groupId) AS q8, (SELECT q9 FROM isdb.teachers_lso WHERE id = a.groupId) AS q9,
+                    (SELECT q10 FROM isdb.teachers_lso WHERE id = a.groupId) AS q10, (SELECT q11 FROM isdb.teachers_lso WHERE id = a.groupId) AS q11, (SELECT q12 FROM isdb.teachers_lso WHERE id = a.groupId) AS q12
                 FROM isdb.teachers_attestation a
                 WHERE a.groupId = :rowId
                 GROUP BY a.whoWasVisited, a.groupId, purpose, cur_level, up_level
@@ -2095,10 +2100,16 @@ class VisitModel extends Model
             $localParam['summary'] =  $param['summary'];
             $localParam['correction'] =  $param['correction'];
         } else if ($param['period'] == 2) {
-            $values = 'second_recommendation = :summary, second_correction = :correction, all_recommendation = :recommendation';
+            $values = 'second_recommendation = :summary, second_correction = :correction, second_comment = :comment, all_recommendation = :recommendation, ';
+            $values = $values.'q1 = :q1, q2 = :q2, q3 = :q3, q4 = :q4, q5 = :q5, q6 = :q6, q7 = :q7, q8 = :q8, q9 = :q9, q10 = :q10, q11 = :q11, q12 = :q12';
             $localParam['summary'] =  $param['summary'];
             $localParam['correction'] =  $param['correction'];
+            $localParam['comment'] =  $param['comment'];
             $localParam['recommendation'] =  $param['recommendation'];
+            $localParam['q1'] = $param['q1']; $localParam['q2'] = $param['q2']; $localParam['q3'] = $param['q3'];
+            $localParam['q4'] = $param['q4']; $localParam['q5'] = $param['q5']; $localParam['q6'] = $param['q6'];
+            $localParam['q7'] = $param['q7']; $localParam['q8'] = $param['q8']; $localParam['q9'] = $param['q9'];
+            $localParam['q10'] = $param['q10']; $localParam['q11'] = $param['q11']; $localParam['q12'] = $param['q12'];
         }
         $query = "UPDATE isdb.teachers_lso
                   SET position = :job, ".$values."
@@ -2125,10 +2136,14 @@ class VisitModel extends Model
         $arrayData = self::getLSOResults(['rowId'=>$params['rowId'], 'period'=>$params['mode']]);
         
         // Width for cells
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(2);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(52);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(52);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(2);
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(3);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(27);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(21);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(21);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(21);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(21);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(21);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(3);
 
         // Height for cells
         $spreadsheet->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
@@ -2149,28 +2164,45 @@ class VisitModel extends Model
         } else {
             $spreadsheet->getActiveSheet()->getRowDimension(18)->setRowHeight(100);
             $spreadsheet->getActiveSheet()->getRowDimension(20)->setRowHeight(15);
-            $spreadsheet->getActiveSheet()->getRowDimension(21)->setRowHeight(120);
-            $spreadsheet->getActiveSheet()->getRowDimension(22)->setRowHeight(10);
-            $spreadsheet->getActiveSheet()->getRowDimension(23)->setRowHeight(70);
-            $spreadsheet->getActiveSheet()->getRowDimension(24)->setRowHeight(10);
+            $spreadsheet->getActiveSheet()->getRowDimension(21)->setRowHeight(40);
+            $spreadsheet->getActiveSheet()->getRowDimension(24)->setRowHeight(5);
+            $spreadsheet->getActiveSheet()->getRowDimension(33)->setRowHeight(5);
+            $spreadsheet->getActiveSheet()->getRowDimension(42)->setRowHeight(5);
+            $spreadsheet->getActiveSheet()->getRowDimension(50)->setRowHeight(120);
+            $spreadsheet->getActiveSheet()->getRowDimension(52)->setRowHeight(70);
         }
 
         // Merge cells
-        $spreadsheet->getActiveSheet()->mergeCells('A1:D1');
-        $spreadsheet->getActiveSheet()->mergeCells('A7:D7');
-        $spreadsheet->getActiveSheet()->mergeCells('A9:D9');
-        $spreadsheet->getActiveSheet()->mergeCells('B8:C8');
-        $spreadsheet->getActiveSheet()->mergeCells('B10:C10');
-        $spreadsheet->getActiveSheet()->mergeCells('B12:C12');
-        $spreadsheet->getActiveSheet()->mergeCells('B14:C14');
-        $spreadsheet->getActiveSheet()->mergeCells('B16:C16');
-        $spreadsheet->getActiveSheet()->mergeCells('B18:C18');
+        $spreadsheet->getActiveSheet()->mergeCells('A1:H1');
+        $spreadsheet->getActiveSheet()->mergeCells('A7:H7');
+        $spreadsheet->getActiveSheet()->mergeCells('A9:H9');
+        $spreadsheet->getActiveSheet()->mergeCells('B8:G8');
+        $spreadsheet->getActiveSheet()->mergeCells('B10:G10');
+        $spreadsheet->getActiveSheet()->mergeCells('B12:G12');
+        $spreadsheet->getActiveSheet()->mergeCells('B14:G14');
+        $spreadsheet->getActiveSheet()->mergeCells('B16:G16');
+        $spreadsheet->getActiveSheet()->mergeCells('B18:G18');
         if ($mode == 'lso1') {
-            $spreadsheet->getActiveSheet()->mergeCells('B20:C20');
+            $spreadsheet->getActiveSheet()->mergeCells('B20:G20');
         } else {
-            $spreadsheet->getActiveSheet()->mergeCells('B21:C21');
-            $spreadsheet->getActiveSheet()->mergeCells('B23:C23');
+            $spreadsheet->getActiveSheet()->mergeCells('B21:G21');
+            $spreadsheet->getActiveSheet()->mergeCells('B23:G23');
+            $spreadsheet->getActiveSheet()->mergeCells('B32:G32');
+            $spreadsheet->getActiveSheet()->mergeCells('B41:G41');
+            $spreadsheet->getActiveSheet()->mergeCells('B50:G50');
+            $spreadsheet->getActiveSheet()->mergeCells('B52:G52');
+            $spreadsheet->getActiveSheet()->mergeCells('C30:G30');
+            $spreadsheet->getActiveSheet()->mergeCells('C39:G39');
+            $spreadsheet->getActiveSheet()->mergeCells('C48:G48');
         }
+        $spreadsheet->getActiveSheet()->mergeCells('B2:C2');
+        $spreadsheet->getActiveSheet()->mergeCells('B3:C3');
+        $spreadsheet->getActiveSheet()->mergeCells('B4:C4');
+        $spreadsheet->getActiveSheet()->mergeCells('B5:C5');
+        $spreadsheet->getActiveSheet()->mergeCells('D2:G2');
+        $spreadsheet->getActiveSheet()->mergeCells('D3:G3');
+        $spreadsheet->getActiveSheet()->mergeCells('D4:G4');
+        $spreadsheet->getActiveSheet()->mergeCells('D5:G5');
 
         // Put headers
         $spreadsheet->getActiveSheet()->setCellValue('A1', $this->getTexts('LSO_TABLE_HEADER', 'lso'));
@@ -2191,10 +2223,10 @@ class VisitModel extends Model
         }
         
         // Put data into cells
-        $spreadsheet->getActiveSheet()->setCellValue('C2', $arrayData[0]['whoWasVisited']);
-        $spreadsheet->getActiveSheet()->setCellValue('C3', $arrayData[0]['position']);
-        $spreadsheet->getActiveSheet()->setCellValue('C4', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['cur_level']));
-        $spreadsheet->getActiveSheet()->setCellValue('C5', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['up_level']));
+        $spreadsheet->getActiveSheet()->setCellValue('D2', $arrayData[0]['whoWasVisited']);
+        $spreadsheet->getActiveSheet()->setCellValue('D3', $arrayData[0]['position']);
+        $spreadsheet->getActiveSheet()->setCellValue('D4', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['cur_level']));
+        $spreadsheet->getActiveSheet()->setCellValue('D5', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['up_level']));
         $spreadsheet->getActiveSheet()->setCellValue('B8', $arrayData[0]['purpose']);
         $spreadsheet->getActiveSheet()->setCellValue('B10', $arrayData[0]['planning_lesson_review']);
         $spreadsheet->getActiveSheet()->setCellValue('B12', $arrayData[0]['teaching_lesson_review']);
@@ -2205,14 +2237,39 @@ class VisitModel extends Model
             $spreadsheet->getActiveSheet()->setCellValue('B20', $arrayData[0]['first_correction']);
         } else {
             $spreadsheet->getActiveSheet()->setCellValue('B18', $arrayData[0]['second_recommendation']);
-            $spreadsheet->getActiveSheet()->setCellValue('B21', $arrayData[0]['second_correction']);
-            $spreadsheet->getActiveSheet()->setCellValue('B23', $arrayData[0]['all_recommendation']);
+            $spreadsheet->getActiveSheet()->setCellValue('B21', $arrayData[0]['second_comment']);
+            $spreadsheet->getActiveSheet()->setCellValue('B50', $arrayData[0]['second_correction']);
+            $spreadsheet->getActiveSheet()->setCellValue('B52', $arrayData[0]['all_recommendation']);
+            for ($i=0; $i < 3; $i++) {
+                $spreadsheet->getActiveSheet()->setCellValue('B'.(23+$i*9), $this->getTexts('LSO_QUESTIONS', 'caption'.($i+1)));
+                for ($j=1; $j <= 5; $j++) {
+                    $spreadsheet->getActiveSheet()->setCellValue(chr(66+$j).(25+$i*9), $this->getTexts('LSO_QUESTIONS', 'q'.($j*($i+1))));
+                }
+                for ($k=1; $k <= 4; $k++) {
+                    $spreadsheet->getActiveSheet()->setCellValue('B'.((25+$i*9)+$k), $this->getTexts('LSO_QUESTIONS', 'ans'.$k));
+                    $cents = $arrayData[0]['q'.($i*4+$k)] != '' ? explode('|', $arrayData[0]['q'.($i*4+$k)]) : [];
+                    for ($j=1; $j <= 5; $j++) {
+                        if (!empty($cents)) { $spreadsheet->getActiveSheet()->setCellValue(chr(66+$j).((25+$i*9)+$k), $cents[$j-1]); }
+                    }
+                }
+                $spreadsheet->getActiveSheet()->setCellValue('B'.(30+($i*9)), $this->getTexts('LSO_QUESTIONS', 'cnt'));
+                if (!empty($cents)) { $spreadsheet->getActiveSheet()->setCellValue('C'.(30+$i*9), $cents[5]); }
+            }
+            $spreadsheet->getActiveSheet()->setCellValue('C5', $this->getTexts('TEACHERS_LEVELS', $arrayData[0]['up_level']));
         }
 
         $styleHeaders = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                                          'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
                          'font' => ['bold' => true, 'size' => 14],];
         $styleAllBorders = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],];
+        $styleAllBordersWhiteBackground = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                                           'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+                                           'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
+                                           'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,'startColor' => ['rgb' => 'FFFFFF']]];
+        $styleAllBordersWhiteBackgroundLeft = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                                               'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+                                               'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
+                                               'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,'startColor' => ['rgb' => 'FFFFFF']]];
         $styleOutBordersColorfulBackground = ['borders' => ['outline' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
                                               'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                                          'startColor' => ['rgb' => 'CCEEFF']]];
@@ -2220,28 +2277,46 @@ class VisitModel extends Model
                                                            'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP,],
                                            'borders' => ['outline' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
                                            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,'startColor' => ['rgb' => 'FFFFFF']]];
+        $styleOutBordersWhiteBackgroundCenter = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                                           'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
+                                           'borders' => ['outline' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,],],
+                                           'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,'startColor' => ['rgb' => 'FFFFFF']]];
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:D23')->getAlignment()->setWrapText(true);
+        $spreadsheet->getActiveSheet()->getStyle('A1:H53')->getAlignment()->setWrapText(true);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:D1')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A7:D7')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('A9:D9')->applyFromArray($styleHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('B2:C5')->applyFromArray($styleAllBorders);
+        $spreadsheet->getActiveSheet()->getStyle('A1:H1')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A7:H7')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A9:H9')->applyFromArray($styleHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('B2:G5')->applyFromArray($styleAllBorders);
         if ($mode == 'lso1') {
-            $spreadsheet->getActiveSheet()->getStyle('A7:D21')->applyFromArray($styleOutBordersColorfulBackground);
-            $spreadsheet->getActiveSheet()->getStyle('B20:C20')->applyFromArray($styleOutBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('A7:H21')->applyFromArray($styleOutBordersColorfulBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B20:G20')->applyFromArray($styleOutBordersWhiteBackground);
         } else {
-            $spreadsheet->getActiveSheet()->getStyle('A7:D19')->applyFromArray($styleOutBordersColorfulBackground);
-            $spreadsheet->getActiveSheet()->getStyle('A20:D24')->applyFromArray($styleOutBordersColorfulBackground);
-            $spreadsheet->getActiveSheet()->getStyle('B21:C21')->applyFromArray($styleOutBordersWhiteBackground);
-            $spreadsheet->getActiveSheet()->getStyle('B23:C23')->applyFromArray($styleOutBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('A7:H19')->applyFromArray($styleOutBordersColorfulBackground);
+            $spreadsheet->getActiveSheet()->getStyle('A20:H53')->applyFromArray($styleOutBordersColorfulBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B21:G21')->applyFromArray($styleOutBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B23:G23')->applyFromArray($styleOutBordersWhiteBackgroundCenter);
+            $spreadsheet->getActiveSheet()->getStyle('B32:G32')->applyFromArray($styleOutBordersWhiteBackgroundCenter);
+            $spreadsheet->getActiveSheet()->getStyle('B41:G41')->applyFromArray($styleOutBordersWhiteBackgroundCenter);
+            $spreadsheet->getActiveSheet()->getStyle('B50:G50')->applyFromArray($styleOutBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B52:G52')->applyFromArray($styleOutBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('C25:G29')->applyFromArray($styleAllBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B26:B30')->applyFromArray($styleAllBordersWhiteBackgroundLeft);
+            $spreadsheet->getActiveSheet()->getStyle('C34:G38')->applyFromArray($styleAllBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B35:B39')->applyFromArray($styleAllBordersWhiteBackgroundLeft);
+            $spreadsheet->getActiveSheet()->getStyle('C43:G47')->applyFromArray($styleAllBordersWhiteBackground);
+            $spreadsheet->getActiveSheet()->getStyle('B44:B48')->applyFromArray($styleAllBordersWhiteBackgroundLeft);
+            $spreadsheet->getActiveSheet()->getStyle('C30:G30')->applyFromArray($styleAllBordersWhiteBackgroundLeft);
+            $spreadsheet->getActiveSheet()->getStyle('C39:G39')->applyFromArray($styleAllBordersWhiteBackgroundLeft);
+            $spreadsheet->getActiveSheet()->getStyle('C48:G48')->applyFromArray($styleAllBordersWhiteBackgroundLeft);
         }
-        $spreadsheet->getActiveSheet()->getStyle('B8:C8')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B10:C10')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B12:C12')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B14:C14')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B16:C16')->applyFromArray($styleOutBordersWhiteBackground);
-        $spreadsheet->getActiveSheet()->getStyle('B18:C18')->applyFromArray($styleOutBordersWhiteBackground);
+        $spreadsheet->getActiveSheet()->getStyle('B8:G8')->applyFromArray($styleOutBordersWhiteBackground);
+        $spreadsheet->getActiveSheet()->getStyle('B10:G10')->applyFromArray($styleOutBordersWhiteBackground);
+        $spreadsheet->getActiveSheet()->getStyle('B12:G12')->applyFromArray($styleOutBordersWhiteBackground);
+        $spreadsheet->getActiveSheet()->getStyle('B14:G14')->applyFromArray($styleOutBordersWhiteBackground);
+        $spreadsheet->getActiveSheet()->getStyle('B16:G16')->applyFromArray($styleOutBordersWhiteBackground);
+        $spreadsheet->getActiveSheet()->getStyle('B18:G18')->applyFromArray($styleOutBordersWhiteBackground);
+        
 
         // Rename worksheet
         $spreadsheet->getActiveSheet()->setTitle('Результат оценки урока');
