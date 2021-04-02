@@ -368,10 +368,10 @@ class SkdModel extends Model {
     {
         $tsql = "SELECT P.ID, P.Name AS Surname, P.Firstname AS Firstname, D.Name AS Division, 
                         P.HomePhone AS Contact1, P.WorkPhone AS Contact2, 
-                        CASE P.Chat_ID1 WHEN 0 THEN 'Нет' ELSE 'Да' END AS ChatID1,
-                        CASE P.Chat_ID2 WHEN 0 THEN 'Нет' ELSE 'Да' END AS ChatID2,
-                        CASE P.IsSubscribed1 WHEN 0 THEN 'Нет' ELSE 'Да' END AS Subscribe1,
-                        CASE P.IsSubscribed2 WHEN 0 THEN 'Нет' ELSE 'Да' END AS Subscribe2
+                        CASE ISNULL(P.Chat_ID1, 0) WHEN 0 THEN 'Нет' ELSE 'Да' END AS ChatID1,
+                        CASE ISNULL(P.Chat_ID2, 0) WHEN 0 THEN 'Нет' ELSE 'Да' END AS ChatID2,
+                        CASE ISNULL(P.IsSubscribed1, 0) WHEN 0 THEN 'Нет' ELSE 'Да' END AS Subscribe1,
+                        CASE ISNULL(P.IsSubscribed2, 0) WHEN 0 THEN 'Нет' ELSE 'Да' END AS Subscribe2
                 FROM dbo.pList P 
                 INNER JOIN dbo.pDivision D ON P.Section = D.ID
                 WHERE D.Name = :grade 
