@@ -2243,7 +2243,7 @@ class VisitModel extends Model
             for ($i=0; $i < 3; $i++) {
                 $spreadsheet->getActiveSheet()->setCellValue('B'.(23+$i*9), $this->getTexts('LSO_QUESTIONS', 'caption'.($i+1)));
                 for ($j=1; $j <= 5; $j++) {
-                    $spreadsheet->getActiveSheet()->setCellValue(chr(66+$j).(25+$i*9), $this->getTexts('LSO_QUESTIONS', 'q'.($j*($i+1))));
+                    $spreadsheet->getActiveSheet()->setCellValue(chr(66+$j).(25+$i*9), $this->getTexts('LSO_QUESTIONS', 'q'.($j+($i*5))));
                 }
                 for ($k=1; $k <= 4; $k++) {
                     $spreadsheet->getActiveSheet()->setCellValue('B'.((25+$i*9)+$k), $this->getTexts('LSO_QUESTIONS', 'ans'.$k));

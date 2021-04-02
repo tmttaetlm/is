@@ -66,7 +66,7 @@
                     <tr>
                         <th></th>
                         <?php for ($j=1; $j <= 5; $j++) { ?>
-                            <th><?php echo getTexts('LSO_QUESTIONS', 'q'.($j*($i+1)))?></th>
+                            <th><?php echo getTexts('LSO_QUESTIONS', 'q'.($j+($i*5)))?></th>
                         <?php } ?>
                     </tr>
                     <?php for ($k=1; $k <= 4; $k++) { ?>
