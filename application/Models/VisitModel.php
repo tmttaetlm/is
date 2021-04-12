@@ -895,10 +895,14 @@ class VisitModel extends Model
             }
 
             $spreadsheet->getActiveSheet()->setCellValue('A'.$row, 'Средний балл');
+            $spreadsheet->getActiveSheet()->setCellValue('A'.($row+1), 'В процентах');
             if ($avCount[$col-66] != 0) {
-                $spreadsheet->getActiveSheet()->setCellValue(chr($col).$row, number_format($averages[$col-66]/$avCount[$col-66],1,',',''));
+                $avg = $averages[$col-66]/$avCount[$col-66];
+                $spreadsheet->getActiveSheet()->setCellValue(chr($col).$row, number_format($avg,2,',',''));
+                $spreadsheet->getActiveSheet()->setCellValue(chr($col).($row+1), (number_format($avg*100/5,2,',','')).'%');
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue(chr($col).$row, "0");
+                $spreadsheet->getActiveSheet()->setCellValue(chr($col).($row+1), "0%");
             }
             
             $col++;
@@ -908,11 +912,12 @@ class VisitModel extends Model
         $spreadsheet->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
         $spreadsheet->getActiveSheet()->getRowDimension(2)->setRowHeight(175);
         $spreadsheet->getActiveSheet()->getStyle('A1')->applyFromArray($styleHeader);
-        $spreadsheet->getActiveSheet()->getStyle('A3:A'.$row)->applyFromArray($styleLeftHeaders);
+        $spreadsheet->getActiveSheet()->getStyle('A3:A'.($row+1))->applyFromArray($styleLeftHeaders);
         $spreadsheet->getActiveSheet()->getStyle('A'.$row.':Q'.$row)->applyFromArray($styleAverage);
+        $spreadsheet->getActiveSheet()->getStyle('A'.($row+1).':Q'.($row+1))->applyFromArray($styleAverage);
         $spreadsheet->getActiveSheet()->getStyle('B2:Q2')->getAlignment()->setTextRotation(90);
         $spreadsheet->getActiveSheet()->getStyle('B2:Q2')->applyFromArray($styleTopHeaders);
-        $spreadsheet->getActiveSheet()->getStyle('B3:Q'.$row)->applyFromArray($styleData);
+        $spreadsheet->getActiveSheet()->getStyle('B3:Q'.($row+1))->applyFromArray($styleData);
 
         // Rename worksheet
         $spreadsheet->getActiveSheet()->setTitle('Свод по критериям');
