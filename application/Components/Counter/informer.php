@@ -7,7 +7,8 @@ class informer {
     public $db;
     public function count() {
         $this->db = Components\Db::getDb();
-        $date = date("Y-m-d");
+        $date = getdate();
+        if ($date['hours'] < 8) { $date = date("Y-m-d 08:00:00", strtotime("-1 day")); } else { $date = date("Y-m-d 08:00:00"); }
         return $this->db->selectQuery("SELECT views, hosts FROM isdb.counter_visits WHERE date='$date'");
     }
 }

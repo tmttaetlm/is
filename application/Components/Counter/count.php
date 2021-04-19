@@ -11,7 +11,9 @@ class counter {
 
         // Получаем IP-адрес посетителя и сохраняем текущую дату
         $visitor_ip = $_SERVER['REMOTE_ADDR'];
-        $date = date("Y-m-d");
+        $date = getdate();
+
+        if ($date['hours'] < 8) { $date = date("Y-m-d 08:00:00", strtotime("-1 day")); } else { $date = date("Y-m-d 08:00:00"); }
 
         // Узнаем, были ли посещения за сегодня
         $visits = $this->db->selectQuery("SELECT * FROM isdb.counter_visits WHERE date='$date'");
