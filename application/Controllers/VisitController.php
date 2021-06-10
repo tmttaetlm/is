@@ -194,11 +194,13 @@ class VisitController extends Controller
 
     public function actionGetVisitResults()
     {
-        $default = $this->model->getDefaultCriteriasList();
-        $criterias = $this->model->getCriteriaDiscription();
-        $data = $this->model->getVisitResults($_POST);
-        $subjects = $this->model->getSubjects();
-        $grades = $this->model->getGrades();
+        // в данную функцию обращается алгоритм из JavaScript
+        $default = $this->model->getDefaultCriteriasList();     // получаем из БД критерии оценивания
+        $criterias = $this->model->getCriteriaDiscription();    // получаем из БД описания критерии оценивания
+        $data = $this->model->getVisitResults($_POST);          // получаем из БД данные о результатах посещения
+        $subjects = $this->model->getSubjects();                // получаем из БД список предметов
+        $grades = $this->model->getGrades();                    // получаем из БД список классов
+        // задаем параметры для генерации шаблона
         $params = [
             "def" => $default,
             "data" => $data,
@@ -208,8 +210,10 @@ class VisitController extends Controller
         ];
         
         if ($_POST['className'] == 'myVisits') {
+            // если посетитель я, то генерируем шаблон для заполнения оценок
             echo $this->view->generate('visit/standard/patternForFill',$params);
         } else { 
+            // если я посещаемый, то генерируем шаблон для просмотра оценок
             echo $this->view->generate('visit/standard/patternForShow',$params); 
         }
     }

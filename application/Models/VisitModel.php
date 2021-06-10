@@ -218,6 +218,7 @@ class VisitModel extends Model
 
     public function getDefaultCriteriasList()
     {
+        // создаем запрос к БД
         $query = "
         SELECT adt1.discription d1,adt2.discription d2,IFNULL(adt1.rowspan,1) rs
         FROM isdb.evaluationCriterias
@@ -226,11 +227,11 @@ class VisitModel extends Model
         LEFT JOIN isdb.additionalTableForEvaluation adt2
         ON RIGHT(r_names,1) = adt2.uid
         ;";
-        $db = Db::getDb();
-        $data = $db->selectQuery($query,[]);
-        $data = $this->addRowNumbers($data);
+        $db = Db::getDb(); // подключаемся к БД
+        $data = $db->selectQuery($query,[]); // выполняем запрос к БД
+        $data = $this->addRowNumbers($data); // нумерация строк в результате запроса
 
-        return $data;
+        return $data; // выводим результат запроса
     }
 
     public function getCriteriaDiscription($criteria = null,$mark = "*")
@@ -264,16 +265,17 @@ class VisitModel extends Model
 
     public function getVisitResults($post_params)
     {
+        // создаем запрос к БД
         $query = "
         SELECT visitDate, whoVisited, whoWasVisited, (SELECT teacher_purpose FROM teachers_purposes WHERE teacher_iin = iinWhoWasVisited) AS purpose,
                grade, lessonName, theme, evaluates, recommendation, purpose_review, confirmations
         FROM isdb.evaluationTeachers
         WHERE id = :rowId
         ;";
-        $db = Db::getDb();
-        $data = $db->selectQuery($query,['rowId'=>$post_params['rowId']]);
+        $db = Db::getDb(); // подключаемся к БД
+        $data = $db->selectQuery($query,['rowId'=>$post_params['rowId']]); // выполняем запрос к БД с параметрами
 
-        return $data;
+        return $data; // выводим результат запроса
     }
 
     public function checkEvaluates($params)

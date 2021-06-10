@@ -1,10 +1,13 @@
 <?php
+    // функция получения текстовки интерфейса для заданного языка
     function getTexts($section,$property) {
         $ini_params = parse_ini_file(ROOT.'/public/texts/'.$_COOKIE["lang"].'-lang.ini',true);
         return $ini_params[$section][$property];
     }
+    //
 ?>
 
+<!-- Генерация шаблона листа оценивания урока -->
 <table class="results" id="visitResults">
     <caption><?php echo getTexts('TABLE_HEADERS', 'caption')?></caption>
     <tr>
