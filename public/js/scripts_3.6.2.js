@@ -1211,37 +1211,40 @@ function clickHandler(obj)
         dumpForm.submit();
     }
     
-    if (obj.parentElement.localName == 'tr') {
-        if (obj.localName != 'th' && obj.parentElement.className == 'allowed') {
+    if (obj.parentElement.localName == 'tr') { // нажатие на строку таблицы с посещениями
+        if (obj.localName != 'th' && obj.parentElement.className == 'allowed') { // проверка на доступность для редактирования
             let row = obj.parentNode;
             let className = row.offsetParent.parentElement.className;
             if (obj.offsetParent.className == 'visitResults') {
                 let param = 'rowId='+row.dataset.rowId+'&className='+className;
-                ajax('/visit/getVisitResults', function(data){
+                ajax('/visit/getVisitResults', function(data){ // получение из БД данных о посещении
                     if (data.indexOf('content-login') >= 0) { location.reload(true) };
                     if (document.getElementById('tempRow')) {
                         let tempRow = document.getElementById('tempRow');
                         if (className == 'myVisits') {
                             let tempRowId = tempRow.parentNode.children[tempRow.rowIndex-1].dataset.rowId;
-                            saveVisitResults();
-                            closePattern();
+                            // если повторно нажали на строку, то
+                            saveVisitResults(); // происходит сохранение данных
+                            closePattern(); // закрытие шаблона
                             if (tempRowId == row.dataset.rowId) { return; }
                         } else {
+                            // тоже самое, но с моими листами оценки
                             if (tempRow.parentNode.children[tempRow.rowIndex-1].dataset.rowId == row.dataset.rowId) { 
                                 closePattern();
                                 return; }
                             else { closePattern(); }
                         }
                     }
-                    let table = document.body.querySelector('.'+className).querySelector('.visitResults');
-                    let new_tr = table.insertRow(row.rowIndex+1);
-                    new_tr.id = "tempRow";
-                    let cell = new_tr.insertCell(0);
-                    cell.colSpan = 6;
-                    cell.id = 'subject_review'
-                    cell.innerHTML = data;
+                    let table = document.body.querySelector('.'+className).querySelector('.visitResults');  //
+                    let new_tr = table.insertRow(row.rowIndex+1);                                           //
+                    new_tr.id = "tempRow";                                                                  //
+                    let cell = new_tr.insertCell(0);                                                        // открытие шаблона для заполнения
+                    cell.colSpan = 6;                                                                       //
+                    cell.id = 'subject_review';                                                             //
+                    cell.innerHTML = data;                                                                  //
                 }, param);
             }
+            // тот же алгорит, что выше, но с листами наблюдения для аттестации
             if (obj.offsetParent.className == 'visitAResults') {
                 let param = 'rowId='+row.dataset.rowId+'&className='+className;
                 ajax('/visit/getAttestationVisitResults', function(data){
@@ -1269,6 +1272,7 @@ function clickHandler(obj)
                     cell.innerHTML = data;
                 }, param);
             }
+            // тот же алгорит, что выше, но с листами школьного оценивания
             if (className == 'LSO') {
                 if (row.dataset.period != 0) {
                     let param = 'rowId='+row.dataset.rowId+'&period='+row.dataset.period;
