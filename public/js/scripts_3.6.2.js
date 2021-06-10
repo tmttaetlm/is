@@ -1730,9 +1730,11 @@ function getInputDate(offset){
 }
 
 function saveVisitResults(){
+    // функция сохранения результатов оценивания на клиентской стороне
     let tempRow = document.getElementById('tempRow');
     let prevRow = tempRow.parentNode.children[tempRow.rowIndex-1];
     if (tempRow.parentElement.parentElement.parentElement.className == 'myVisits') {
+        // задаем параметры
         let subject = document.getElementById('visitSubject').value;
         let topic = document.getElementById('visitTopic').value;
         let grade = document.getElementById('visitGrade').value+document.getElementById('visitLitera').value;
@@ -1747,8 +1749,11 @@ function saveVisitResults(){
                     '&subject='+subject+'&topic='+topic+'&grade='+grade+
                     '&recommendation='+recommendation+'&marks='+marks+
                     '&purpose_review='+purpose_review;
+        // --------------------------------------
         ajax('/visit/setVisitResults', function(data){ console.log(data) }, param);
+        // функция сохранения результатов оценивания на серверной стороне
         param = 'rowId='+prevRow.dataset.rowId+'&mode=standart';
+        // проверка статуса посещение и смена последнего в интерфейсе клиента
         ajax('/visit/checkEvaluates', function(data){
             switch (data) {
                 case 'confirmed':
@@ -1770,6 +1775,7 @@ function saveVisitResults(){
             }
         }, param);
     }
+    // тот же алгоритм? что выше, но для посещения в рамках оценивания
     if (tempRow.parentElement.parentElement.parentElement.className == 'myAVisits') {
         let date = document.getElementById('visitDate').value;
         let subject = document.getElementById('visitSubject').value;

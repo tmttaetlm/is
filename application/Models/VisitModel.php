@@ -251,16 +251,17 @@ class VisitModel extends Model
         return $data;
     }
 
+    // фнкция сохранения результатов оценивания урока на серверной стороне
     public function setVisitResults($params)
     {
+        // создаем запрос к БД
         $query = "
         UPDATE isdb.evaluationTeachers
         SET lessonName = :subject, theme = :topic, grade = :grade, evaluates = :marks, recommendation = :recommendation, purpose_review = :purpose_review
         WHERE id = :rowId
         ;";
-        $db = Db::getDb();
-        $data = $db->selectQuery($query,$params);
-        //return $data;
+        $db = Db::getDb(); // подключаемся к БД
+        $data = $db->selectQuery($query,$params); // выполняем запрос к БД с параметрами
     }
 
     public function getVisitResults($post_params)
